@@ -128,21 +128,21 @@
             <div id="header">
                 <div id="logol">
                     <span id="number"
-                          py:content="'nº {03}'.format(mailing.number)">
+                          py:content="'nº {0:03}'.format(mailing.number)">
                           nº 001
                    </span>
                 </div>
                 <div id="logor">
                     <span id="fecha"
-                          py:content="format_date(mailing.date)">
+                          py:content="format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()">
                           Junio 01 2012
                     </span>
                 </div>
 
                 <div class="seccion-ct"
-                     py:for"(cat, items) in mailing.grouped_items">
-                    <img py:if="cat.logo"
-                         py:attrs="dict(src=cat.logo.path, alt=cat.title)"
+                     py:for="(cat, items) in mailing.grouped_items">
+                    <img py:if="cat.image"
+                         py:attrs="dict(src=cat.image.path, alt=cat.title)"
                          src="images/actividad.gif" alt="Actividad" />
                     <div class="seccion">
                         <ul>
@@ -159,7 +159,7 @@
                 <div id="resumen-footer">
                     <div id="url-ct">&nbsp;</div>
                     <div id="nombre-ct">&nbsp;</div>
-                    <div style="clear:both;"</div>
+                    <div style="clear:both;"></div>
                 </div>
 
             </div>

@@ -1,3 +1,4 @@
+import datetime
 from unittest import TestCase
 
 
@@ -12,6 +13,7 @@ class BaseModelTest(TestCase):
 
     def _makeMailing(self, **kw):
         from ..models import Mailing
+        kw.setdefault('date', datetime.datetime(2010,1,1))
         return Mailing(**kw)
 
     def _makeExternalLink(self, **kw):
