@@ -1,16 +1,27 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:py="http://genshi.edgewall.org/"
-      xmlns:xi="http://www.w3.org/2001/XInclude">
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:with="formatted_number='nº {0:03}'.format(mailing.number);
+               formatted_date=format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()">
 
 <head>
-    <title>Calisto te cuenta</title>
+    <title>Calisto te cuenta - ${formatted_number} - ${formatted_date}</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <style>
-        body, ul, p {
+        body, ul, p, h1, h2, h3, h4, h5, pre {
             margin: 0;
             padding: 0;
         }
+
+        p {
+            margin-bottom: .7em;
+        }
+
+        h2 {
+            margin-bottom: .9em;
+        }
+
         body {
             background: #aaa;
             width:100%;
@@ -105,17 +116,26 @@
         }
 
 
-        .seccion a {
+        .seccion a, .articulo div a {
             color: #0063be;
             text-decoration: none;
         }
 
-        .seccion a:visited {
+        .seccion a:visited, .articulo div a:visited {
             color: #d54d0d;
         }
 
-        .seccion a:hover {
+        .seccion a:hover, .articulo div a:hover {
             text-decoration: underline;
+        }
+
+        .articulo {
+            margin-top: 15px;
+            border-bottom: solid black 1px;
+        }
+
+        .articulo div {
+            text-align: justify;
         }
 
 
@@ -127,14 +147,12 @@
         <div id="resumenes">
             <div id="header">
                 <div id="logol">
-                    <span id="number"
-                          py:content="'nº {0:03}'.format(mailing.number)">
+                    <span id="number" py:content="formatted_number">
                           nº 001
                    </span>
                 </div>
                 <div id="logor">
-                    <span id="fecha"
-                          py:content="format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()">
+                    <span id="fecha" py:content="formatted_date">
                           Junio 01 2012
                     </span>
                 </div>
@@ -166,6 +184,17 @@
         </div>
 
         <div id="articulos">
+            <div py:for="article in mailing.items_by_type('Article')"
+                 class="articulo">
+                 <a name="${article.anchor}">
+                    <h2 py:content="article.title">Título del artículo</h2>
+                 </a>
+                    <div py:content="Markup(article.html)">
+                        <p>Lorem ipsum dolor, lalalala</p>
+                        <p>Lorem ipsum dolor, lalalala</p>
+                        <p>Lorem ipsum dolor, lalalala</p>
+                    </div>
+            </div>
         </div>
 
     </div>

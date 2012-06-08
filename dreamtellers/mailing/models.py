@@ -69,7 +69,7 @@ class Item(Model):
     category = orm.relation(Category, backref='items', lazy=False)
 
     def __repr__(self):
-        data = (self.id, self.title, category.title)
+        data = (self.id, self.title, self.category.title)
         return self.__class__.__name__ + repr(data)
 
 
@@ -97,8 +97,10 @@ class Article(Item):
         return "%d"%self.position
 
 
-    def __html__(self):
+    @property
+    def html(self):
         return markdown.markdown(self.text)
+
 
 class Template(Model):
     __tablename__ = "template"
