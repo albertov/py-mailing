@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
 
 <head>
     <title>Calisto te cuenta</title>
@@ -98,6 +100,11 @@
             padding: 13px;
         }
 
+        .seccion li {
+            margin-bottom: .5em;
+        }
+
+
         .seccion a {
             color: #0063be;
             text-decoration: none;
@@ -120,55 +127,34 @@
         <div id="resumenes">
             <div id="header">
                 <div id="logol">
-                    <span id="number">nº 001</span>
+                    <span id="number"
+                          py:content="'nº {03}'.format(mailing.number)">
+                          nº 001
+                   </span>
                 </div>
                 <div id="logor">
-                    <span id="fecha">Junio 01 2012</span>
+                    <span id="fecha"
+                          py:content="format_date(mailing.date)">
+                          Junio 01 2012
+                    </span>
                 </div>
 
-                <div class="seccion-ct">
-                    <img src="images/actividad.gif" alt="Actividad" />
+                <div class="seccion-ct"
+                     py:for"(cat, items) in mailing.grouped_items">
+                    <img py:if="cat.logo"
+                         py:attrs="dict(src=cat.logo.path, alt=cat.title)"
+                         src="images/actividad.gif" alt="Actividad" />
                     <div class="seccion">
                         <ul>
-                            <li>
-                                <a href="#a1">Blah, blah, blahhhhhhh</a>
+                            <li py:for="item in items">
+                                <a href="${item.url}" py:content="item.title">
+                                    Blah, blah, blahhhhhhh
+                                </a>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                <div class="seccion-ct">
-                    <img src="images/suenios.gif" alt="Sueños" />
-                    <div class="seccion">
-                        <ul>
-                            <li>
-                                <a href="#a1">Blah, blah, blahhhhhhh</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="seccion-ct">
-                    <img src="images/actualidad.gif" alt="Actualidad" />
-                    <div class="seccion">
-                        <ul>
-                            <li>
-                                <a href="#a1">Blah, blah, blahhhhhhh</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="seccion-ct">
-                    <img src="images/agenda.gif" alt="Agenda" />
-                    <div class="seccion">
-                        <ul>
-                            <li>
-                                <a href="#a1">Blah, blah, blahhhhhhh</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
 
                 <div id="resumen-footer">
                     <div id="url-ct">&nbsp;</div>

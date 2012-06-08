@@ -1,4 +1,5 @@
 Env
 *egg-info
+*.egg
 *.sw[po]
 *.pyc

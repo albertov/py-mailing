@@ -20,8 +20,17 @@ setup(
     zip_safe = True,
     namespace_packages = ['dreamtellers'],
     test_suite="nose.collector",
+    tests_require=["nose"],
     install_requires = [
-        "Bottle",
+        "bottle",
+        "bottle_sqlalchemy",
+        "markdown",
+        "genshi",
+        "SQLAlchemy",
+        "Babel",
+        "lxml",
+        "cssutils",
+        "ftputil",
         ],
     entry_points = """
         """,
