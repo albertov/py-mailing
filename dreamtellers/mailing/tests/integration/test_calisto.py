@@ -61,7 +61,21 @@ class BaseModelTest(TestCase):
                tpl.images.append(i)
         return mailing
 
-    def test_create_and_persist(self):
-        m = self._makeMailing()
-        self.session.add(m)
+    def test_create_persist_retrieve(self):
+        self.session.add(self._makeMailing())
         self.session.commit()
+        self.session.expunge_all()
+
+        m = self.session.query(Mailing).one()
+        self.failUnless(m)
+
+    def test_correct_items(self):
+        m = self._makeMailing()
+        self.failUnlessEqual(len(m.items), 13)
+        self.failUnlessEqual(len(m.items_by_type('Article')), 9)
+        self.failUnlessEqual(len(m.items_by_type('ExternalLink')), 4)
+
+    def test_correct_images(self):
+        m = self._makeMailing()
+        self.failUnlessEqual(len(m.images), 10)
+        self.failUnlessEqual(len([i for i in m.images if i.title]), 4)

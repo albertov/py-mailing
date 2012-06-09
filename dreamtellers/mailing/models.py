@@ -184,9 +184,7 @@ class Mailing(Model):
     number = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
     send_date = Column(DateTime)
-    _template = Column("template", Integer, ForeignKey("template.id"))
 
-    template = orm.relation(Template)
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
                          lazy=False)
@@ -200,16 +198,18 @@ class Mailing(Model):
 
     @property
     def images(self):
-        images = set(self.template.images) 
-        for i in items:
+        images = set()
+        for t in self.templates.values():
+            images.update(t.images)
+        for i in self.items:
             if i.category.image:
                 images.add(i.category.image)
-            if hasattr(i, 'image'):
+            if hasattr(i, 'image') and i.image is not None:
                 images.add(i.image)
         return list(images)
 
     def items_by_type(self, type):
-        return (i for i in self.items if i.type==type)
+        return [i for i in self.items if i.type==type]
 
     def render(self, format='xhtml'):
         return self.templates['format'].render(mailing=self)
