@@ -94,7 +94,6 @@ class MessageComposer(object):
             meta.getparent().remove(meta)
 
     def _internalize_images(self, dom):
-        # should be called after _embed_syles
         for img in dom.xpath('//img'):
             img.attrib['src'] = 'cid:' + img.attrib['src']
         
@@ -102,6 +101,8 @@ class MessageComposer(object):
         for e in dom.xpath('//*[@style]'):
             style = e.attrib['style']
             e.attrib['style'] = self._url_re.sub(repl, style)
+        for e in dom.xpath('//style'):
+            e.text = self._url_re.sub(repl, e.text)
 
     def _embed_syles(self, dom):
         for style in dom.xpath('//style'):

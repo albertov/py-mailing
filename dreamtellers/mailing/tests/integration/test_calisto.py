@@ -124,5 +124,5 @@ class TestCalistoMailing(TestCase):
         # style elements have been removed
         self.failUnless('<style>' not in body)
 
-        #background css images have been internalized
+        # background css images have been internalized
         self.failUnless('url(cid:' in body)
