@@ -134,7 +134,7 @@ class Template(Model):
         if self.type == 'text':
             return unicode(stream)
         else:
-            return stream.render(self.serializer)
+            return stream.render(self.type)
         
 
 class Group(Model):
@@ -212,7 +212,7 @@ class Mailing(Model):
         return [i for i in self.items if i.type==type]
 
     def render(self, format='xhtml'):
-        return self.templates['format'].render(mailing=self)
+        return self.templates[format].render(mailing=self)
 
     def __repr__(self):
         data = (self.number, self.date, len(self.items))

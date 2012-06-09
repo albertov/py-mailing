@@ -6,6 +6,8 @@ from glob import glob
 
 from pkg_resources import resource_filename
 
+from lxml import etree
+
 from ...models import *
 
 def fixture(s):
@@ -79,3 +81,9 @@ class BaseModelTest(TestCase):
         m = self._makeMailing()
         self.failUnlessEqual(len(m.images), 10)
         self.failUnlessEqual(len([i for i in m.images if i.title]), 4)
+
+    def test_can_render(self):
+        m = self._makeMailing()
+        html = m.render('xhtml')
+        dom = etree.HTML(html)
+        self.failUnlessEqual(len(dom.xpath("//div[@class='seccion']")), 4)
