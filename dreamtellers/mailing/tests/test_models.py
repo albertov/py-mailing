@@ -28,6 +28,10 @@ class BaseModelTest(TestCase):
         from ..models import Image
         return Image(**kw)
 
+    def _makeTemplate(self, **kw):
+        from ..models import Template
+        return Template(**kw)
+
     def _makeCategory(self, **kw):
         from ..models import Category
         kw.setdefault('title', 'CategoryTitle')
@@ -83,3 +87,15 @@ class TestMailing(BaseModelTest):
         self.failUnlessEqual(len(items), 2)
         self.failUnlessEqual(items[0].title, "Foo2")
         self.failUnlessEqual(items[1].title, "Foo1")
+
+    def test_templates_descriptor(self):
+        ob = self._makeOne()
+        tpl = self._makeTemplate(title="fooo", body='foo')
+        TYPE = 'xhtml'
+        ob.templates[TYPE] = tpl
+        self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        retrieved = self.session.query(ob.__class__).one()
+        self.failUnlessEqual(retrieved.templates[TYPE].type, TYPE)

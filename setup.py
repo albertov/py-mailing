@@ -28,7 +28,6 @@ setup(
         "genshi",
         "SQLAlchemy",
         "Babel",
-        "PIL",
         "lxml",
         "cssutils",
         "ftputil",

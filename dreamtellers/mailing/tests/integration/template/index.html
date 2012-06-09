@@ -33,15 +33,15 @@
             width: 600px;
             padding: 25px;
             margin:20px auto;
-            background: url(images/vline.gif) top repeat-x white;
+            background: url(vline.gif) top repeat-x white;
         }
 
         #resumenes {
-            background: url(images/hline.gif) left repeat-y;
+            background: url(hline.gif) left repeat-y;
         }
 
         #logol {
-            background: url(images/logo.gif) 0 15px no-repeat;
+            background: url(logo.gif) 0 15px no-repeat;
             width:128px;
             height: 128px;
             margin:10px 13px 0px 13px;
@@ -54,7 +54,7 @@
         }
 
         #logor {
-            background: url(images/header.gif);
+            background: url(header.gif);
             width:358px;
             height:86px;
             margin:13px 29px;
@@ -72,14 +72,14 @@
         }
 
         #url-ct {
-            background: url(images/url.gif) 13px 15px no-repeat;
+            background: url(url.gif) 13px 15px no-repeat;
             height: 35px;
             width: 154px;
             float: left;
         }
 
         #nombre-ct {
-            background: url(images/nombre.gif) right 15px no-repeat;
+            background: url(nombre.gif) right 15px no-repeat;
             height: 35px;
             width: 254px;
             float: right;
@@ -160,8 +160,8 @@
                 <div class="seccion-ct"
                      py:for="(cat, items) in mailing.grouped_items">
                     <img py:if="cat.image"
-                         py:attrs="dict(src=cat.image.path, alt=cat.title)"
-                         src="images/actividad.gif" alt="Actividad" />
+                         py:attrs="dict(src=cat.image.filename, alt=cat.title)"
+                         src="actividad.gif" alt="Actividad" />
                     <div class="seccion">
                         <ul>
                             <li py:for="item in items">

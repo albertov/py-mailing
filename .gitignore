@@ -3,3 +3,4 @@ Env
 *.egg
 *.sw[po]
 *.pyc
+*.sqlite
