@@ -1,85 +1,131 @@
-import os
+import re
 import logging
-import smtplib
 from itertools import chain
+
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 from email.MIMEBase import MIMEBase
 from email.MIMEImage import MIMEImage
-from email import Charset, Encoders
+from email import Encoders
 from email.Header import Header
-Charset.add_charset('utf-8', Charset.SHORTEST, Charset.QP, 'utf-8')
-Charset.add_charset('iso-8859-1', Charset.SHORTEST, Charset.QP, 'iso-8859-1')
 
-import sx.pisa3 as pisa
-from cStringIO import StringIO
-
-from pkg_resources import resource_string, resource_filename
-from lxml import etree
-from lxml.cssselect import CSSSelector
 import cssutils
-from resumencm.lib.base import config, render, render_mako
-from resumencm.lib.helpers import format_date
 
-class RenderPDFError(StandardError): pass
+from lxml import etree
+from lxml.cssselect import CSSSelector, ExpressionError
+
+def _add_email_charsets():
+    from email import Charset
+    Charset.add_charset('utf-8', Charset.SHORTEST, Charset.QP, 'utf-8')
+    Charset.add_charset('iso-8859-1', Charset.SHORTEST, Charset.QP,
+                        'iso-8859-1')
+
+_add_email_charsets()
 
 log = logging.getLogger(__name__)
 
-def _load_data(p):
-    return resource_string('resumencm', os.path.join('public', p.lstrip('/')))
+class MultipartMessage(object):
+    def __init__(self, encoding='utf-8'):
+        self._encoding = encoding
+        self._msg = MIMEMultipart('related')
+        self._alternative = MIMEMultipart('alternative')
+        self._msg.attach(self._alternative)
+        self._msg.preamble = 'This is a multi-part message in MIME format.'
 
-def embed_images(doc):
-    doc = parse(doc)
-    images = []
-    for i, img_tag in enumerate(doc.xpath('//img')):
-        img = MIMEImage(_load_data(img_tag.attrib['src']))
-        img.add_header('Content-ID', '<image-%d>'%i)
-        images.append(img)
-        img_tag.attrib['src'] = 'cid:image-%d' % i
-    return doc, images
+    def add_text(self, content, type='plain'):
+        part = SafeMIMEText(self._encode(content), type, self._encoding)
+        self._alternative.attach(part)
 
-def embed_styles(doc):
-    doc = parse(doc)
-    for link_tag in  doc.xpath('//link[@rel="stylesheet"]'):
-        sheet = cssutils.parseString(_load_data(link_tag.attrib['href']))
-        link_tag.getparent().remove(link_tag)
-        for selector in sheet:
-            for node in CSSSelector(selector.selectorText)(doc):
-                styles = set(chain(*(s.split(';') for s in selector.style.cssText.split('\n'))))
-                if 'style' in node.attrib:
-                    old_styles = set(node.attrib['style'].split(';'))
-                    old_styles.update(styles)
-                    styles = old_styles
-                node.attrib['style'] = '; '.join(filter(None, map(lambda s: s.strip(), styles)))
-    return doc
+    def add_image(self, data, id):
+        img = MIMEImage(data)
+        img.add_header('Content-ID', id)
+        self._msg.attach(img)
 
-static_path = resource_filename('resumencm', 'public')
+    def add_attachment(self, filename, payload, content_type='octet/stream'):
+        filename = self._encode(filename)
+        attachment = MIMEBase(*content_type.split('/'), name=filename)
+        attachment.set_payload(payload)
+        Encoders.encode_base64(attachment)
+        attachment.add_header('Contet-Disposition',
+                              'attachment; filename="%s"'%filename)
+        self._msg.attach(attachment)
 
-def _link_cb(src, relative):
-    path = os.path.abspath(os.path.join(static_path, src.lstrip('/')))
-    return path
+    def add_header(self, name, value):
+        self._msg[name] = self._encode(value)
+
+    def get_header(self, name):
+        return self._msg[name]
+        
+    def del_header(self, name):
+        del self._msg[name]
+        
+    def _encode(self, text):
+        if isinstance(text, unicode):
+            text = text.encode(self._encoding)
+        return text
+
+    def __str__(self):
+        return self._msg.as_string()
+        
+class MessageComposer(object):
+    _url_re = re.compile(r'url\(["\']{0,1}(.*?)["\']{0,1}\)')
+
+    def __init__(self, mailing, encoding='utf-8'):
+        self._mailing = mailing
+        self._encoding = encoding
+
+    def generate_message(self):
+        msg = MultipartMessage(self._encoding)
+        msg.add_text(self._generate_html(), 'html')
+        for img in self._mailing.images:
+            msg.add_image(img.data, img.filename)
+        return msg
+
+    def _generate_html(self):
+        dom = etree.HTML(self._mailing.render('xhtml'))
+        self._remove_http_equiv_headers(dom)
+        self._embed_syles(dom)
+        self._internalize_images(dom)
+        return etree.tounicode(dom, method='html')
 
 
-def render_pdf(mailing, subscriber):
-    html = render('mailing/show.html', mailing=mailing, subscriber=subscriber)
-    html = etree.tounicode(embed_styles(html), method='html')
-    output = StringIO()
-    enc = 'utf-8'
-    pdf = pisa.CreatePDF(StringIO(html.encode(enc)), output, encoding=enc,
-                         link_callback=_link_cb)
-    if pdf.err:
-        raise RenderPDFError
-    return output.getvalue()
+    def _remove_http_equiv_headers(self, dom):
+        for meta in dom.xpath('//meta[@http-equiv]'):
+            meta.getparent().remove(meta)
 
-def parse(doc):
-    if isinstance(doc, str):
-        doc = etree.HTML(doc.decode('utf-8'))
-    elif isinstance(doc, unicode):
-        doc = etree.HTML(doc)
-    return doc
-    
+    def _internalize_images(self, dom):
+        # should be called after _embed_syles
+        for img in dom.xpath('//img'):
+            img.attrib['src'] = 'cid:' + img.attrib['src']
+        
+        repl = lambda s: 'url(cid:{0})'.format(s.group(1))
+        for e in dom.xpath('//*[@style]'):
+            style = e.attrib['style']
+            e.attrib['style'] = self._url_re.sub(repl, style)
 
-    
+    def _embed_syles(self, dom):
+        for style in dom.xpath('//style'):
+            sheet = cssutils.parseString(style.text)
+            style.getparent().remove(style)
+            for selector in sheet:
+                try:
+                    xpath = CSSSelector(selector.selectorText)
+                except ExpressionError, e:
+                    log.warn("Could not internalize selector %r because: %s",
+                             selector.selectorText, e)
+                    continue
+                for node in xpath(dom):
+                    styles = set(chain(*(
+                        s.split(';') for s in selector.style.cssText.split('\n')
+                    )))
+                    if 'style' in node.attrib:
+                        old_styles = set(node.attrib['style'].split(';'))
+                        old_styles.update(styles)
+                        styles = old_styles
+                    style = '; '.join(filter(None, [s.strip() for s in styles]))
+                    node.attrib['style'] = style
+
+
 class BadHeaderError(ValueError):
     pass
 
@@ -96,72 +142,3 @@ class SafeHeaderMixin(object):
 
 class SafeMIMEText(MIMEText, SafeHeaderMixin):
     pass
-
-def send_mailing(mailing, subscribers):
-    smtp = open_smtp_connection()
-    for subscriber in subscribers:
-        log.info("Enviando %r a %r", mailing, subscriber)
-        send_mailing_to_subscriber(mailing, subscriber, smtp=smtp)
-        log.info("Enviado %r a %r con exito", mailing, subscriber)
-    smtp.quit()
-
-def send_mailing_to_subscriber(mailing, subscriber, send_pdf=False, smtp=None):
-    token = mailing.generate_token(subscriber).token
-    html = render('mailing/show.html', mailing=mailing, subscriber=subscriber,
-                  token=token)
-    text = render_mako('mailing/show.mako', mailing=mailing,
-                       subscriber=subscriber, token=token)
-    doc = parse(html)
-    # remove content-type headers
-    for meta in doc.xpath('//meta[@http-equiv]'):
-        meta.getparent().remove(meta)
-    doc, images = embed_images(doc)
-    doc = embed_styles(doc)
-    strFrom = config['resumencm.email_from']
-    strTo = subscriber.email
-
-    # Create the root message and fill in the from, to, and subject headers
-    msgRoot = MIMEMultipart('related')
-    subject = "Resumen de confidenciales de CapitalMadrid (%s)" % format_date(mailing.send_on, format='long', locale='es')
-    msgRoot['Subject'] = subject
-    msgRoot['From'] = strFrom
-    msgRoot['To'] = strTo
-    msgRoot.preamble = 'This is a multi-part message in MIME format.'
-
-    # Encapsulate the plain and HTML versions of the message body in an
-    # 'alternative' part, so message agents can decide which they want to
-    # display.
-    msgAlternative = MIMEMultipart('alternative')
-    msgRoot.attach(msgAlternative)
-
-    msgText = SafeMIMEText(text, 'plain', 'utf-8')
-    msgAlternative.attach(msgText)
-
-    html =  etree.tounicode(doc, method='html')
-    #open('test.html', 'w').write(html.encode('utf-8'))
-    msgText = SafeMIMEText(html.encode('utf-8'), 'html', 'utf-8')
-    msgAlternative.attach(msgText)
-
-    map(msgRoot.attach, images)
-
-    if send_pdf:
-        # attach pdf
-        fname = "resumen-confidenciales-CapitalMadrid-%s.pdf"
-        fname = fname  % mailing.send_on.strftime("%Y%m%d")
-        pdf = MIMEBase('application', 'pdf', name=fname)
-        pdf.set_payload(render_pdf(mailing, subscriber))
-        Encoders.encode_base64(pdf)
-        pdf.add_header('Contet-Disposition', 'attachment; filename="%s"'%fname)
-        msgRoot.attach(pdf)
-
-    # Send the email (this example assumes SMTP authentication is required)
-    if smtp is None:
-        smtp = open_smtp_connection()
-    smtp.sendmail(strFrom, strTo, msgRoot.as_string())
-    #smtp.quit()
-
-def open_smtp_connection():
-    smtp = smtplib.SMTP()
-    smtp.connect(config['resumencm.email_server'])
-    smtp.login(config['resumencm.email_user'], config['resumencm.email_passwd'])
-    return smtp

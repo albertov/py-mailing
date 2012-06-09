@@ -8,24 +8,28 @@ from pkg_resources import resource_filename
 
 from lxml import etree
 
-from ...models import *
+                      
+        
 
 def fixture(s):
     return resource_filename(__name__, s)
 
 
-class BaseModelTest(TestCase):
+class TestCalistoMailing(TestCase):
 
     def setUp(self):
         self.session = self._makeSession()
 
     def _makeSession(self):
+        from ...models import create_sessionmaker
         return create_sessionmaker()()
 
     def _loadData(self):
         return json.load(open(fixture('data.json')))
 
     def _makeMailing(self):
+        from ...models import (Mailing, Image, Article, ExternalLink, Template,
+                               Category)
         number = 1
         date = datetime.datetime(2012,6,9)
         data = self._loadData()
@@ -62,13 +66,20 @@ class BaseModelTest(TestCase):
                 # no es imagen de categoria
                tpl.images.append(i)
         return mailing
+    
+    def _makeComposer(self, mailing=None):
+        if mailing is None:
+            mailing = self._makeMailing()
+        from ...mail import MessageComposer
+        return MessageComposer(mailing)
 
     def test_create_persist_retrieve(self):
-        self.session.add(self._makeMailing())
+        ob = self._makeMailing()
+        self.session.add(ob)
         self.session.commit()
         self.session.expunge_all()
 
-        m = self.session.query(Mailing).one()
+        m = self.session.query(ob.__class__).one()
         self.failUnless(m)
 
     def test_correct_items(self):
@@ -85,5 +96,27 @@ class BaseModelTest(TestCase):
     def test_can_render(self):
         m = self._makeMailing()
         html = m.render('xhtml')
+        self.failUnless(isinstance(html, unicode), type(html))
+
+    def test_renders_valid_xhtml(self):
+        m = self._makeMailing()
+        html = m.render('xhtml')
+        dom = etree.fromstring(html)
+
+    def test_contains_expected_elements(self):
+        m = self._makeMailing()
+        html = m.render('xhtml')
         dom = etree.HTML(html)
         self.failUnlessEqual(len(dom.xpath("//div[@class='seccion']")), 4)
+
+    def test_email_message(self):
+        m = self._makeMailing()
+        composer = self._makeComposer(m)
+        msg = composer.generate_message()
+        body = str(msg)
+
+        for img in m.images:
+            # Contains image as multipart
+            self.failUnless('Content-ID: '+img.filename in body)
+            # Has replaced refereces to images with internal ones
+            self.failUnless('cid:'+ img.filename in body)

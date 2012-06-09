@@ -12,7 +12,7 @@ import markdown
 from pkg_resources import resource_filename
 
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, create_engine
+                        Table, LargeBinary, String, create_engine
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -55,7 +55,7 @@ class Item(Model):
     __tablename__ = "item"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
-    type = Column(Unicode(20), nullable=False)
+    type = Column(String(20), nullable=False)
     position = Column(Integer, nullable=False, default=0)
     category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     _mailing = Column("mailing", Integer, ForeignKey('mailing.number'),
@@ -82,7 +82,7 @@ class Article(Item):
 
     text = orm.synonym('_data')
     image = orm.relation(Image)
-    image_position = Column(Unicode(1), nullable=False, default="l")
+    image_position = Column(String(1), nullable=False, default="l")
 
     __mapper_args__ = {'polymorphic_identity':'Article'}
 
@@ -108,7 +108,7 @@ class Template(Model):
     __tablename__ = "template"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
-    type = Column(Unicode(20), nullable=False, default='xhtml')
+    type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
 
     images = orm.relation(Image, secondary=template_image_table)
@@ -211,8 +211,9 @@ class Mailing(Model):
     def items_by_type(self, type):
         return [i for i in self.items if i.type==type]
 
-    def render(self, format='xhtml'):
-        return self.templates[format].render(mailing=self)
+    def render(self, format='xhtml', **kw):
+        ns = dict(kw, mailing=self)
+        return self.templates[format].render(**ns).decode('utf8')
 
     def __repr__(self):
         data = (self.number, self.date, len(self.items))

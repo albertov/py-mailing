@@ -4,3 +4,4 @@ Env
 *.sw[po]
 *.pyc
 *.sqlite
+.coverage
