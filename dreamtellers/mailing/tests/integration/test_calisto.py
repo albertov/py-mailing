@@ -120,3 +120,9 @@ class TestCalistoMailing(TestCase):
             self.failUnless('Content-ID: '+img.filename in body)
             # Has replaced refereces to images with internal ones
             self.failUnless('cid:'+ img.filename in body)
+
+        # style elements have been removed
+        self.failUnless('<style>' not in body)
+
+        #background css images have been internalized
+        self.failUnless('url(cid:' in body)
