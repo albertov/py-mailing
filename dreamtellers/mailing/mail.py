@@ -40,7 +40,7 @@ class MultipartMessage(object):
     def add_image(self, data, id):
         img = MIMEImage(data)
         img.add_header('Content-ID', '<{0}>'.format(id))
-        img.add_header('Content-Disposition', 'Attachment')
+        img.add_header('Content-Disposition', 'inline')
         self._msg.attach(img)
 
     def add_attachment(self, filename, payload, content_type='octet/stream'):
@@ -113,7 +113,11 @@ class MessageComposer(object):
     def _embed_image_data(self, txt):
         def repl(m):
             src = m.group(1)
-            img = [i for i in self._mailing.images if i.filename==src][0]
+            try:
+                img = [i for i in self._mailing.images if i.filename==src][0]
+            except IndexError:
+                # Not an internal image, leave it as-is
+                return m.group(0)
             data = b64encode(img.data)
             return "url(data:{0};base64,{1})".format(img.content_type, data)
         return self._url_re.sub(repl, txt)
