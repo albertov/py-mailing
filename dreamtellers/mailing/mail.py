@@ -133,12 +133,21 @@ class MessageComposer(object):
                     styles = set(chain(*(
                         s.split(';') for s in selector.style.cssText.split('\n')
                     )))
-                    if 'style' in node.attrib:
-                        old_styles = node.attrib['style'].split(';')
+                    if 'cstyle' in node.attrib:
+                        old_styles = node.attrib['cstyle'].split(';')
                         old_styles.extend(styles)
                         styles = old_styles
                     style = '; '.join(filter(None, [s.strip() for s in styles]))
-                    node.attrib['style'] = style
+                    node.attrib['cstyle'] = style
+        for e in dom.xpath('//*[@cstyle]'):
+            if 'style' in e.attrib:
+                styles = e.attrib['style'].split(';')
+            else:
+                styles = []
+            computed_styles = e.attrib['cstyle'].split(';')
+            del e.attrib['cstyle']
+            e.attrib['style'] = ';'.join(computed_styles+styles)
+
 
 
 class BadHeaderError(ValueError):
