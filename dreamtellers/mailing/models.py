@@ -17,8 +17,6 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.orderinglist import ordering_list
 
-IMAGE_DIR_KEY = 'DT_IMAGE_DIR'
-
 def create_sessionmaker(dburl="sqlite:///:memory:", create_tables=True,
                         echo=True):
     engine = create_engine(dburl, echo=echo)
@@ -100,8 +98,10 @@ class Article(Item):
         return markdown.markdown(self.text)
 
 template_image_table = Table("template_image", Model.metadata,
-    Column('template', Integer, ForeignKey('template.id', ondelete="CASCADE")),
-    Column('image', Integer, ForeignKey('image.id', ondelete="CASCADE"))
+    Column('template', Integer, ForeignKey('template.id', ondelete="CASCADE"),
+           primary_key=True),
+    Column('image', Integer, ForeignKey('image.id', ondelete="CASCADE"),
+           primary_key=True)
 )
 
 class Template(Model):
@@ -134,7 +134,7 @@ class Template(Model):
         if self.type == 'text':
             return unicode(stream)
         else:
-            return stream.render(self.type)
+            return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
         
 
 class Group(Model):
@@ -213,7 +213,7 @@ class Mailing(Model):
 
     def render(self, format='xhtml', **kw):
         ns = dict(kw, mailing=self)
-        return self.templates[format].render(**ns).decode('utf8')
+        return self.templates[format].render(**ns)
 
     def __repr__(self):
         data = (self.number, self.date, len(self.items))
