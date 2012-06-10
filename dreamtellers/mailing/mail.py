@@ -1,6 +1,7 @@
 import re
 import logging
 from itertools import chain
+from base64 import b64encode
 
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
@@ -38,7 +39,8 @@ class MultipartMessage(object):
 
     def add_image(self, data, id):
         img = MIMEImage(data)
-        img.add_header('Content-ID', id)
+        img.add_header('Content-ID', '<{0}>'.format(id))
+        img.add_header('Content-Disposition', 'Attachment')
         self._msg.attach(img)
 
     def add_attachment(self, filename, payload, content_type='octet/stream'):
@@ -46,8 +48,8 @@ class MultipartMessage(object):
         attachment = MIMEBase(*content_type.split('/'), name=filename)
         attachment.set_payload(payload)
         Encoders.encode_base64(attachment)
-        attachment.add_header('Contet-Disposition',
-                              'attachment; filename="%s"'%filename)
+        attachment.add_header('Content-Disposition',
+                              'Attachment; filename="%s"'%filename)
         self._msg.attach(attachment)
 
     def add_header(self, name, value):
@@ -78,7 +80,8 @@ class MessageComposer(object):
         msg = MultipartMessage(self._encoding)
         msg.add_text(self._generate_html(), 'html')
         for img in self._mailing.images:
-            msg.add_image(img.data, img.filename)
+            #TODO: NO incluir las imagenes ya incluidas como data:
+            msg.add_image(img.data, self._content_id(img.filename))
         return msg
 
     def _generate_html(self):
@@ -95,14 +98,25 @@ class MessageComposer(object):
 
     def _internalize_images(self, dom):
         for img in dom.xpath('//img'):
-            img.attrib['src'] = 'cid:' + img.attrib['src']
-        
-        repl = lambda s: 'url(cid:{0})'.format(s.group(1))
+            img.attrib['src'] = 'cid:' + self._content_id(img.attrib['src'])
+
+        for e in dom.xpath('//*[@background]'):
+            e.attrib['background'] = 'cid:' + self._content_id(e.attrib['background'])
         for e in dom.xpath('//*[@style]'):
-            style = e.attrib['style']
-            e.attrib['style'] = self._url_re.sub(repl, style)
+            e.attrib['style'] = self._embed_image_data(e.attrib['style'])
         for e in dom.xpath('//style'):
-            e.text = self._url_re.sub(repl, e.text)
+            e.text = self._embed_image_data.sub(e.text)
+
+    def _content_id(self, src):
+        return src + '@dreamtellers.mailing'
+
+    def _embed_image_data(self, txt):
+        def repl(m):
+            src = m.group(1)
+            img = [i for i in self._mailing.images if i.filename==src][0]
+            data = b64encode(img.data)
+            return "url(data:{0};base64,{1})".format(img.content_type, data)
+        return self._url_re.sub(repl, txt)
 
     def _embed_syles(self, dom):
         for style in dom.xpath('//style'):

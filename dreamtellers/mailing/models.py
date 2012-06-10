@@ -32,6 +32,7 @@ class Image(Model):
     filename = Column(Unicode(255), nullable=False)
     title = Column(Unicode(512))
     data = Column(LargeBinary(), nullable=False)
+    content_type = 'image/gif' #XXX
 
     def __repr__(self):
         data = (self.id, self.title, self.filename)
