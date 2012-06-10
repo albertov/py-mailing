@@ -134,8 +134,8 @@ class MessageComposer(object):
                         s.split(';') for s in selector.style.cssText.split('\n')
                     )))
                     if 'style' in node.attrib:
-                        old_styles = set(node.attrib['style'].split(';'))
-                        old_styles.update(styles)
+                        old_styles = node.attrib['style'].split(';')
+                        old_styles.extend(styles)
                         styles = old_styles
                     style = '; '.join(filter(None, [s.strip() for s in styles]))
                     node.attrib['style'] = style
