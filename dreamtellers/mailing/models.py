@@ -209,8 +209,11 @@ class Mailing(Model):
                 images.add(i.image)
         return list(images)
 
-    def items_by_type(self, type):
-        return [i for i in self.items if i.type==type]
+    def items_by_type(self, type, grouped=False):
+        items =  [i for i in self.items if i.type==type]
+        if grouped:
+            items = groupby(items, attrgetter('category'))
+        return items
 
     def render(self, format='xhtml', **kw):
         ns = dict(kw, mailing=self)

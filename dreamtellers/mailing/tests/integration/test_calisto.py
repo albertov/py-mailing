@@ -40,10 +40,11 @@ class TestCalistoMailing(TestCase):
         mailing.templates['xhtml'] = Template(title="Calisto 1", body=body)
 
         images = {}
-        for f in glob(fixture('template/*.gif')):
-            fname = os.path.basename(f)
-            with open(f) as file:
-                images[fname] = Image(filename=fname, data=file.read())
+        for f in glob(fixture('template/*')):
+            if f.split('.')[-1] in ('gif', 'png'):
+                fname = os.path.basename(f)
+                with open(f) as file:
+                    images[fname] = Image(filename=fname, data=file.read())
 
         for cat_data in data['categories']:
             cat = Category(title=cat_data['title'])
@@ -96,7 +97,7 @@ class TestCalistoMailing(TestCase):
 
     def test_correct_images(self):
         m = self._makeMailing()
-        self.failUnlessEqual(len(m.images), 10)
+        self.failUnlessEqual(len(m.images), 11)
         self.failUnlessEqual(len([i for i in m.images if i.title]), 4)
 
     def test_can_render(self):

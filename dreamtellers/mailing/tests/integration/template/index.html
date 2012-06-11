@@ -16,6 +16,7 @@
 
         table {
             table-layout: fixed;
+            border-collapse: collapse;
         }
 
         td, th {
@@ -23,23 +24,25 @@
         }
 
         p {
-            margin-bottom: .7em;
+            margin-bottom: .3em;
         }
 
-        h2 {
-            margin-bottom: .9em;
+        h3 {
+            margin-bottom: .5em;
+            font-weight: normal;
+            font-size: 25px;
         }
 
         body {
             background: #aaa;
             width:100%;
             height:100%;
-            font-family: Helvetica, arial, sans-serif;
+            font-family: elvetica, arial, sans-serif;
+            font-size: 15px;
         }
 
         #contenedor {
             width: 600px;
-            padding: 25px;
             margin:20px auto;
             background-repeat: repeat-x;
             background-position: top;
@@ -50,6 +53,7 @@
             background-position: left;
             background-repeat: repeat-y;
             width: 550px;
+            margin: 25px 25px -40px 25px;
         }
 
         #resumenes thead {
@@ -74,6 +78,7 @@
 
         #number {
             position: relative;
+            font-weight: normal;
             left: 0;
             top: 0;
             font-size:27px;
@@ -86,8 +91,10 @@
         
         #fecha {
             margin: 68px 0px 0px 255px;
+            font-weight: normal;
+            font-size: 15px;
             display: block;
-            color: #7fc7eb;
+            color: #34b4e4;
         }
 
         #resumen-footer {
@@ -95,9 +102,15 @@
         }
 
         #url-ct {
-            background-position: 13px 15px;
-            background-repeat: no-repeat;
-            height: 35px;
+            height: 60px;
+            padding: 0 6px;
+        }
+
+        #url-ct a {
+            text-decoration: none;
+            color: black;
+            font-size: 14px;
+
         }
 
         #nombre-ct {
@@ -107,18 +120,42 @@
         }
 
         .seccion {
-            border-bottom: solid black 2px;
+            border-bottom: solid #7fc7e6 2px;
             height: 128px;
         }
 
-        .seccion-ct img  {
-            margin: 13px 13px 0 13px;
+        .seccion-ct:last-child .seccion {
+            border-bottom: none;
         }
 
-        .seccion-ct img {
+
+        .seccion-img img {
+            margin: 13px 13px 0 13px;
             width: 128px;
             height: 128px;
         }
+
+        #articulos .seccion-ct h2 {
+            text-align: right;
+            font-weight: normal;
+            background: black;
+            color: #7fc7eb;
+            height: 40px;
+            font-size: 25px;
+            padding: 8px 20px 4px 0;
+            margin-bottom: 10px;
+        }
+
+        .goto-top {
+            display: block;
+            width: 100%;
+            text-align: right;
+        }
+
+        .goto-top img {
+            margin-right: 20px;
+        }
+
 
         .seccion ul {
             padding: 13px;
@@ -143,8 +180,13 @@
         }
 
         .articulo {
-            margin-top: 15px;
-            border-bottom: solid black 1px;
+            border-bottom: solid #7fc7e6 1px;
+            margin: 5px 25px 0px 25px;
+            padding-bottom: 25px;
+        }
+
+        .articulo:last-child {
+            border-bottom: none;
         }
 
         .articulo div {
@@ -175,6 +217,7 @@
             </tr>
             </thead>
             <tbody>
+            <a name="top" />
             <tr class="seccion-ct"
                  py:for="(cat, items) in mailing.grouped_items">
                 <td class="seccion-img"><img py:if="cat.image"
@@ -182,10 +225,16 @@
                      src="actividad.gif" alt="Actividad" /></td>
                 <td class="seccion">
                     <ul>
-                        <li py:for="item in items">
-                            <a href="${item.url}" py:content="item.title">
+                        <li py:for="item in items"
+                            py:with="ext='http' in item.url">
+                            <a href="${item.url}"
+                               py:content="item.title"
+                               target="${'_blank' if ext else '_self'}"
+                            >
                                 Blah, blah, blahhhhhhh
                             </a>
+                            <img py:if="ext" src="elink.png" 
+                                 width="16" height="16" />
                         </li>
                     </ul>
                 </td>
@@ -193,23 +242,33 @@
             </tbody>
             <tfoot>
             <tr id="resumen-footer">
-                <td id="url-ct" background="url.gif">&nbsp;</td>
-                <td id="nombre-ct" background="nombre.gif">&nbsp;</td>
+                <td id="url-ct" colspan="2">
+                    <a href="http://www.dreamtellers.org">
+                        www.dreamtellers.org
+                    </a>
+                </td>
             </tr>
             </tfoot>
         </table>
 
         <div id="articulos">
-            <div py:for="article in mailing.items_by_type('Article')"
-                 class="articulo">
-                 <a name="${article.anchor}">
-                    <h2 py:content="article.title">Título del artículo</h2>
+            <div py:for="(cat, articles) in mailing.items_by_type('Article', True)"
+                 class="seccion-ct">
+                 <a href="#top" class="goto-top">
+                    <img src="arrow.png" alt="Subir" />
                  </a>
-                    <div py:content="Markup(article.html)">
+                 <h2 py:content="cat.title">Nombre cat</h2>
+                 <div py:for="article in articles"
+                      class="articulo">
+                     <a name="${article.anchor}">
+                        <h3 py:content="article.title">Título del artículo</h3>
+                     </a>
+                     <div py:content="Markup(article.html)">
                         <p>Lorem ipsum dolor, lalalala</p>
                         <p>Lorem ipsum dolor, lalalala</p>
                         <p>Lorem ipsum dolor, lalalala</p>
-                    </div>
+                     </div>
+                 </div>
             </div>
         </div>
 
