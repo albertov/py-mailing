@@ -67,7 +67,13 @@ class TestCalistoMailing(TestCase):
                tpl.images.append(i)
         return mailing
     
-    def _makeComposer(self, mailing=None):
+    def _makeHTMLPageComposer(self, mailing=None):
+        if mailing is None:
+            mailing = self._makeMailing()
+        from ...html import HTMLPageComposer
+        return HTMLPageComposer(mailing)
+
+    def _makeMessageComposer(self, mailing=None):
         if mailing is None:
             mailing = self._makeMailing()
         from ...mail import MessageComposer
@@ -111,6 +117,10 @@ class TestCalistoMailing(TestCase):
 
     def test_email_message(self):
         m = self._makeMailing()
-        composer = self._makeComposer(m)
+        composer = self._makeMessageComposer(m)
         msg = composer.generate_message()
         body = str(msg)
+
+    def test_upload_to_ftpsite(self):
+        m = self._makeMailing()
+        composer = self._makeHTMLPageComposer(m)

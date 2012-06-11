@@ -1,6 +1,5 @@
 import re
 import logging
-from itertools import chain
 from base64 import b64encode
 
 from email.MIMEMultipart import MIMEMultipart
@@ -13,7 +12,8 @@ from email.Header import Header
 import cssutils
 
 from lxml import etree
-from lxml.cssselect import CSSSelector, ExpressionError
+
+from .util import collapse_styles
 
 def _add_email_charsets():
     from email import Charset
@@ -87,7 +87,7 @@ class MessageComposer(object):
     def _generate_html(self):
         dom = etree.HTML(self._mailing.render('xhtml'))
         self._remove_http_equiv_headers(dom)
-        self._embed_syles(dom)
+        self._collapse_styles(dom)
         self._internalize_images(dom)
         return etree.tounicode(dom, method='html')
 
@@ -122,36 +122,8 @@ class MessageComposer(object):
             return "url(data:{0};base64,{1})".format(img.content_type, data)
         return self._url_re.sub(repl, txt)
 
-    def _embed_syles(self, dom):
-        for style in dom.xpath('//style'):
-            sheet = cssutils.parseString(style.text)
-            style.getparent().remove(style)
-            for selector in sheet:
-                try:
-                    xpath = CSSSelector(selector.selectorText)
-                except ExpressionError, e:
-                    log.warn("Could not internalize selector %r because: %s",
-                             selector.selectorText, e)
-                    continue
-                for node in xpath(dom):
-                    styles = set(chain(*(
-                        s.split(';') for s in selector.style.cssText.split('\n')
-                    )))
-                    if 'cstyle' in node.attrib:
-                        old_styles = node.attrib['cstyle'].split(';')
-                        old_styles.extend(styles)
-                        styles = old_styles
-                    style = '; '.join(filter(None, [s.strip() for s in styles]))
-                    node.attrib['cstyle'] = style
-        for e in dom.xpath('//*[@cstyle]'):
-            if 'style' in e.attrib:
-                styles = e.attrib['style'].split(';')
-            else:
-                styles = []
-            computed_styles = e.attrib['cstyle'].split(';')
-            del e.attrib['cstyle']
-            e.attrib['style'] = ';'.join(computed_styles+styles)
-
+    def _collapse_styles(self, dom):
+        collapse_styles(dom)
 
 
 class BadHeaderError(ValueError):
