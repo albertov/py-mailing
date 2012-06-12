@@ -37,8 +37,9 @@ class MultipartMessage(object):
         part = SafeMIMEText(self._encode(content), type, self._encoding)
         self._alternative.attach(part)
 
-    def add_image(self, data, id):
-        img = MIMEImage(data)
+    def add_image(self, data, id, content_type=None):
+        subtype = content_type.split('/')[-1] if content_type else None
+        img = MIMEImage(data, subtype)
         img.add_header('Content-ID', '<{0}>'.format(id))
         img.add_header('Content-Disposition', 'inline')
         self._msg.attach(img)
@@ -82,7 +83,9 @@ class MessageComposer(object):
         msg.add_text(html, 'html')
         for img in self._mailing.images:
             #TODO: NO incluir las imagenes ya incluidas como data:
-            msg.add_image(img.data, self._content_id(img.filename))
+            msg.add_image(img.data,
+                          self._content_id(img.filename),
+                          img.content_type)
         return msg
 
     def _generate_html(self):

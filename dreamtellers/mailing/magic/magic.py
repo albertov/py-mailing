@@ -192,6 +192,12 @@ class Magic(object):
         if kind.startswith("ldate-"):
             NOT_DONE_YET=kind[6:]
             kind="ldate"
+
+        # XXX: No idea what are those extension
+        if kind.startswith("regex"):
+            NOT_DONE_YET=kind[5:]
+            kind="regex"
+    
     
         return kind
 
@@ -347,6 +353,8 @@ class Magic(object):
                 data = self.__data(kind,result)
 
                 # Get the length of the data
+                if kind not in self.data_size:
+                    continue
                 length = self.__length(kind,data)
                 
                 # Special characters

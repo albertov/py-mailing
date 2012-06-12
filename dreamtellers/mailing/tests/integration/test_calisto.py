@@ -99,7 +99,7 @@ class TestCalistoMailing(TestCase):
         m = self._makeMailing()
         self.failUnlessEqual(len(m.images), 11)
         self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/gif']), 9)
-        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/x-png']), 2)
+        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/png']), 2)
         self.failUnlessEqual(len([i for i in m.images if i.title]), 4)
 
     def test_can_render(self):
@@ -123,6 +123,9 @@ class TestCalistoMailing(TestCase):
         composer = self._makeMessageComposer(m)
         msg = composer.generate_message()
         body = str(msg)
+        self.failUnless('image/png' in body)
+        self.failUnless('image/gif' in body)
+        self.failUnless('text/html' in body)
 
     def test_html_compposer(self):
         m = self._makeMailing()
