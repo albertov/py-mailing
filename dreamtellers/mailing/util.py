@@ -1,8 +1,10 @@
 from itertools import chain
 import logging
+from cStringIO import StringIO
 
 import cssutils
 from lxml.cssselect import CSSSelector, ExpressionError
+
 
 log = logging.getLogger(__name__)
 
@@ -39,3 +41,11 @@ def collapse_styles(dom):
         computed_styles = e.attrib['cstyle'].split(';')
         del e.attrib['cstyle']
         e.attrib['style'] = ';'.join(computed_styles+styles)
+
+def sniff_content_type(data):
+    #return magic.from_buffer(StringIO(data), True)
+    if data[:3]=='GIF':
+        return 'image/gif'
+    if data[1:4]=='PNG':
+        return 'image/png'
+    return 'octet/stream'

@@ -77,8 +77,9 @@ class MessageComposer(object):
         self._encoding = encoding
 
     def generate_message(self):
-        msg = MultipartMessage(self._encoding)
-        msg.add_text(self._generate_html(), 'html')
+        html, encoding = self._generate_html()
+        msg = MultipartMessage(encoding)
+        msg.add_text(html, 'html')
         for img in self._mailing.images:
             #TODO: NO incluir las imagenes ya incluidas como data:
             msg.add_image(img.data, self._content_id(img.filename))
@@ -89,7 +90,9 @@ class MessageComposer(object):
         self._remove_http_equiv_headers(dom)
         self._collapse_styles(dom)
         self._internalize_images(dom)
-        return etree.tounicode(dom, method='html')
+        #TODO: Extract encoding from <meta http-equiv=""> if present
+        encoding = self._encoding
+        return etree.tounicode(dom, method='html'), encoding
 
 
     def _remove_http_equiv_headers(self, dom):

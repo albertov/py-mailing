@@ -16,6 +16,9 @@ from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.hybrid import hybrid_property
+
+from .util import sniff_content_type
 
 def create_sessionmaker(dburl="sqlite:///:memory:", create_tables=True,
                         echo=True):
@@ -31,8 +34,21 @@ class Image(Model):
     id = Column(Integer, primary_key=True)
     filename = Column(Unicode(255), nullable=False)
     title = Column(Unicode(512))
-    data = Column(LargeBinary(), nullable=False)
-    content_type = 'image/gif' #XXX
+    _data = Column('data', LargeBinary(), nullable=False)
+    content_type = Column(String(20), nullable=False)
+
+    @hybrid_property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, value):
+        self.content_type = sniff_content_type(value)
+        self._data = value
+
+    @data.expression
+    def data(cls):
+        return cls._data
 
     def __repr__(self):
         data = (self.id, self.title, self.filename)
@@ -208,6 +224,12 @@ class Mailing(Model):
             if hasattr(i, 'image') and i.image is not None:
                 images.add(i.image)
         return list(images)
+
+    def get_file_by_filename(self, filename):
+        try:
+            return [i for i in self.images if i.filename==filename][0]
+        except IndexError:
+            raise LookupError(filename)
 
     def items_by_type(self, type, grouped=False):
         items =  [i for i in self.items if i.type==type]

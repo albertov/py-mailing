@@ -122,6 +122,12 @@ class TestCalistoMailing(TestCase):
         msg = composer.generate_message()
         body = str(msg)
 
-    def test_upload_to_ftpsite(self):
+    def test_html_compposer(self):
         m = self._makeMailing()
         composer = self._makeHTMLPageComposer(m)
+        files = dict(composer.files)
+        self.failUnless('index.html' in files)
+        for img in m.images:
+            self.failUnless(img.filename in files)
+        for fname, data in files.items():
+            self.failUnlessEqual(composer.get_file_data(fname), data)
