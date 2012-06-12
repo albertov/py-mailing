@@ -98,6 +98,8 @@ class TestCalistoMailing(TestCase):
     def test_correct_images(self):
         m = self._makeMailing()
         self.failUnlessEqual(len(m.images), 11)
+        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/gif']), 9)
+        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/x-png']), 2)
         self.failUnlessEqual(len([i for i in m.images if i.title]), 4)
 
     def test_can_render(self):
