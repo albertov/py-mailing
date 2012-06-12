@@ -5,6 +5,7 @@ from cStringIO import StringIO
 import cssutils
 from lxml.cssselect import CSSSelector, ExpressionError
 
+from .magic import from_buffer as magic_from_buffer
 
 log = logging.getLogger(__name__)
 
@@ -43,9 +44,4 @@ def collapse_styles(dom):
         e.attrib['style'] = ';'.join(computed_styles+styles)
 
 def sniff_content_type(data):
-    #return magic.from_buffer(StringIO(data), True)
-    if data[:3]=='GIF':
-        return 'image/gif'
-    if data[1:4]=='PNG':
-        return 'image/png'
-    return 'octet/stream'
+    return magic_from_buffer(StringIO(data), 'mime')
