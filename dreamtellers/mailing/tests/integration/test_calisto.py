@@ -24,11 +24,8 @@ class TestCalistoMailing(TestCase):
         from ...models import create_sessionmaker
         return create_sessionmaker()()
 
-    def _loadData(self):
-        return json.load(open(fixture('data.json')))
-
     def _makeMailing(self):
-        return mailing_from_fixture(self._loadData())
+        return mailing_from_fixture(fixture('data.json'))
     
     def _makeHTMLPageComposer(self, mailing=None):
         if mailing is None:
@@ -59,10 +56,7 @@ class TestCalistoMailing(TestCase):
 
     def test_correct_images(self):
         m = self._makeMailing()
-        self.failUnlessEqual(len(m.images), 11)
-        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/gif']), 9)
-        self.failUnlessEqual(len([i for i in m.images if i.content_type=='image/png']), 2)
-        self.failUnlessEqual(len([i for i in m.images if i.title]), 4)
+        self.failUnlessEqual(len(m.images), 15)
 
     def test_can_render(self):
         m = self._makeMailing()
@@ -99,10 +93,11 @@ class TestCalistoMailing(TestCase):
         for fname, data in files.items():
             self.failUnlessEqual(composer.get_file(fname).data, data)
 
-def mailing_from_fixture(data, number=1, date=datetime.datetime.now()):
+def mailing_from_fixture(fname, number=1, date=datetime.datetime.now()):
     from ...models import (Mailing, Image, Article, ExternalLink, Template,
                            Category)
-
+    
+    data = json.load(open(fname))
     mailing = Mailing(number=number, date=date)
 
     body = open(fixture('template/index.html')).read().decode('utf8')
@@ -111,9 +106,9 @@ def mailing_from_fixture(data, number=1, date=datetime.datetime.now()):
     images = {}
     for f in glob(fixture('template/*')):
         if f.split('.')[-1] in ('gif', 'png'):
-            fname = os.path.basename(f)
             with open(f) as file:
-                images[fname] = Image(filename=fname, data=file.read())
+                f = os.path.basename(f)
+                images[f] = Image(filename=f, data=file.read())
 
     for cat_data in data['categories']:
         cat = Category(title=cat_data['title'])
@@ -127,6 +122,14 @@ def mailing_from_fixture(data, number=1, date=datetime.datetime.now()):
             else:
                 item = Article(text=item_data['text'],
                                title=item_data['title'])
+                image = item_data.get('image')
+                if image:
+                    path = os.path.join(os.path.dirname(os.path.abspath(fname)),
+                                        image['path'])
+                    assert os.path.exists(path), path
+                    item.image = Image(data=open(path).read(),
+                                       filename=image['path'],
+                                       title=image['title'])
             item.category = cat
             mailing.items.append(item)
 

@@ -20,7 +20,6 @@ def main(args):
 
 def configure_sqlalchemy(app, dbfile):
     from bottle.ext.sqlalchemy import Plugin
-    print dbfile
     plugin = Plugin(
         create_engine('sqlite:///'+dbfile, echo=True),
         metadata,

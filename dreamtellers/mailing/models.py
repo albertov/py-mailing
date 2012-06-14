@@ -5,6 +5,8 @@ from operator import attrgetter
 
 from babel.dates import format_date
 
+from lxml import etree, builder
+
 from genshi import template
 
 import markdown
@@ -117,7 +119,23 @@ class Article(Item):
 
     @property
     def html(self):
-        return markdown.markdown(self.text)
+        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
+        self._insert_image(dom)
+        return '\n'.join(etree.tounicode(e) for e in dom.getchildren())
+
+    def _insert_image(self, dom):
+        if self.image:
+            ps = dom.xpath('//p[1]')
+            if ps:
+                p = ps[0]
+                img = builder.E.img(src=self.image.filename,
+                                    title=self.image.title,
+                                    alt=self.image.title)
+                class_ = 'left' if self.image_position=='l' else 'right'
+                img.attrib["class"] = class_
+                p.insert(0, img)
+                img.tail = p.text
+                p.text = None
 
 template_image_table = Table("template_image", Model.metadata,
     Column('template', Integer, ForeignKey('template.id', ondelete="CASCADE"),
