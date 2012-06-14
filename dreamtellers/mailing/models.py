@@ -12,8 +12,10 @@ import markdown
 from pkg_resources import resource_filename
 
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, String, create_engine
+                        Table, LargeBinary, String, create_engine, MetaData
+from sqlalchemy.orm import deferred
 from sqlalchemy.orm.collections import attribute_mapped_collection
+from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -27,14 +29,15 @@ def create_sessionmaker(dburl="sqlite:///:memory:", create_tables=True,
         Model.metadata.create_all(engine)
     return orm.sessionmaker(bind=engine)
     
-Model = declarative_base()
+metadata = MetaData()
+Model = declarative_base(metadata=metadata)
 
 class Image(Model):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
     filename = Column(Unicode(255), nullable=False)
     title = Column(Unicode(512))
-    _data = Column('data', LargeBinary(), nullable=False)
+    _data = deferred(Column('data', LargeBinary(), nullable=False))
     content_type = Column(String(20), nullable=False)
 
     @hybrid_property
@@ -59,7 +62,7 @@ class Category(Model):
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
     _image = Column("image", Integer, ForeignKey("image.id"))
-    image = orm.relation(Image)
+    image = orm.relation(Image, lazy=False)
 
     def __repr__(self):
         data = (self.id, self.title, self.image)
@@ -96,7 +99,7 @@ class Article(Item):
     _image = Column("image", Integer, ForeignKey("image.id"))
 
     text = orm.synonym('_data')
-    image = orm.relation(Image)
+    image = orm.relation(Image, lazy=False)
     image_position = Column(String(1), nullable=False, default="l")
 
     __mapper_args__ = {'polymorphic_identity':'Article'}
@@ -128,7 +131,7 @@ class Template(Model):
     type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
 
-    images = orm.relation(Image, secondary=template_image_table)
+    images = orm.relation(Image, secondary=template_image_table, lazy=False)
 
     variables =  dict(
         format_date = format_date
@@ -207,7 +210,8 @@ class Mailing(Model):
                          lazy=False)
     groups = orm.relation(Group, secondary=group_mailing_table)
     templates = orm.relation(Template, secondary=mailing_template_table,
-                             collection_class=attribute_mapped_collection('type'))
+                             collection_class=attribute_mapped_collection('type'),
+                             lazy=False)
 
     @property
     def grouped_items(self):
