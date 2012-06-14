@@ -15,10 +15,10 @@ class HTMLPageComposer(object):
         for img in self._mailing.images:
             yield img.filename, img.data
 
-    def get_file_data(self, filename):
+    def get_file(self, filename):
         if filename == 'index.html':
-            return self._generate_html()
-        return self._mailing.get_file_by_filename(filename).data
+            return _HTMLFile(self._generate_html())
+        return self._mailing.get_file(filename)
 
         
     
@@ -32,3 +32,7 @@ class HTMLPageComposer(object):
     def _collapse_styles(self, dom):
         collapse_styles(dom)
 
+class _HTMLFile(object):
+    content_type = 'text/html; charset=utf-8'
+    def __init__(self, data):
+        self.data = data

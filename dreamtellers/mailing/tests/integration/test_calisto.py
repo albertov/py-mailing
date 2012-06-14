@@ -97,7 +97,7 @@ class TestCalistoMailing(TestCase):
         for img in m.images:
             self.failUnless(img.filename in files)
         for fname, data in files.items():
-            self.failUnlessEqual(composer.get_file_data(fname), data)
+            self.failUnlessEqual(composer.get_file(fname).data, data)
 
 def mailing_from_fixture(data, number=1, date=datetime.datetime.now()):
     from ...models import (Mailing, Image, Article, ExternalLink, Template,

@@ -1,4 +1,4 @@
-from bottle import Bottle, redirect, abort
+from bottle import Bottle, redirect, abort, response
 
 from ..models import Mailing, NoResultFound
 from ..html import HTMLPageComposer
@@ -17,7 +17,9 @@ def mailing(number, db):
 
 @app.route('/mailing/<number:int>/<filename:re:.+>')
 def mailing_file(number, filename, db):
-    return _get_composer(db, number).get_file_data(filename)
+    f = _get_composer(db, number).get_file(filename)
+    response.content_type = f.content_type
+    return f.data
 
 def _get_composer(db, number):
     try:

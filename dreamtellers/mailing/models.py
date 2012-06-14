@@ -229,7 +229,7 @@ class Mailing(Model):
                 images.add(i.image)
         return list(images)
 
-    def get_file_by_filename(self, filename):
+    def get_file(self, filename):
         try:
             return [i for i in self.images if i.filename==filename][0]
         except IndexError:
