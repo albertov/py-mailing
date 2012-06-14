@@ -80,7 +80,9 @@ class Item(Model):
                        nullable=False)
     _data = Column('data', Unicode, nullable=False)
 
-    __mapper_args__ = {'polymorphic_on':type, 'polymorphic_identity':'Item'}
+    __mapper_args__ = {'polymorphic_on': type,
+                       'polymorphic_identity': 'Item',
+                       'with_polymorphic': '*'}
 
     category = orm.relation(Category, backref='items', lazy=False)
 
@@ -99,7 +101,7 @@ class Article(Item):
     _image = Column("image", Integer, ForeignKey("image.id"))
 
     text = orm.synonym('_data')
-    image = orm.relation(Image, lazy=False)
+    image = orm.relation(Image)
     image_position = Column(String(1), nullable=False, default="l")
 
     __mapper_args__ = {'polymorphic_identity':'Article'}
