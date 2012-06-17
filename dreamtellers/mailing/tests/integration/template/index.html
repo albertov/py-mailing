@@ -10,7 +10,10 @@
     <meta name="viewport" content="width=600,initial-scale = 1,user-scalable=no" /> <!-- Para iphone -->
     <style>
         body, ul, p, h1, h2, h3, h4, h5, pre, table, tr, td, img {
-            margin: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 0;
+            margin-right: 0;
             padding: 0;
             border: 0;
         }
@@ -50,7 +53,8 @@
 
         #contenedor {
             width: 600px;
-            margin:0 20px;
+            margin-left: 20px;
+            margin-right: 20px;
             background-repeat: repeat-x;
             background-color: white;
         }
@@ -58,7 +62,10 @@
         #resumenes {
             background-repeat: repeat-y;
             width: 550px;
-            margin: 25px 25px 0 25px;
+            margin-top: 25px;
+            margin-right: 25px;
+            margin-bottom: 0;
+            margin-left: 25px;
             font-size: 11pt;
         }
 
@@ -66,38 +73,36 @@
             height: 128px;
         }
 
-        #logol img {
-            margin: 0;
+        #logor img {
+            margin-top: 20px;
         }
-
         #logol, .seccion-img {
             width:165px;
         }
 
-        #logor, .seccion {
-            width:385px;
-        }
-
-        #logol, #logor {
-            height: 128px;
+        /* Controla altura cabecera */
+        #logol {
+            height: 130px;
         }
 
         #number {
             font-weight: normal;
             font-size:27px;
-            height: 35px;
+            padding: 8px 0;
+            display: block;
         }
 
-        #logor {
-            background-repeat: no-repeat;
+        #tagline {
+            text-align: left;
         }
-        
         #fecha {
-            margin: 68px 0px 0px 255px;
+            text-align: right;
+        }
+        #fecha, #tagline {
+            color: #34b4e4;
             font-weight: normal;
             font-size: 15px;
-            display: block;
-            color: #34b4e4;
+            padding-top: 10px;
         }
 
         #resumen-footer {
@@ -123,9 +128,27 @@
         }
 
         .seccion {
+            width:384px;
             border-bottom: solid #7fc7e6 2px;
             height: 128px;
         }
+
+        .seccion table {
+            table-layout: auto;
+            margin-top: 10px;
+            margin-left: 13px;
+        }
+
+
+        .seccion table td a {
+            display: block;
+            margin-bottom: .5em;
+        }
+
+        .seccion table td:first-child img {
+            margin-right: 10px;
+        }
+
 
         .seccion-ct:last-child .seccion {
             border-bottom: none;
@@ -133,7 +156,10 @@
 
 
         .seccion-img img {
-            margin: 6px 13px 6px 13px;
+            margin-top: 6px;
+            margin-right: 13px;
+            margin-bottom: 6px;
+            margin-left: 13px;
             width: 128px;
             height: 128px;
         }
@@ -160,14 +186,6 @@
         }
 
 
-        .seccion ul {
-            padding: 13px;
-        }
-
-        .seccion li {
-            margin-bottom: .5em;
-        }
-
 
         .seccion a, .articulo div a {
             color: #0063be;
@@ -184,7 +202,10 @@
 
         .articulo {
             border-bottom: solid #7fc7e6 2px;
-            margin: 0px 25px;
+            margin-top: 0px;
+            margin-bottom: 0px;
+            margin-left: 25px;
+            margin-right: 25px;
             padding: 8px 0px;
         }
 
@@ -193,12 +214,18 @@
         }
 
         .articulo img.left {
-            margin: 0 30px 20px 0;
+            margin-top: 0;
+            margin-right: 30px;
+            margin-bottom: 20px;
+            margin-left: 0;
             float: left;
         }
 
         .articulo img.right {
-            margin: 0 0 20px 30px;
+            margin-top: 0;
+            margin-right: 0;
+            margin-bottom: 20px;
+            margin-left: 30px;
             float: right;
         }
 
@@ -227,10 +254,21 @@
                     </a>
                    <img src="logo.gif" alt="Logo" width="95" height="96" />
                  </th>
-                 <th id="logor" background="header.gif">
-                    <span id="fecha" py:content="formatted_date">
-                          Junio 01 2012
-                    </span>
+                 <th>
+                    <table>
+                        <tr>
+                            <td id="logor" colspan="2">
+                                <img src="header.gif" width="358" height="55"
+                                     al="Calisto te cuenta" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="tagline">Boletín informativo quincenal</td>
+                            <td id="fecha" py:content="formatted_date">
+                                  Junio 01 2012
+                            </td>
+                        </tr>
+                     </table>
                  </th>
             </tr>
             </thead>
@@ -250,19 +288,24 @@
                      py:attrs="dict(src=cat.image.filename, alt=cat.title)"
                      src="actividad.gif" alt="Actividad" /></td>
                 <td class="seccion">
-                    <ul>
-                        <li py:for="item in items"
+                    <table>
+                        <tr py:for="item in items"
                             py:with="ext='http' in item.url">
-                            <a href="${item.url}"
-                               py:content="item.title"
-                               target="${'_blank' if ext else '_self'}"
-                            >
-                                Blah, blah, blahhhhhhh
-                            </a>
-                            <img py:if="ext" src="elink.png" 
-                                 width="16" height="16" alt="ir" />
-                        </li>
-                    </ul>
+                            <td>
+                              <img src="bala.gif" width="5" height="6" alt="" />
+                            </td>
+                            <td>
+                                <a href="${item.url}"
+                                   target="${'_blank' if ext else '_self'}"
+                                >
+                                <span py:strip="1" py:content="item.title">
+                                Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...</span>
+                                <img py:if="ext" src="elink.png" 
+                                     width="16" height="16" alt="ir" />
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
             </tbody>

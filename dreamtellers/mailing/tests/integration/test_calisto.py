@@ -105,7 +105,7 @@ def mailing_from_fixture(fname, number=1, date=datetime.datetime.now()):
 
     images = {}
     for f in glob(fixture('template/*')):
-        if f.split('.')[-1] in ('gif', 'png'):
+        if f.split('.')[-1] in ('gif', 'png', 'jpg', 'jpeg'):
             with open(f) as file:
                 f = os.path.basename(f)
                 images[f] = Image(filename=f, data=file.read())

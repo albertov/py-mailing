@@ -18,6 +18,9 @@ def collapse_styles(dom):
         sheet = cssutils.parseString(style.text)
         style.getparent().remove(style)
         for selector in sheet:
+            if not hasattr(selector, 'selectorText'):
+                # salta comentarios
+                continue
             try:
                 xpath = CSSSelector(selector.selectorText)
             except ExpressionError, e:
@@ -32,7 +35,15 @@ def collapse_styles(dom):
                     old_styles = node.attrib['cstyle'].split(';')
                     old_styles.extend(styles)
                     styles = old_styles
-                style = '; '.join(filter(None, [s.strip() for s in styles]))
+                keys = []
+                values = {}
+                for s in styles:
+                    if s.strip():
+                        key, value = [v.strip() for v in s.split(':')]
+                        if key not in keys:
+                            keys.append(key)
+                        values[key] = value
+                style = '; '.join(':'.join([k, values[k]]) for k in keys)
                 node.attrib['cstyle'] = style
     for e in dom.xpath('//*[@cstyle]'):
         if 'style' in e.attrib:
