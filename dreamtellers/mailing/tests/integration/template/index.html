@@ -1,6 +1,5 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:py="http://genshi.edgewall.org/"
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:py="http://genshi.edgewall.org/"
       xmlns:xi="http://www.w3.org/2001/XInclude"
       py:with="formatted_number='nº {0:03}'.format(mailing.number);
                formatted_date=format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()">
@@ -8,6 +7,7 @@
 <head>
     <title>Calisto te cuenta - ${formatted_number} - ${formatted_date}</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=600,initial-scale = 1,user-scalable=no" /> <!-- Para iphone -->
     <style>
         body, ul, p, h1, h2, h3, h4, h5, pre, table, tr, td, img {
             margin: 0;
@@ -34,29 +34,28 @@
             font-size: 18pt;
         }
 
-        body {
-            background: #aaa;
-            width:100%;
-            height:100%;
-            font-family: "Century Gothic", "Helvetica", "Arial", sans-serif;
-        }
-
         tfoot {
             vertical-align: bottom;
+        }
+
+        #body {
+            font-size: 10pt;
+            background: #aaa;
+            padding-top: 20px;
+            height:100%;
+            width: 100%;
+            font-family: Century Gothic, Helvetica, Arial, sans-serif;
         }
 
 
         #contenedor {
             width: 600px;
-            margin:20px auto;
+            margin:0 20px;
             background-repeat: repeat-x;
-            background-position: top;
             background-color: white;
-            font-size: 10pt;
         }
 
         #resumenes {
-            background-position: left;
             background-repeat: repeat-y;
             width: 550px;
             margin: 25px 25px 0 25px;
@@ -68,8 +67,7 @@
         }
 
         #logol img {
-            margin-top: -20px;
-            margin-bottom: -20px;
+            margin: 0;
         }
 
         #logol, .seccion-img {
@@ -92,7 +90,6 @@
 
         #logor {
             background-repeat: no-repeat;
-            background-position: 20px 2px;
         }
         
         #fecha {
@@ -115,13 +112,12 @@
 
         #url-ct a {
             text-decoration: none;
-            color: black;
+            color: #010101;
             font-size: 9pt;
 
         }
 
         #nombre-ct {
-            background-position: right 15px;
             background-repeat: no-repeat;
             height: 35px;
         }
@@ -217,16 +213,19 @@
 </head>
 
 <body>
+<div id="body">
     <table id="contenedor" background="vline.gif">
         <tr><td>
         <table id="resumenes" background="hline.gif">
             <thead>
             <tr>
                 <th id="logol">
-                    <span id="number" py:content="formatted_number">
-                      nº 001
-                   </span>
-                   <img src="logo.gif" alt="Logo" width="128" height="128" />
+                    <a name="top">
+                        <span id="number" py:content="formatted_number">
+                          nº 001
+                       </span>
+                    </a>
+                   <img src="logo.gif" alt="Logo" width="95" height="96" />
                  </th>
                  <th id="logor" background="header.gif">
                     <span id="fecha" py:content="formatted_date">
@@ -235,8 +234,16 @@
                  </th>
             </tr>
             </thead>
+            <tfoot>
+                <tr id="resumen-footer">
+                    <td id="url-ct" colspan="2">
+                        <a href="http://www.dreamtellers.org">
+                            www.dreamtellers.org
+                        </a>
+                    </td>
+                </tr>
+            </tfoot>
             <tbody>
-            <a name="top" />
             <tr class="seccion-ct"
                  py:for="(cat, items) in mailing.grouped_items">
                 <td class="seccion-img"><img py:if="cat.image"
@@ -253,21 +260,12 @@
                                 Blah, blah, blahhhhhhh
                             </a>
                             <img py:if="ext" src="elink.png" 
-                                 width="16" height="16" />
+                                 width="16" height="16" alt="ir" />
                         </li>
                     </ul>
                 </td>
             </tr>
             </tbody>
-            <tfoot>
-            <tr id="resumen-footer">
-                <td id="url-ct" colspan="2">
-                    <a href="http://www.dreamtellers.org">
-                        www.dreamtellers.org
-                    </a>
-                </td>
-            </tr>
-            </tfoot>
         </table>
 
         <div id="articulos">
@@ -279,9 +277,10 @@
                  <h2 py:content="cat.title">Nombre cat</h2>
                  <div py:for="article in articles"
                       class="articulo">
-                     <a name="${article.anchor}">
-                        <h3 py:content="article.title">Título del artículo</h3>
-                     </a>
+                     <h3>
+                        <a name="${article.anchor}"
+                          py:content="article.title">Título del artículo</a>
+                     </h3>
                      <div py:content="Markup(article.html)">
                         <p><img src="../fabiola.jpg" class="left" />
                         Fundación Cuentasueños y PWC España y México alcanzan un acuerdo para ampliar el programa de becas de estudios superiores para mujeres indígenas y sin recursos en México. PWC financiará los gastos de matrícula y derivados como el alojamiento, dietas etc. de otras dos jóvenes mexicanas. Las ayudas se gestionarán a través de Fundación Vamos a Dar, contraparte de Cuentasueños en México. Además, estas estudiantes tendrán la oportunidad de completar su formación académica con prácticas en empresas en las que dedicarán un mínimo de horas a realizar servicios a la comunidad.</p>
@@ -294,6 +293,7 @@
 
     </td></tr>
     </table>
+</div>
 </body>
 
 </html> 

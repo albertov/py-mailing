@@ -110,11 +110,11 @@ class Article(Item):
 
     @property
     def url(self):
-        return "#%d"%self.position
+        return "#art-%d"%self.position
 
     @property
     def anchor(self):
-        return "%d"%self.position
+        return "art-%d"%self.position
 
 
     @property
