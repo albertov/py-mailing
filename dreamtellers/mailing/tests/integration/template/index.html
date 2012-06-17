@@ -18,6 +18,14 @@
             border: 0;
         }
 
+        /* Para hotmail */
+        h2,h2 a,h2 a:visited,
+        h3,h3 a,h3 a:visited,
+        h4, h5, h6,
+        .t_cht {
+            color:#010101 !important;
+        }
+
         table {
             table-layout: fixed;
             border-collapse: collapse;
@@ -59,10 +67,13 @@
             background-color: white;
         }
 
+        #resumenes-ct {
+            padding-top: 25px;
+        }
+
         #resumenes {
             background-repeat: repeat-y;
             width: 550px;
-            margin-top: 25px;
             margin-right: 25px;
             margin-bottom: 0;
             margin-left: 25px;
@@ -73,8 +84,8 @@
             height: 128px;
         }
 
-        #logor img {
-            margin-top: 20px;
+        #logor {
+            padding-top: 20px;
         }
         #logol, .seccion-img {
             width:165px;
@@ -131,12 +142,12 @@
             width:384px;
             border-bottom: solid #7fc7e6 2px;
             height: 128px;
+            padding-top: 10px;
+            padding-left: 13px;
         }
 
         .seccion table {
             table-layout: auto;
-            margin-top: 10px;
-            margin-left: 13px;
         }
 
 
@@ -155,13 +166,10 @@
         }
 
 
-        .seccion-img img {
-            margin-top: 6px;
-            margin-right: 13px;
-            margin-bottom: 6px;
-            margin-left: 13px;
-            width: 128px;
-            height: 128px;
+        .seccion-img {
+            padding-top: 6px;
+            padding-bottom: 6px;
+            padding-left: 13px;
         }
 
         #articulos .seccion-ct h2 {
@@ -202,7 +210,6 @@
 
         .articulo {
             border-bottom: solid #7fc7e6 2px;
-            margin-top: 0px;
             margin-bottom: 0px;
             margin-left: 25px;
             margin-right: 25px;
@@ -214,7 +221,6 @@
         }
 
         .articulo img.left {
-            margin-top: 0;
             margin-right: 30px;
             margin-bottom: 20px;
             margin-left: 0;
@@ -222,7 +228,6 @@
         }
 
         .articulo img.right {
-            margin-top: 0;
             margin-right: 0;
             margin-bottom: 20px;
             margin-left: 30px;
@@ -242,16 +247,15 @@
 <body>
 <div id="body">
     <table id="contenedor" background="vline.gif">
-        <tr><td>
+        <tr><td id="resumenes-ct">
         <table id="resumenes" background="hline.gif">
             <thead>
             <tr>
                 <th id="logol">
-                    <a name="top">
-                        <span id="number" py:content="formatted_number">
-                          nº 001
-                       </span>
-                    </a>
+                    <span id="number" py:content="formatted_number">
+                      nº 001
+                      <a name="top">&nbsp;</a>
+                   </span>
                    <img src="logo.gif" alt="Logo" width="95" height="96" />
                  </th>
                  <th>
