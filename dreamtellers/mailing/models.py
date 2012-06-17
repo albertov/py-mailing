@@ -121,7 +121,14 @@ class Article(Item):
     def html(self):
         dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
         self._insert_image(dom)
-        return '\n'.join(etree.tounicode(e) for e in dom.getchildren())
+        return '\n'.join(etree.tounicode(e, method='xml')
+                         for e in dom.getchildren())
+
+    @property
+    def plain_text(self):
+        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
+        return '\n'.join(etree.tounicode(e, method='text')
+                         for e in dom.getchildren())
 
     def _insert_image(self, dom):
         if self.image:
