@@ -2,6 +2,7 @@
 import os, os.path
 from itertools import groupby
 from operator import attrgetter
+import textwrap
 
 from babel.dates import format_date
 
@@ -33,6 +34,9 @@ def create_sessionmaker(dburl="sqlite:///:memory:", create_tables=True,
     
 metadata = MetaData()
 Model = declarative_base(metadata=metadata)
+
+class MissingTemplate(StandardError):
+    pass
 
 class Image(Model):
     __tablename__ = "image"
@@ -124,11 +128,11 @@ class Article(Item):
         return '\n'.join(etree.tounicode(e, method='xml')
                          for e in dom.getchildren())
 
-    @property
-    def plain_text(self):
+    def plain_text(self, width=79):
         dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
-        return '\n'.join(etree.tounicode(e, method='text')
+        text = '\n\n'.join(etree.tounicode(e, method='text')
                          for e in dom.getchildren())
+        return textwrap.fill(text, width)
 
     def _insert_image(self, dom):
         if self.image:
@@ -270,7 +274,12 @@ class Mailing(Model):
 
     def render(self, format='xhtml', **kw):
         ns = dict(kw, mailing=self)
-        return self.templates[format].render(**ns)
+        try:
+            tpl = self.templates[format]
+        except KeyError:
+            raise MissingTemplate(format)
+        else:
+            return tpl.render(**ns)
 
     def __repr__(self):
         data = (self.number, self.date, len(self.items))

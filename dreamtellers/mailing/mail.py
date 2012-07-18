@@ -14,6 +14,7 @@ import cssutils
 from lxml import etree
 
 from .util import collapse_styles
+from .models import MissingTemplate
 
 def _add_email_charsets():
     from email import Charset
@@ -72,6 +73,7 @@ class MultipartMessage(object):
         
 class MessageComposer(object):
     _url_re = re.compile(r'url\(["\']{0,1}(.*?)["\']{0,1}\)')
+    missing_template_text = "This is a HTML only message"
 
     def __init__(self, mailing, encoding='utf-8'):
         self._mailing = mailing
@@ -80,6 +82,8 @@ class MessageComposer(object):
     def generate_message(self):
         html, encoding = self._generate_html()
         msg = MultipartMessage(encoding)
+        text = self._generate_text()
+        msg.add_text(text, 'plain')
         msg.add_text(html, 'html')
         for img in self._mailing.images:
             #TODO: NO incluir las imagenes ya incluidas como data:
@@ -87,6 +91,12 @@ class MessageComposer(object):
                           self._content_id(img.filename),
                           img.content_type)
         return msg
+
+    def _generate_text(self):
+        try:
+            return self._mailing.render('text')
+        except MissingTemplate:
+            return self.missing_template_text
 
     def _generate_html(self):
         dom = etree.HTML(self._mailing.render('xhtml'))

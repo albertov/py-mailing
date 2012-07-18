@@ -50,13 +50,13 @@ class TestCalistoMailing(TestCase):
 
     def test_correct_items(self):
         m = self._makeMailing()
-        self.failUnlessEqual(len(m.items), 13)
-        self.failUnlessEqual(len(m.items_by_type('Article')), 9)
-        self.failUnlessEqual(len(m.items_by_type('ExternalLink')), 4)
+        self.failUnlessEqual(len(m.items), 14)
+        self.failUnlessEqual(len(m.items_by_type('Article')), 14)
+        self.failUnlessEqual(len(m.items_by_type('ExternalLink')), 0)
 
     def test_correct_images(self):
         m = self._makeMailing()
-        self.failUnlessEqual(len(m.images), 15)
+        self.failUnlessEqual(len(m.images), 19)
 
     def test_can_render(self):
         m = self._makeMailing()
@@ -102,6 +102,9 @@ def mailing_from_fixture(fname, number=1, date=datetime.datetime.now()):
 
     body = open(fixture('template/index.html')).read().decode('utf8')
     mailing.templates['xhtml'] = Template(title="Calisto 1", body=body)
+
+    #body = open(fixture('template/index.txt')).read().decode('utf8')
+    #mailing.templates['text'] = Template(title="Calisto 1 (texto)", body=body, type='text')
 
     images = {}
     for f in glob(fixture('template/*')):

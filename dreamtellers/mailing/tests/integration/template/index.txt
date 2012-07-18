@@ -1,0 +1,33 @@
+Calisto te cuenta ${'nº {0:03}'.format(mailing.number)}
+==============================================================================
+
+Boletín informativo quincenal, ${format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()}
+
+{% for (cat, items) in mailing.grouped_items %}\
+${cat.title.upper()}
+${'-'*len(cat.title)}
+
+{% for item in items %}\
+ * ${item.title}
+{% end %}\
+
+{% end %}
+
+==============================================================================
+
+
+{% for (cat, items) in mailing.grouped_items %}
+${cat.title.upper()}
+${'-'*len(cat.title)}
+
+{% for item in items %}
+* ${item.title} *
+
+{% choose item.type %}
+{% when 'Article' %}${item.plain_text(79)}{% end %}
+{% when 'ExternalLink' %}${item.url}{% end %}
+{% end %}
+
+{% end %}
+
+{% end %}
