@@ -1,33 +1,35 @@
+## -*- coding: utf-8 -*-
 Calisto te cuenta ${'nº {0:03}'.format(mailing.number)}
 ==============================================================================
+Boletín informativo mensual, ${format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()}
 
-Boletín informativo quincenal, ${format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()}
+(Si no puede visualizar correctamente este email pruebe en la siguiente
+dirección: ${mailing.url})
 
-{% for (cat, items) in mailing.grouped_items %}\
+
+% for (cat, items) in mailing.grouped_items:
 ${cat.title.upper()}
 ${'-'*len(cat.title)}
 
-{% for item in items %}\
+% for item in items:
  * ${item.title}
-{% end %}\
+% endfor
 
-{% end %}
-
+% endfor
 ==============================================================================
 
-
-{% for (cat, items) in mailing.grouped_items %}
+% for (cat, items) in mailing.grouped_items:
 ${cat.title.upper()}
 ${'-'*len(cat.title)}
 
-{% for item in items %}
+% for item in items:
 * ${item.title} *
 
-{% choose item.type %}
-{% when 'Article' %}${item.plain_text(79)}{% end %}
-{% when 'ExternalLink' %}${item.url}{% end %}
-{% end %}
+% if item.type == 'Article':
+${item.plain_text(79)}
+% elif item.type == 'ExternalLink':
+${item.url}
+% endif
 
-{% end %}
-
-{% end %}
+% endfor
+% endfor

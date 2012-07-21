@@ -93,7 +93,7 @@ class TestCalistoMailing(TestCase):
         for fname, data in files.items():
             self.failUnlessEqual(composer.get_file(fname).data, data)
 
-def mailing_from_fixture(fname, number=1, date=datetime.datetime.now()):
+def mailing_from_fixture(fname, number=0, date=datetime.datetime.now()):
     from ...models import (Mailing, Image, Article, ExternalLink, Template,
                            Category)
     
@@ -103,8 +103,9 @@ def mailing_from_fixture(fname, number=1, date=datetime.datetime.now()):
     body = open(fixture('template/index.html')).read().decode('utf8')
     mailing.templates['xhtml'] = Template(title="Calisto 1", body=body)
 
-    #body = open(fixture('template/index.txt')).read().decode('utf8')
-    #mailing.templates['text'] = Template(title="Calisto 1 (texto)", body=body, type='text')
+    body = open(fixture('template/index.txt')).read().decode('utf8')
+    mailing.templates['text'] = Template(title="Calisto 1 (texto)", body=body,
+                                         type='text')
 
     images = {}
     for f in glob(fixture('template/*')):

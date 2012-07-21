@@ -25,6 +25,7 @@ setup(
         "bottle",
         "bottle_sqlalchemy",
         "markdown",
+        "mako",
         "genshi",
         "SQLAlchemy",
         "Babel",

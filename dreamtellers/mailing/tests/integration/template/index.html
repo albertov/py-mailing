@@ -52,7 +52,6 @@
         #body {
             font-size: 10pt;
             background: #aaa;
-            padding-top: 20px;
             height:100%;
             width: 100%;
             font-family: Century Gothic, Helvetica, Arial, sans-serif;
@@ -246,6 +245,8 @@
 
 <body>
 <div id="body">
+    <div >Si no puede visualizar correctamente este email haga click
+         <a href="${mailing.url}">aquí</a></div>
     <table id="contenedor" background="vline.gif">
         <tr><td id="resumenes-ct">
         <table id="resumenes" background="hline.gif">
@@ -267,7 +268,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td id="tagline">Boletín informativo quincenal</td>
+                            <td id="tagline">Boletín informativo mensual</td>
                             <td id="fecha" py:content="formatted_date">
                                   Junio 01 2012
                             </td>

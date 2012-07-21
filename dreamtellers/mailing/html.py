@@ -1,6 +1,7 @@
 from lxml import etree
 
 from .util import collapse_styles
+from .models import MissingTemplate
 
 class HTMLPageComposer(object):
 
@@ -25,13 +26,21 @@ class HTMLPageComposer(object):
     @property
     def files(self):
         yield 'index.html', self._generate_html()
+        text = self._generate_text()
+        if text:
+            yield 'index.txt', text
         for img in self._mailing.images:
             yield img.filename, img.data
 
     def get_file(self, filename):
         if filename == 'index.html':
             return _HTMLFile(self._generate_html())
-        return self._mailing.get_file(filename)
+        elif filename == 'index.txt':
+            text = self._generate_text()
+            if text:
+                return _TextFile(text)
+        else:
+            return self._mailing.get_file(filename)
 
         
     
@@ -42,6 +51,12 @@ class HTMLPageComposer(object):
         #TODO: Extract encoding from <meta http-equiv=""> if present
         encoding = self._encoding
         return self._serialize(dom, True).encode(encoding)
+
+    def _generate_text(self):
+        try:
+            return self._mailing.render('text').encode(self._encoding)
+        except MissingTemplate:
+            return None
 
     def _insert_head_padding(self, dom):
         try:
@@ -63,5 +78,10 @@ class HTMLPageComposer(object):
 
 class _HTMLFile(object):
     content_type = 'text/html; charset=utf-8'
+    def __init__(self, data):
+        self.data = data
+
+class _TextFile(object):
+    content_type = 'text/plain; charset=utf-8'
     def __init__(self, data):
         self.data = data

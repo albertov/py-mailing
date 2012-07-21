@@ -8,8 +8,6 @@ from babel.dates import format_date
 
 from lxml import etree, builder
 
-from genshi import template
-
 import markdown
 
 from pkg_resources import resource_filename
@@ -130,6 +128,10 @@ class Article(Item):
 
     def plain_text(self, width=79):
         dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
+        for e in dom.xpath('//a'):
+            if 'href' in e.attrib:
+                e.tag = 'span'
+                e.text += u' ({0})'.format(e.attrib.pop('href'))
         text = '\n\n'.join(etree.tounicode(e, method='text')
                          for e in dom.getchildren())
         return textwrap.fill(text, width)
@@ -173,18 +175,20 @@ class Template(Model):
         data = (self.id, self.title)
         return self.__class__.__name__ + repr(data)
 
-    @property
-    def _template(self):
-        if self.type == 'text':
-            return template.TextTemplate(self.body)
-        else:
-            return template.MarkupTemplate(self.body)
-
     def render(self, **data):
-        stream = self._template.generate(**dict(self.variables, **data))
+        namespace = dict(self.variables, **data)
         if self.type == 'text':
-            return unicode(stream)
+            from mako.template import Template
+            module_directory = '/tmp/mako_templates' #FIXME
+            tpl = Template(self.body,
+                module_directory=module_directory,
+                default_filters=['decode.utf8'],
+                )
+            return tpl.render_unicode(**namespace)
         else:
+            from genshi.template import MarkupTemplate
+            tpl = MarkupTemplate(self.body)
+            stream = tpl.generate(**namespace)
             return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
         
 
@@ -247,6 +251,12 @@ class Mailing(Model):
     @property
     def grouped_items(self):
         return groupby(self.items, attrgetter('category'))
+
+    @property
+    def url(self):
+        #FIXME
+        return "http://dreamtellers.org/boletines/{0:03}/".format(self.number)
+
 
     @property
     def images(self):
