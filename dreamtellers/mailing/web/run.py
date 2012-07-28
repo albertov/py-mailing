@@ -13,7 +13,7 @@ parser = OptionParser()
 parser.add_option('-b', '--bind', dest='bind', default='localhost')
 parser.add_option('-d', '--db', dest='db', default='~/.mailing.db')
 
-def main(args):
+def main(args=None):
     opts = parser.parse_args(args)[0]
     configure_sqlalchemy(app, dbfile=os.path.expanduser(opts.db))
     run(app, host='0.0.0.0', port=8080)
@@ -28,6 +28,8 @@ def configure_sqlalchemy(app, dbfile):
         commit=False,
         )
     app.install(plugin)
+    from .template import Plugin
+    app.install(Plugin())
 
     
 if __name__ == '__main__':

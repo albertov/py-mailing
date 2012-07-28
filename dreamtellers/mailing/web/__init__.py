@@ -1,15 +1,16 @@
-from bottle import Bottle, redirect, abort, response
+from pkg_resources import resource_filename
+
+from bottle import Bottle, redirect, abort, response, static_file
 
 from ..models import Mailing, NoResultFound
 from ..html import HTMLPageComposer
 
-
 app = Bottle()
 
 
-@app.route('/')
+@app.route('/', template='index.html')
 def index():
-    return "hola"
+    return {}
 
 @app.route('/mailing/<number:int>/')
 def mailing(number, db):
@@ -27,3 +28,7 @@ def _get_composer(db, number):
     except NoResultFound:
         abort(404)
     return HTMLPageComposer(m)
+
+@app.route('/static/<filename:path>')
+def server_static(filename):
+    return static_file(filename, root=resource_filename(__name__, 'static'))
