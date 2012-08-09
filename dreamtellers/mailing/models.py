@@ -1,8 +1,9 @@
 #coding: utf8
 import os, os.path
-from itertools import groupby
+from itertools import groupby, chain
 from operator import attrgetter
 import textwrap
+import datetime
 
 from babel.dates import format_date
 
@@ -217,12 +218,6 @@ class Recipient(Model):
 
 
 
-group_mailing_table = Table("group_mailing", Model.metadata,
-    Column('group', Integer, ForeignKey('group.id', ondelete="CASCADE"),
-            primary_key=True),
-    Column('mailing', Integer, ForeignKey('mailing.number', ondelete="CASCADE"),
-           primary_key=True)
-)
 
 
 mailing_template_table = Table("mailing_template", Model.metadata,
@@ -238,12 +233,10 @@ class Mailing(Model):
 
     number = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
-    send_date = Column(DateTime)
 
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
                          lazy=False)
-    groups = orm.relation(Group, secondary=group_mailing_table)
     templates = orm.relation(Template, secondary=mailing_template_table,
                              collection_class=attribute_mapped_collection('type'),
                              lazy=False)
@@ -295,3 +288,33 @@ class Mailing(Model):
         data = (self.number, self.date, len(self.items))
         return self.__class__.__name__ + repr(data)
 
+group_sent_mailing_table = Table("group_sent_mailing", Model.metadata,
+    Column('group', Integer, ForeignKey('group.id', ondelete="CASCADE"),
+            primary_key=True),
+    Column('sent_mailing', Integer,
+           ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+           primary_key=True)
+)
+recipient_sent_mailing_table = Table("recipient_sent_mailing", Model.metadata,
+    Column('recipient', Integer, ForeignKey('recipient.id', ondelete="CASCADE"),
+            primary_key=True),
+    Column('sent_mailing', Integer,
+           ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+           primary_key=True)
+)
+
+class SentMailing(Model):
+    __tablename__ = 'sent_mailing'
+
+    id = Column(Integer, primary_key=True)
+    _mailing = Column("mailing", Integer, ForeignKey('mailing.number'),
+                      nullable=False)
+    time = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    groups = orm.relation(Group, secondary=group_sent_mailing_table)
+    recipients = orm.relation(Recipient, secondary=recipient_sent_mailing_table)
+
+    mailing = orm.relation(Mailing)
+
+    @property
+    def all_recipients(self):
+        return chain(self.recipients, *(g.recipients for g in self.groups))
