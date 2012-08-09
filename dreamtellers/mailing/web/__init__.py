@@ -1,9 +1,10 @@
 from pkg_resources import resource_filename
 
-from bottle import Bottle, redirect, abort, response, static_file
+from bottle import Bottle, redirect, abort, response, static_file, request
 
 from ..models import Mailing, NoResultFound
 from ..html import HTMLPageComposer
+from .validators import validate, ModelListValidator
 
 app = Bottle()
 
@@ -14,7 +15,33 @@ def index():
 
 @app.route('/mailing/<number:int>/')
 def mailing(number, db):
-    return _get_composer(db, number).get_file_data('index.html')
+    return _get_composer(db, number).get_file('index.html').data
+
+@app.route('/mailing/')
+def mailings(db):
+    form = validate(ModelListValidator(Mailing), request.params)
+    if not form.is_valid:
+        response.status = '400 Bad Request'
+        return {
+            'success':False,
+            'message': form.message,
+            'errors': form.errors,
+        }
+    else:
+        query = db.query(Mailing)
+        total = query.count()
+        if form['sort']:
+            query = query.order_by(*form['sort'])
+        query = query.limit(form['limit']).offset(form['start'])
+        return {
+            'success': True,
+            'total': total,
+            'mailings': [
+                dict(number=m.number,
+                     date=m.date.isoformat() if m.date else None)
+                for m in query
+            ]
+        }
 
 @app.route('/mailing/<number:int>/<filename:re:.+>')
 def mailing_file(number, filename, db):

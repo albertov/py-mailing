@@ -7,8 +7,9 @@ class Plugin(object):
     name = 'genshi'
     api = 2
 
-    def __init__(self):
-        self.loader = TemplateLoader([resource_filename(__name__, 'templates')])
+    def __init__(self, auto_reload=True):
+        self.loader = TemplateLoader([resource_filename(__name__, 'templates')],
+                                     auto_reload=auto_reload)
         self.global_variables = dict(
             static_url = static_url
             )
