@@ -2,7 +2,8 @@ from pkg_resources import resource_filename
 
 from bottle import Bottle, redirect, abort, response, static_file, request
 
-from ..models import Mailing, NoResultFound
+from ..models import (Mailing, NoResultFound, Item, Category, Recipient, Group,
+                      Image)
 from ..html import HTMLPageComposer
 from .validators import validate, ModelListValidator
 
@@ -17,33 +18,42 @@ def index():
 def mailing(number, db):
     return _get_composer(db, number).get_file('index.html').data
 
-@app.route('/mailing/')
-def mailings(db):
-    form = validate(ModelListValidator(Mailing), request.params)
-    if not form.is_valid:
-        response.status = '400 Bad Request'
-        return {
-            'success':False,
-            'message': form.message,
-            'errors': form.errors,
-        }
-    else:
-        query = db.query(Mailing)
-        total = query.count()
-        if form['sort']:
-            query = query.order_by(*form['sort'])
-        query = query.limit(form['limit']).offset(form['start'])
-        return {
-            'success': True,
-            'total': total,
-            'mailings': [
-                dict(number=m.number,
-                     date=m.date.isoformat() if m.date else None,
-                     created=m.created.isoformat() if m.created else None,
-                     modified=m.modified.isoformat() if m.modified else None,
-                ) for m in query
-            ]
-        }
+ 
+def list_view(model, plural=None):
+    if plural is None:
+        plural = model.__name__.lower()+'s'
+    def view(db):
+        form = validate(ModelListValidator(model), request.params)
+        if not form.is_valid:
+            response.status = '400 Bad Request'
+            return {
+                'success':False,
+                'message': form.message,
+                'errors': form.errors,
+            }
+        else:
+            query = db.query(model)
+            if form['filter']:
+                for f in form['filter']:
+                    query = query.filter(f)
+            total = query.count()
+            query = query.limit(form['limit']).offset(form['start'])
+            if form['sort']:
+                query = query.order_by(*form['sort'])
+            return {
+                'success': True,
+                'total': total,
+                 plural: [m.__json__() for m in query]
+            }
+    view.func_name = 'list_'+plural
+    return view
+
+app.route('/mailing/')(list_view(Mailing))
+app.route('/item/')(list_view(Item))
+app.route('/image/')(list_view(Image))
+app.route('/recipient/')(list_view(Recipient))
+app.route('/group/')(list_view(Group))
+app.route('/category/')(list_view(Category, 'categories'))
 
 @app.route('/mailing/<number:int>/<filename:re:.+>')
 def mailing_file(number, filename, db):

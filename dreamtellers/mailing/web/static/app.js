@@ -1,7 +1,7 @@
 Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
-    models: ['Mailing', 'Category', 'Item'],
+    models: ['Category', 'Item', 'Mailing'],
     stores: ['Mailings'],
     requires: [
         'WebMailing.Application',

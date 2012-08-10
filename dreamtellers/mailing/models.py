@@ -42,6 +42,8 @@ class Image(Model):
     id = Column(Integer, primary_key=True)
     filename = Column(Unicode(255), nullable=False)
     title = Column(Unicode(512))
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     _data = deferred(Column('data', LargeBinary(), nullable=False))
     content_type = Column(String(20), nullable=False)
 
@@ -62,19 +64,36 @@ class Image(Model):
         data = (self.id, self.title, self.filename)
         return self.__class__.__name__ + repr(data)
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            filename=self.filename,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
+            )
+
 class Category(Model):
     __tablename__ = "category"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
-    _image = Column("image", Integer, ForeignKey("image.id"))
+    image_id = Column(Integer, ForeignKey("image.id"))
     image = orm.relation(Image, lazy=False)
 
     def __repr__(self):
         data = (self.id, self.title, self.image)
         return self.__class__.__name__ + repr(data)
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            image_id=self.image_id,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
+            )
 
 class Item(Model):
     __tablename__ = "item"
@@ -82,11 +101,10 @@ class Item(Model):
     title = Column(Unicode, nullable=False)
     type = Column(String(20), nullable=False)
     position = Column(Integer, nullable=False, default=0)
-    _category = Column('category', Integer, ForeignKey('category.id'),
-                       nullable=False)
+    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
-    _mailing = Column("mailing", Integer, ForeignKey('mailing.number'),
+    mailing_id = Column(Integer, ForeignKey('mailing.id'),
                        nullable=False)
     _data = Column('data', Unicode, nullable=False)
 
@@ -100,6 +118,17 @@ class Item(Model):
         data = (self.id, self.title, self.category.title)
         return self.__class__.__name__ + repr(data)
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            position=self.position,
+            type=self.type,
+            category_id=self.category_id,
+            mailing_id=self.mailing_id,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
+            )
 
 class ExternalLink(Item):
     url = orm.synonym('_data')
@@ -108,7 +137,7 @@ class ExternalLink(Item):
 class Article(Item):
     __tablename__ = "article"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
-    _image = Column("image", Integer, ForeignKey("image.id"))
+    image_id = Column(Integer, ForeignKey("image.id"))
 
     text = orm.synonym('_data')
     image = orm.relation(Image)
@@ -157,9 +186,9 @@ class Article(Item):
                 p.text = None
 
 template_image_table = Table("template_image", Model.metadata,
-    Column('template', Integer, ForeignKey('template.id', ondelete="CASCADE"),
+    Column('template_id', Integer, ForeignKey('template.id', ondelete="CASCADE"),
            primary_key=True),
-    Column('image', Integer, ForeignKey('image.id', ondelete="CASCADE"),
+    Column('image_id', Integer, ForeignKey('image.id', ondelete="CASCADE"),
            primary_key=True)
 )
 
@@ -207,13 +236,18 @@ class Group(Model):
         data = (self.id, self.title)
         return self.__class__.__name__ + repr(data)
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            )
 
 class Recipient(Model):
     __tablename__ = "recipient"
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
     email = Column(Unicode, nullable=False)
-    _group = Column("group", Integer, ForeignKey("group.id"))
+    group_id = Column(Integer, ForeignKey("group.id"))
 
     group = orm.relation(Group, backref="recipients")
     
@@ -222,13 +256,20 @@ class Recipient(Model):
         return self.__class__.__name__ + repr(data)
 
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            name=self.name,
+            email=self.email,
+            group_id=self.group_id,
+            )
 
 
 
 mailing_template_table = Table("mailing_template", Model.metadata,
-   Column('mailing', ForeignKey('mailing.number', ondelete='CASCADE'),
+   Column('mailing_id', ForeignKey('mailing.id', ondelete='CASCADE'),
           primary_key=True),
-    Column('template', ForeignKey('template.id', ondelete='CASCADE'),
+    Column('template_id', ForeignKey('template.id', ondelete='CASCADE'),
            primary_key=True)
 )
                             
@@ -236,7 +277,8 @@ mailing_template_table = Table("mailing_template", Model.metadata,
 class Mailing(Model):
     __tablename__ = "mailing"
 
-    number = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    number = Column(Integer, unique=True, nullable=False, default=0)
     date = Column(DateTime, nullable=False)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
@@ -295,17 +337,26 @@ class Mailing(Model):
         data = (self.number, self.date, len(self.items))
         return self.__class__.__name__ + repr(data)
 
+    def __json__(self):
+        return dict(
+            id=self.id,
+            number=self.number,
+            date=self.date.isoformat() if self.date else None,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
+        )
+        
 group_sent_mailing_table = Table("group_sent_mailing", Model.metadata,
-    Column('group', Integer, ForeignKey('group.id', ondelete="CASCADE"),
+    Column('group_id', Integer, ForeignKey('group.id', ondelete="CASCADE"),
             primary_key=True),
-    Column('sent_mailing', Integer,
+    Column('sent_mailing_id', Integer,
            ForeignKey('sent_mailing.id', ondelete="CASCADE"),
            primary_key=True)
 )
 recipient_sent_mailing_table = Table("recipient_sent_mailing", Model.metadata,
-    Column('recipient', Integer, ForeignKey('recipient.id', ondelete="CASCADE"),
+    Column('recipient_id', Integer, ForeignKey('recipient.id', ondelete="CASCADE"),
             primary_key=True),
-    Column('sent_mailing', Integer,
+    Column('sent_mailing_id', Integer,
            ForeignKey('sent_mailing.id', ondelete="CASCADE"),
            primary_key=True)
 )
@@ -314,7 +365,7 @@ class SentMailing(Model):
     __tablename__ = 'sent_mailing'
 
     id = Column(Integer, primary_key=True)
-    _mailing = Column("mailing", Integer, ForeignKey('mailing.number'),
+    mailing_id = Column(Integer, ForeignKey('mailing.id'),
                       nullable=False)
     time = Column(DateTime, nullable=False, default=datetime.datetime.now)
     groups = orm.relation(Group, secondary=group_sent_mailing_table)

@@ -52,6 +52,21 @@ class SortValidator(JsonValidator):
                 ret.append(col)
             return ret
 
+class FilterValidator(JsonValidator):
+    if_missing = None
+
+    def __init__(self, model):
+        self.model = model
+
+    def _to_python(self, value, state=None):
+        value = super(FilterValidator, self)._to_python(value, state)
+        if value:
+            ret = []
+            for v in value:
+                col = getattr(self.model, v['property'])
+                ret.append(col==v['value'])
+            return ret
+
 
 class ModelListValidator(schema.Schema):
     allow_extra_fields = True
@@ -60,7 +75,10 @@ class ModelListValidator(schema.Schema):
 
     def __init__(self, model):
         self.model = model
-        fields = dict(self.fields, sort=SortValidator(model))
+        fields = dict(self.fields,
+            sort=SortValidator(model),
+            filter=FilterValidator(model),
+            )
         super(ModelListValidator, self).__init__(fields=fields)
 
     limit = validators.Int(min=0, max=100, if_missing=25)

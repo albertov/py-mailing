@@ -1,5 +1,8 @@
 Ext.define('WebMailing.model.Item', {
     extend: 'Ext.data.Model',
+    requires: [
+        'WebMailing.model.Category'
+    ],
     idProperty: 'id',
     fields: [
         {name:'id', type: 'int'},
@@ -8,12 +11,12 @@ Ext.define('WebMailing.model.Item', {
         {name:'position', type: 'int'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'},
-        {name:'category', type: 'int'},
-        {name:'mailing', type: 'int'},
+        {name:'category_id', type: 'int'},
+        {name:'mailing_id', type: 'int'},
     ],
-    associations: [
-        {type: 'belongsTo', model: 'Mailing', foreignKey: 'mailing'},
-        {type: 'belongsTo', model: 'Category', foreignKey: 'category'},
+    belongsTo: [
+        {model: 'WebMailing.model.Mailing', foreignKey: 'mailing_id', name:'mailing'},
+        {model: 'WebMailing.model.Category', foreignKey: 'category_id', name:'category'}
     ],
     proxy: {
         type: 'rest',

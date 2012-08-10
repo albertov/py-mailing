@@ -1,14 +1,18 @@
 Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
-    idProperty: 'number',
+    idProperty: 'id',
+    requires: [
+        'WebMailing.model.Item'
+    ],
     fields: [
+        {name:'id', type: 'int'},
         {name:'number', type: 'int'},
         {name:'date', type: 'date',  dateFormat: 'c'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}
     ],
-    associations: [
-        {type: 'hasMany', model: 'Item', foreignKey: 'mailing', name:'_items'}
+    hasMany: [
+        {model: 'WebMailing.model.Item', foreignKey: 'mailing_id', name:'items', primaryKey:'id'}
     ],
     proxy: {
         type: 'rest',

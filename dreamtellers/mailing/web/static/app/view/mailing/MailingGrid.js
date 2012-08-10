@@ -5,7 +5,7 @@ Ext.define('WebMailing.view.mailing.MailingGrid', {
     columns: [
         {text: 'Número', dataIndex: 'number', sortable: true},
         {text: 'Fecha', dataIndex: 'date', sortable: true,
-         renderer: Ext.util.Format.dateRenderer('Y/m/d')},
+         renderer: Ext.util.Format.dateRenderer('Y/m/d')}
     ],
     listeners: {
         afterrender: function() {

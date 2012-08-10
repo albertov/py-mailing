@@ -7,8 +7,8 @@ Ext.define('WebMailing.model.Category', {
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}
     ],
-    associations: [
-        {type: 'hasMany', model: 'Item', foreignKey: 'category', name: 'items'}
+    hasMany: [
+        {model: 'WebMailing.model.Item', foreignKey: 'category_id', name: 'items'}
     ],
     proxy: {
         type: 'rest',
