@@ -38,8 +38,10 @@ def mailings(db):
             'total': total,
             'mailings': [
                 dict(number=m.number,
-                     date=m.date.isoformat() if m.date else None)
-                for m in query
+                     date=m.date.isoformat() if m.date else None,
+                     created=m.created.isoformat() if m.created else None,
+                     modified=m.modified.isoformat() if m.modified else None,
+                ) for m in query
             ]
         }
 

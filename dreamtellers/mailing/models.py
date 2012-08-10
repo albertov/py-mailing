@@ -66,6 +66,8 @@ class Category(Model):
     __tablename__ = "category"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     _image = Column("image", Integer, ForeignKey("image.id"))
     image = orm.relation(Image, lazy=False)
 
@@ -80,7 +82,10 @@ class Item(Model):
     title = Column(Unicode, nullable=False)
     type = Column(String(20), nullable=False)
     position = Column(Integer, nullable=False, default=0)
-    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
+    _category = Column('category', Integer, ForeignKey('category.id'),
+                       nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     _mailing = Column("mailing", Integer, ForeignKey('mailing.number'),
                        nullable=False)
     _data = Column('data', Unicode, nullable=False)
@@ -233,6 +238,8 @@ class Mailing(Model):
 
     number = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',

@@ -24,6 +24,7 @@ setup(
     install_requires = [
         "bottle",
         "bottle_sqlalchemy",
+        "formencode",
         "markdown",
         "mako",
         "genshi",
