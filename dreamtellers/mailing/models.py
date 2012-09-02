@@ -80,7 +80,7 @@ class Category(Model):
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     image_id = Column(Integer, ForeignKey("image.id"))
-    image = orm.relation(Image, lazy=False)
+    image = orm.relation(Image, lazy=True)
 
     def __repr__(self):
         data = (self.id, self.title, self.image)
@@ -112,7 +112,7 @@ class Item(Model):
                        'polymorphic_identity': 'Item',
                        'with_polymorphic': '*'}
 
-    category = orm.relation(Category, backref='items', lazy=False)
+    category = orm.relation(Category, backref='items', lazy=True)
 
     def __repr__(self):
         data = (self.id, self.title, self.category.title)
@@ -199,7 +199,7 @@ class Template(Model):
     type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
 
-    images = orm.relation(Image, secondary=template_image_table, lazy=False)
+    images = orm.relation(Image, secondary=template_image_table, lazy=True)
 
     variables =  dict(
         format_date = format_date
@@ -285,10 +285,10 @@ class Mailing(Model):
 
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
-                         lazy=False)
+                         lazy=True)
     templates = orm.relation(Template, secondary=mailing_template_table,
                              collection_class=attribute_mapped_collection('type'),
-                             lazy=False)
+                             lazy=True)
 
     @property
     def grouped_items(self):

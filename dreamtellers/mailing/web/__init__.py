@@ -33,13 +33,13 @@ def list_view(model, plural=None):
             }
         else:
             query = db.query(model)
+            if form['sort']:
+                query = query.order_by(*form['sort'])
             if form['filter']:
                 for f in form['filter']:
                     query = query.filter(f)
             total = query.count()
             query = query.limit(form['limit']).offset(form['start'])
-            if form['sort']:
-                query = query.order_by(*form['sort'])
             return {
                 'success': True,
                 'total': total,
