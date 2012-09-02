@@ -7,8 +7,21 @@ Ext.define('WebMailing.Application', {
         'WebMailing.modules.Mailings'
     ],
 
+    constructor: function(mainapp) {
+        this.application = mainapp;
+        var args = args = Array.prototype.slice.call(arguments, 1);
+        this.callParent(args);
+    },
+
+    getController: function() {
+        return this.application.getController.apply(this.application, arguments);
+    },
+
+    destroyController: function(controller) {
+        Ext.destroy(this.application.controllers.remove(controller));
+    },
+
     getModules : function() {
-        console.debug('getModules');
         return [
             new WebMailing.modules.Mailings()
         ]

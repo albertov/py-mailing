@@ -8,6 +8,7 @@ Ext.define('WebMailing.modules.Mailings', {
         text: 'Envíos'
     },
 
+    // TODO: factor this out into a base class
     createWindow: function() {
         var desktop = this.app.getDesktop();
         var win = desktop.getWindow(this.id);
@@ -23,6 +24,13 @@ Ext.define('WebMailing.modules.Mailings', {
                     {xtype: 'mailinggrid'}
                 ]
             });
+            var controller = this.app.getController('Mailings');
+            win.mon(win, 'afterrender', function() {
+                controller.init();
+            }, this, {single:true});
+            win.mon(win, 'destroy', function() {
+                this.app.destroyController(controller);
+            }, this, {single:true});
         }
         return win;
     }

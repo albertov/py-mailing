@@ -21,5 +21,11 @@ Ext.define('WebMailing.model.Mailing', {
             type: 'json',
             root: 'mailings',
         }
+    },
+
+    getViewUrl: function() {
+        return this.getProxy().url + this.get('number') + '/';
     }
+
+
 });

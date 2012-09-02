@@ -8,6 +8,10 @@ Ext.application({
     ],
 
     launch: function() {
-        this.app = new WebMailing.Application();
+        this.app = new WebMailing.Application(this);
+    },
+
+    getDesktop: function() {
+        return this.app.getDesktop();
     }
 });
