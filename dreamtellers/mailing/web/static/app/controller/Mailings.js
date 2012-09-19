@@ -1,31 +1,39 @@
 Ext.define('WebMailing.controller.Mailings', {
     extend: 'Ext.app.Controller',
-    views: ['mailing.MailingPanel'],
+    views: ['mailing.Panel'],
+    refs: [
+        {
+            ref: 'grid',
+            selector: 'mailing_grid'
+        }, {
+            ref: 'detail',
+            selector: 'mailing_detail'
+        }
+    ],
 
     init: function() {
         this.control({
-            "mailinggrid": {
-                'select': this.onRowSelect
+            "mailing_grid": {
+                'select': this.onRowSelect,
+                'afterrender': this.reloadStore
             }
         });
     },
 
-    onRowSelect: function(selectionmodel, record) {
-        var winId = record.id,
-            desktop = this.application.getDesktop(),
-            win = desktop.getWindow(winId);
-        if (!win) {
-            win = desktop.createWindow({
-                id: winId,
-                width: 800,
-                height: 600,
-                title: "Mailing #"+record.get('number'),
-                layout: 'fit',
-                constrainHeader: true,
-                items: {xtype: 'mailingpanel', record: record}
-            });
-        }
-        win.show();
+    onRowSelect: function(_, record) {
+        this.setActiveRecord(record);
+    },
+
+    reloadStore: function() {
+        this.application.getStore('Mailings').load();
+    },
+
+    setActiveRecord: function(record) {
+        if (this.record===record)
+            return;
+        this.record = record;
+        this.getGrid().getSelectionModel().select(this.record);
+        this.getDetail().setRecord(this.record);
     }
 });
 

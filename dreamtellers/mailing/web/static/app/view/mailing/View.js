@@ -1,13 +1,10 @@
-Ext.define('WebMailing.view.mailing.MailingView', {
+Ext.define('WebMailing.view.mailing.View', {
     extend: 'Ext.panel.Panel',
-    alias: 'widget.mailingview',
+    alias: 'widget.mailing_view',
     html: '<iframe frameborder="0" width="100%" height="100%" />',
     listeners: {
         afterrender: function() {
             this.iframe = this.getEl().query('iframe')[0];
-            if (this.src) {
-                this.setSrc(this.src);
-            }
         }
     },
     setSrc: function(src) {

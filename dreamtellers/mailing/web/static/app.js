@@ -3,15 +3,30 @@ Ext.application({
     appFolder: window.appFolder,
     models: ['Category', 'Item', 'Mailing'],
     stores: ['Mailings'],
+    controllers: ['Mailings'],
     requires: [
-        'WebMailing.Application',
+        'Ext.tab.Panel',
+        'Ext.container.Viewport',
+        'WebMailing.view.Home',
     ],
 
     launch: function() {
-        this.app = new WebMailing.Application(this);
-    },
-
-    getDesktop: function() {
-        return this.app.getDesktop();
+        Ext.create('Ext.container.Viewport', {
+            layout: 'fit',
+            items: {
+                xtype: 'tabpanel',
+                items: [
+                    {
+                        id: 'home',
+                        xtype: 'home',
+                        title: 'Inicio' // i18n
+                    }, {
+                        id: 'mailings',
+                        xtype: 'mailings',
+                        title: 'Envíos' // i18n
+                    }
+                ]
+            }
+        });
     }
 });

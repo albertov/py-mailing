@@ -1,7 +1,6 @@
-Ext.define('WebMailing.view.mailing.MailingGrid', {
+Ext.define('WebMailing.view.mailing.Grid', {
     extend: 'Ext.grid.Panel',
-    title: 'Envíos', // i18n
-    alias: 'widget.mailinggrid',
+    alias: 'widget.mailing_grid',
     store: 'Mailings',
     columns: [
         {text: 'Número', dataIndex: 'number', sortable: true},
@@ -13,10 +12,5 @@ Ext.define('WebMailing.view.mailing.MailingGrid', {
         {text: 'Modificado', dataIndex: 'modified', sortable: true,
          renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
          width:100}
-    ],
-    listeners: {
-        afterrender: function() {
-            this.store.load();
-        }
-    }
+    ]
 });
