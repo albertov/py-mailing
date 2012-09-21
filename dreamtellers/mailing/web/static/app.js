@@ -1,7 +1,7 @@
 Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
-    models: ['Category', 'Item', 'Mailing'],
+    models: ['ItemNode', 'Category', 'Item', 'Mailing'],
     stores: ['Mailings'],
     controllers: ['Mailings'],
     requires: [
@@ -11,6 +11,7 @@ Ext.application({
     ],
 
     launch: function() {
+        window.application = this;
         Ext.create('Ext.container.Viewport', {
             layout: 'fit',
             items: {
@@ -28,5 +29,12 @@ Ext.application({
                 ]
             }
         });
+    },
+    getFreshController: function(name) {
+        var old = this.controllers.get(name);
+        if (old) {
+            Ext.destroy(this.controllers.remove(old));
+        }
+        return this.getController(name);
     }
 });

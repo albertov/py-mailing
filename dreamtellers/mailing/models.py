@@ -80,7 +80,20 @@ class Category(Model):
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     image_id = Column(Integer, ForeignKey("image.id"))
+    category_id = Column(Integer, ForeignKey("category.id"))
+
     image = orm.relation(Image, lazy=True)
+    subcategories = orm.relation("Category",
+        backref = orm.backref('category', remote_side=[id],
+                              lazy='joined', join_depth=3))
+                            
+
+    @property
+    def path(self):
+        if self.category:
+            for p in self.category.path:
+                yield p
+        yield self
 
     def __repr__(self):
         data = (self.id, self.title, self.image)
@@ -91,6 +104,7 @@ class Category(Model):
             id=self.id,
             title=self.title,
             image_id=self.image_id,
+            category_id=self.category_id,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
             )
@@ -106,7 +120,6 @@ class Item(Model):
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     mailing_id = Column(Integer, ForeignKey('mailing.id'),
                        nullable=False)
-    _data = Column('data', Unicode, nullable=False)
 
     __mapper_args__ = {'polymorphic_on': type,
                        'polymorphic_identity': 'Item',
@@ -131,15 +144,24 @@ class Item(Model):
             )
 
 class ExternalLink(Item):
-    url = orm.synonym('_data')
+    __tablename__ = "external_link"
+    id = Column(Integer, ForeignKey("item.id"), primary_key=True)
+    url = Column(Unicode, nullable=False)
+    text = Column(Unicode)
     __mapper_args__ = {'polymorphic_identity':'ExternalLink'}
+
+    def __json__(self):
+        return dict(super(ExternalLink, self).__json__(),
+            text = self.text,
+            url = self.url,
+            )
 
 class Article(Item):
     __tablename__ = "article"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
     image_id = Column(Integer, ForeignKey("image.id"))
 
-    text = orm.synonym('_data')
+    text = Column(Unicode, nullable=False)
     image = orm.relation(Image)
     image_position = Column(String(1), nullable=False, default="l")
 
@@ -184,6 +206,13 @@ class Article(Item):
                 p.insert(0, img)
                 img.tail = p.text
                 p.text = None
+
+    def __json__(self):
+        return dict(super(Article, self).__json__(),
+            image_id = self.image_id,
+            image_position = self.image_position,
+            text = self.text,
+            )
 
 template_image_table = Table("template_image", Model.metadata,
     Column('template_id', Integer, ForeignKey('template.id', ondelete="CASCADE"),

@@ -81,6 +81,7 @@ class ModelListValidator(schema.Schema):
             )
         super(ModelListValidator, self).__init__(fields=fields)
 
+    id = validators.String(if_missing=None)
     limit = validators.Int(min=0, max=100, if_missing=25)
     page = validators.Int(min=1, if_missing=1)
     start = validators.Int(min=0, if_missing=0)

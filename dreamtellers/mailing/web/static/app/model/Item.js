@@ -7,16 +7,30 @@ Ext.define('WebMailing.model.Item', {
     fields: [
         {name:'id', type: 'int'},
         {name:'title', type: 'string'},
+        {name:'text', type: 'string', defaultValue:null},
+        {name:'url', type: 'string', defaultValue:null},
         {name:'type', type: 'string'},
         {name:'position', type: 'int'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'},
-        {name:'category_id', type: 'int'},
-        {name:'mailing_id', type: 'int'},
+        {name:'category_id', defaultValue:null},
+        {name:'mailing_id', defaultValue:null}
     ],
     belongsTo: [
-        {model: 'WebMailing.model.Mailing', foreignKey: 'mailing_id', name:'mailing'},
-        {model: 'WebMailing.model.Category', foreignKey: 'category_id', name:'category'}
+        {
+            model: 'WebMailing.model.Mailing',
+            foreignKey: 'mailing_id',
+            name:'mailing',
+            setterName: 'setMailing',
+            getterName: 'getMailing'
+        }, {
+            model: 'WebMailing.model.Category',
+            foreignKey: 'category_id',
+            primaryKey:'id',
+            name:'category',
+            setterName: 'setCategory',
+            getterName: 'getCategory'
+        }
     ],
     proxy: {
         type: 'rest',

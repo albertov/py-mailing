@@ -10,7 +10,7 @@ Ext.define('WebMailing.view.mailing.Panel', {
         {
             xtype: 'mailing_grid',
             region: 'west',
-            width: 300,
+            width: 200,
             collapsible: true,
             split: true
         }, {

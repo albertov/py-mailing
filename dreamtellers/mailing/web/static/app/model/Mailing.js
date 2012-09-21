@@ -2,7 +2,8 @@ Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
     requires: [
-        'WebMailing.model.Item'
+        'WebMailing.model.Item',
+        'WebMailing.model.ItemNode'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -12,7 +13,12 @@ Ext.define('WebMailing.model.Mailing', {
         {name:'modified', type: 'date',  dateFormat: 'c'}
     ],
     hasMany: [
-        {model: 'WebMailing.model.Item', foreignKey: 'mailing_id', name:'items', primaryKey:'id'}
+        {
+            model: 'WebMailing.model.Item',
+            foreignKey: 'mailing_id',
+            name:'items',
+            primaryKey:'id'
+        }
     ],
     proxy: {
         type: 'rest',
@@ -24,8 +30,25 @@ Ext.define('WebMailing.model.Mailing', {
     },
 
     getViewUrl: function() {
-        return this.getProxy().url + this.get('number') + '/';
+        return Ext.String.format('/m/{0}/', this.get('number'));
+    },
+
+    item_tree: function() {
+        if (!this._item_tree_store) {
+            this._item_tree_store = Ext.create('Ext.data.TreeStore', {
+                model: 'WebMailing.model.ItemNode',
+                proxy:  this.item_tree_proxy()
+            });
+        }
+        return this._item_tree_store;
+    },
+    item_tree_proxy: function() {
+        return Ext.create('Ext.data.proxy.Ajax', {
+            url: Ext.String.format('mailing/{0}/item_tree/',
+                                   this.get('id')),
+            reader: {
+                type: 'json',
+            }
+        });
     }
-
-
 });

@@ -33,7 +33,8 @@ Ext.define('WebMailing.controller.Mailings', {
             return;
         this.record = record;
         this.getGrid().getSelectionModel().select(this.record);
-        this.getDetail().setRecord(this.record);
+        var c = this.application.getFreshController('Items');
+        c.init(this.record, this.getDetail());
     }
 });
 
