@@ -20,7 +20,6 @@ Ext.define('WebMailing.view.mailing.Detail', {
         this.record = record;
         this.items.get(0).setSrc(this.record.getViewUrl());
         this.items.get(1).setRecord(this.record);
-        this.setTitle(
-            Ext.String.format("Mailing #{0}", this.record.get('number')));
+        this.setTitle(record.getTitle());
     }
 });

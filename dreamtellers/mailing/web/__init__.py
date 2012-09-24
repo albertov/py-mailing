@@ -35,14 +35,16 @@ def mailing_item_tree(id, db):
             roots.append(root)
         assert category not in category_items
         category_items[category] = list(items)
-    def make_node(category):
+    def make_category_node(category):
         items = category_items.get(category, [])
         children = [dict(i.__json__(), leaf=True, id='item-%d'%i.id)
                     for i in items]
-        children.extend(make_node(c) for c in category.subcategories)
-        return dict(category.__json__(), id='category-%d'%category.id,
+        children.extend(make_category_node(c) for c in category.subcategories)
+        return dict(category.__json__(),
+                    id='category-%d'%category.id,
+                    expanded=True,
                     children=children)
-    return {'success': True, 'children': map(make_node, roots)}
+    return {'success': True, 'children': map(make_category_node, roots)}
     
 
  

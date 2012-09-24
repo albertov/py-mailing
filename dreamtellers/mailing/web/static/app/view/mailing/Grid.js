@@ -23,7 +23,8 @@ Ext.define('WebMailing.view.mailing.Grid', {
             sortable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d'),
             field: {
-                xtype: 'datefield'
+                xtype: 'datefield',
+                format: 'Y/m/d'
             }
         }, {
             text: 'Modificado',

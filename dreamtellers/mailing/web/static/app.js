@@ -2,7 +2,7 @@ Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
     models: ['ItemNode', 'Category', 'Item', 'Mailing'],
-    stores: ['Mailings'],
+    stores: ['Mailings', 'Categories'],
     controllers: ['Mailings'],
     requires: [
         'Ext.tab.Panel',

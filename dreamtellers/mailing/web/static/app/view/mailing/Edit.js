@@ -16,7 +16,11 @@ Ext.define('WebMailing.view.mailing.Edit', {
             Ext.destroy(old);
             this.items.remove(old);
             var tree = Ext.create('WebMailing.view.item.Tree', {
-                store: record.item_tree()
+                store: record.item_tree(),
+                root: {
+                    expanded: true,
+                    title: this.record.getTitle()
+                }
             });
             this.items.insert(0, tree);
             this.doLayout();
