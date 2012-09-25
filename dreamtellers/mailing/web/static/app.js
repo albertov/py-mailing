@@ -31,10 +31,13 @@ Ext.application({
         });
     },
     getFreshController: function(name) {
+        this.destroyController(name);
+        return this.getController(name);
+    },
+    destroyController: function(name) {
         var old = this.controllers.get(name);
         if (old) {
             Ext.destroy(this.controllers.remove(old));
         }
-        return this.getController(name);
     }
 });

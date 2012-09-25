@@ -7,11 +7,14 @@ Ext.define('WebMailing.view.mailing.Detail', {
     alias: 'widget.mailing_detail',
     title: '&nbsp;',
     record: null,
+    disabled: true,
     items: [
         {
+            itemId: 'view',
             xtype: 'mailing_view',
             title: 'Vista' // i18n
         }, {
+            itemId: 'edit',
             xtype: 'mailing_edit',
             title: 'Edición' //i18n
         }

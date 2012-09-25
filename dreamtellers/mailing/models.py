@@ -14,7 +14,7 @@ import markdown
 from pkg_resources import resource_filename
 
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, String, create_engine, MetaData
+                        Table, LargeBinary, String, create_engine, MetaData, sql
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
@@ -118,7 +118,8 @@ class Item(Model):
     category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
-    mailing_id = Column(Integer, ForeignKey('mailing.id'),
+    mailing_id = Column(Integer, ForeignKey('mailing.id', ondelete='CASCADE',
+                                            onupdate='CASCADE'),
                        nullable=False)
 
     __mapper_args__ = {'polymorphic_on': type,
@@ -224,6 +225,8 @@ template_image_table = Table("template_image", Model.metadata,
 class Template(Model):
     __tablename__ = "template"
     id = Column(Integer, primary_key=True)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     title = Column(Unicode, nullable=False)
     type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
@@ -233,6 +236,12 @@ class Template(Model):
     variables =  dict(
         format_date = format_date
         )
+
+    @classmethod
+    def latest_by_type(cls, session, type):
+        q =session.query(cls).filter_by(type=type)
+        q = q.order_by(sql.desc(cls.modified))
+        return q.first()
 
 
     def __repr__(self):
@@ -314,10 +323,16 @@ class Mailing(Model):
 
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
-                         lazy=True)
+                         lazy=True, cascade='all,delete-orphan')
     templates = orm.relation(Template, secondary=mailing_template_table,
                              collection_class=attribute_mapped_collection('type'),
                              lazy=True)
+
+
+    @classmethod
+    def next_number(cls, session):
+        query = sql.select([sql.func.max(cls.number)])
+        return session.execute(query).scalar() + 1
 
     @property
     def grouped_items(self):

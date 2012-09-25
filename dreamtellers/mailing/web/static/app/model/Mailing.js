@@ -8,7 +8,7 @@ Ext.define('WebMailing.model.Mailing', {
     ],
     fields: [
         {name:'id', type: 'int'},
-        {name:'number', type: 'int'},
+        {name:'number', type: 'int', defaultValue: null},
         {name:'date', type: 'date',  dateFormat: 'c'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}

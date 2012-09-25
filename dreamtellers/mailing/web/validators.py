@@ -1,6 +1,7 @@
 import json
 from formencode import api, schema, validators
 from sqlalchemy import sql
+from iso8601 import parse_date, ParseError
 
 class validate(object):
     def __init__(self, validator, params):
@@ -23,6 +24,10 @@ class validate(object):
 
     def __getitem__(self, name):
         return self.params[name]
+
+    def __iter__(self):
+        return iter(self.params)
+
 
 class JsonValidator(api.FancyValidator):
     def _to_python(self, value, state=None):
@@ -85,3 +90,24 @@ class ModelListValidator(schema.Schema):
     limit = validators.Int(min=0, max=100, if_missing=25)
     page = validators.Int(min=1, if_missing=1)
     start = validators.Int(min=0, if_missing=0)
+
+class ISO8601DateValidator(validators.FancyValidator):
+    messages = {
+        'invalid': 'Invalid format'
+    }
+    if_empty=None
+    def _to_python(self, value, state=None):
+        if value:
+            try:
+                value = parse_date(value).replace(tzinfo=None)
+            except ParseError:
+                raise api.Invalid(self.message('invalid', state), value, state)
+        return value
+
+class MailingValidator(schema.Schema):
+    allow_extra_fields = True
+    filter_extra_fields = True
+    ignore_key_missing = True
+
+    date = ISO8601DateValidator(allow_empty=False)
+    number = validators.Int(min=0)

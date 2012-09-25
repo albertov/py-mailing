@@ -1,11 +1,12 @@
+import json
 from pkg_resources import resource_filename
 
 from bottle import Bottle, redirect, abort, response, static_file, request
 
 from ..models import (Mailing, NoResultFound, Item, Category, Recipient, Group,
-                      Image)
+                      Image, Template)
 from ..html import HTMLPageComposer
-from .validators import validate, ModelListValidator
+from .validators import validate, ModelListValidator, MailingValidator
 
 app = Bottle()
 
@@ -47,6 +48,13 @@ def mailing_item_tree(id, db):
     return {'success': True, 'children': map(make_category_node, roots)}
     
 
+def _invalid_form_response(form):
+    response.status = '400 Bad Request'
+    return {
+        'success':False,
+        'message': form.message,
+        'errors': form.errors,
+    }
  
 def collection_view(model, plural=None):
     if plural is None:
@@ -54,12 +62,7 @@ def collection_view(model, plural=None):
     def view(db):
         form = validate(ModelListValidator(model), request.params)
         if not form.is_valid:
-            response.status = '400 Bad Request'
-            return {
-                'success':False,
-                'message': form.message,
-                'errors': form.errors,
-            }
+            return _invalid_form_response(form)
         else:
             query = db.query(model)
             if form['sort']:
@@ -80,32 +83,59 @@ def collection_view(model, plural=None):
 def item_view(model, plural=None):
     if plural is None:
         plural = model.__name__.lower()+'s'
-    def show(id, db):
+    def view(id, db):
         item = db.query(model).get(id.split('::'))
         return {
             'success': True,
             'total': 1,
              plural: [item.__json__()]
         }
+    return view
+
+def item_delete(model):
     def delete(id, db):
         item = db.query(model).get(id.split('::'))
         db.delete(item)
+        db.commit()
         return {
             'success': True,
         }
-    def view(id, db):
-        if request.method=='GET':
-            return show(id, db)
-        elif request.method=='DELETE':
-            return delete(id, db)
-        else:
-            response.status = '405 Method Not Allowed'
-            return {}
-    view.func_name = 'show_'+plural
-    return view
+    return delete
 
 app.route('/mailing/')(collection_view(Mailing))
+
+@app.route('/mailing/', method='POST')
+def new_mailing(db):
+    form = validate(MailingValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    ob = Mailing()
+    for key in form:
+        setattr(ob, key, form[key])
+
+    if 'xhtml' not in ob.templates:
+        ob.templates['xhtml'] = Template.latest_by_type(db, 'xhtml')
+    ob.number = ob.next_number(db)
+    db.add(ob)
+    db.commit()
+
 app.route('/mailing/<id>')(item_view(Mailing))
+app.route('/mailing/<id>', method='DELETE')(item_delete(Mailing))
+
+@app.route('/mailing/<id>', method='PUT')
+def update_mailing(id, db):
+    form = validate(MailingValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    else:
+        ob = db.query(Mailing).get(id)
+        for key in form:
+            setattr(ob, key, form[key])
+        db.commit()
+        return {
+            'success': True,
+            'mailing': ob.__json__()
+        }
 
 app.route('/item/')(collection_view(Item))
 app.route('/image/')(collection_view(Image))
