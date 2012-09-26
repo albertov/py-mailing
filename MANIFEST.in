@@ -1,1 +1,3 @@
 recursive-include dreamtellers/mailing/magic magic.*
+recursive-include dreamtellers/mailing/web/static *
+recursive-include dreamtellers/mailing/web/templates *.html
