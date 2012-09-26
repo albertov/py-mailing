@@ -36,6 +36,7 @@ def mailing_item_tree(id, db):
             roots.append(root)
         assert category not in category_items
         category_items[category] = list(items)
+    roots.extend(c for c in Category.roots(db) if c not in roots)
     def make_category_node(category):
         items = category_items.get(category, [])
         children = [dict(i.__json__(), leaf=True, id='item-%d'%i.id)
@@ -47,6 +48,16 @@ def mailing_item_tree(id, db):
                     children=children)
     return {'success': True, 'children': map(make_category_node, roots)}
     
+@app.route('/mailing/<id>/item_tree/', method='POST')
+def update_mailing_item_tree(id, db):
+    import pprint
+    data = json.load(request.body)
+    #pprint.pprint([i for i in data if not i.get('leaf',False)])
+    pprint.pprint(data)
+    pprint.pprint([i['title'] for i in data])
+    return {
+        'success': True
+    }
 
 def _invalid_form_response(form):
     response.status = '400 Bad Request'

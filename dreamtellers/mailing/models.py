@@ -14,7 +14,8 @@ import markdown
 from pkg_resources import resource_filename
 
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, String, create_engine, MetaData, sql
+                        Table, LargeBinary, String, create_engine, MetaData,\
+                        sql, event
 from sqlalchemy.orm import deferred
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
@@ -36,6 +37,13 @@ Model = declarative_base(metadata=metadata)
 
 class MissingTemplate(StandardError):
     pass
+
+
+@event.listens_for(orm.mapper, 'before_update')
+def update_modified_time(mapper, connection, instance):
+    if hasattr(mapper.c, 'modified'):
+        instance.modified = datetime.datetime.now()
+
 
 class Image(Model):
     __tablename__ = "image"
@@ -87,6 +95,9 @@ class Category(Model):
         backref = orm.backref('category', remote_side=[id],
                               lazy='joined', join_depth=3))
                             
+    @classmethod
+    def roots(cls, db):
+        return db.query(cls).filter_by(category_id=None)
 
     @property
     def path(self):

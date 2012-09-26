@@ -1,9 +1,7 @@
 Ext.define('WebMailing.controller.Items', {
     extend: 'Ext.app.Controller',
     views: ['item.Tree'],
-    init: function(record, view) {
-        this.record = record;
-        view.setRecord(record);
+    init: function() {
         this.control({
             "item_tree": {
                 'select': this.onRowSelect

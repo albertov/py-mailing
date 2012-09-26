@@ -24,7 +24,24 @@ Ext.define('WebMailing.controller.Mailings', {
         });
         this.mailings = this.application.getStore('Mailings');
         this.mon(this.mailings, 'update', this.syncMailings, this);
-        this.mon(this.mailings, 'load', this._resetActiveRecord, this);
+        this.mon(this.mailings, 'beforeload', this._saveSelection, this);
+        this.mon(this.mailings, 'load', this._restoreSelection, this);
+    },
+
+    _saveSelection: function() {
+        var grid=this.getGrid(),
+            sm=grid.getSelectionModel();
+        sm._oldSelection=sm.getSelection();
+    },
+    _restoreSelection: function() {
+        var grid=this.getGrid(),
+            sm=grid.getSelectionModel();
+         if (sm._oldSelection) {
+             if (sm._oldSelection.length) {
+                 sm.select(sm._oldSelection);
+             }
+             delete sm._oldSelection;
+         }
     },
 
     onRowSelect: function(grid, record) {
@@ -43,27 +60,13 @@ Ext.define('WebMailing.controller.Mailings', {
         this.getDetail().refresh();
     },
 
-    _resetActiveRecord: function() {
-        if (this._oldRecordId) {
-            var r = this.mailings.getById(this._oldRecordId);
-            this.setActiveRecord(r);
-            delete this._oldRecordId;
-        }
-    },
-
     setActiveRecord: function(record) {
-        if (this.record===record)
-            return;
-        this.record = record;
-        if (this.record) {
-            this.getGrid().getSelectionModel().select(this.record);
-            this.get
-            var c = this.application.getFreshController('Items');
+        if (record) {
+            this.getGrid().getSelectionModel().select(record);
+            this.getDetail().setRecord(record);
             this.getDetail().enable();
-            c.init(this.record, this.getDetail());
         } else {
             this.getGrid().getSelectionModel().deselectAll();
-            this.application.destroyController('Items');
             this.getDetail().disable();
         }
     },
@@ -96,9 +99,6 @@ Ext.define('WebMailing.controller.Mailings', {
     },
     syncMailings: function() {
         var store = this.application.getStore('Mailings');
-        if (this.record) {
-            this._oldRecordId = this.record.phantom?null:this.record.internalId;
-        }
         store.sync({
             success: function() {
                 store.reload();

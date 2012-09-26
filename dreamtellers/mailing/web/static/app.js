@@ -3,7 +3,7 @@ Ext.application({
     appFolder: window.appFolder,
     models: ['ItemNode', 'Category', 'Item', 'Mailing'],
     stores: ['Mailings', 'Categories'],
-    controllers: ['Mailings'],
+    controllers: ['Mailings', 'Items'],
     requires: [
         'Ext.tab.Panel',
         'Ext.container.Viewport',
@@ -29,15 +29,5 @@ Ext.application({
                 ]
             }
         });
-    },
-    getFreshController: function(name) {
-        this.destroyController(name);
-        return this.getController(name);
-    },
-    destroyController: function(name) {
-        var old = this.controllers.get(name);
-        if (old) {
-            Ext.destroy(this.controllers.remove(old));
-        }
     }
 });
