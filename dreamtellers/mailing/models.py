@@ -92,8 +92,8 @@ class Category(Model):
 
     image = orm.relation(Image, lazy=True)
     subcategories = orm.relation("Category",
-        backref = orm.backref('category', remote_side=[id],
-                              lazy='joined', join_depth=3))
+        backref = orm.backref('category', remote_side=[id]),
+        lazy='joined', join_depth=3)
                             
     @classmethod
     def roots(cls, db):
@@ -115,6 +115,7 @@ class Category(Model):
             id=self.id,
             title=self.title,
             image_id=self.image_id,
+            children = [c.__json__() for c in self.subcategories],
             category_id=self.category_id,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,

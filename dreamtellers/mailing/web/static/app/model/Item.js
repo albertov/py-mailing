@@ -5,7 +5,7 @@ Ext.define('WebMailing.model.Item', {
     ],
     idProperty: 'id',
     fields: [
-        {name:'id', type: 'int'},
+        {name:'id'},
         {name:'title', type: 'string'},
         {name:'text', type: 'string', defaultValue:null},
         {name:'url', type: 'string', defaultValue:null},

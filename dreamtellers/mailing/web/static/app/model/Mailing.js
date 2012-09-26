@@ -3,8 +3,7 @@ Ext.define('WebMailing.model.Mailing', {
     idProperty: 'id',
     requires: [
         'WebMailing.model.Item',
-        'WebMailing.model.ItemNode',
-        'Ext.data.proxy.Ajax',
+        'WebMailing.store.ItemTreeStore'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -40,17 +39,11 @@ Ext.define('WebMailing.model.Mailing', {
 
     item_tree: function() {
         if (!this._item_tree_store) {
-            this._item_tree_store = Ext.create('Ext.data.TreeStore', {
-                model: 'WebMailing.model.ItemNode',
-                proxy:  this.item_tree_proxy()
+            this._item_tree_store = Ext.create(
+                'WebMailing.store.ItemTreeStore', {
+                    mailing: this
             });
         }
         return this._item_tree_store;
-    },
-    item_tree_proxy: function() {
-        return Ext.create('Ext.data.proxy.Ajax', {
-            url: Ext.String.format('mailing/{0}/item_tree/', this.get('id')),
-            reader: {type: 'json'}
-        });
     }
 });

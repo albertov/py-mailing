@@ -25,39 +25,6 @@ def mailing_file(number, filename, db):
     response.content_type = f.content_type
     return f.data
 
-@app.route('/mailing/<id>/item_tree/')
-def mailing_item_tree(id, db):
-    mailing = db.query(Mailing).get(id)
-    category_items = {}
-    roots = []
-    for category, items in mailing.grouped_items:
-        root = category.path.next()
-        if root not in roots:
-            roots.append(root)
-        assert category not in category_items
-        category_items[category] = list(items)
-    roots.extend(c for c in Category.roots(db) if c not in roots)
-    def make_category_node(category):
-        items = category_items.get(category, [])
-        children = [dict(i.__json__(), leaf=True, id='item-%d'%i.id)
-                    for i in items]
-        children.extend(make_category_node(c) for c in category.subcategories)
-        return dict(category.__json__(),
-                    id='category-%d'%category.id,
-                    expanded=True,
-                    children=children)
-    return {'success': True, 'children': map(make_category_node, roots)}
-    
-@app.route('/mailing/<id>/item_tree/', method='POST')
-def update_mailing_item_tree(id, db):
-    import pprint
-    data = json.load(request.body)
-    #pprint.pprint([i for i in data if not i.get('leaf',False)])
-    pprint.pprint(data)
-    pprint.pprint([i['title'] for i in data])
-    return {
-        'success': True
-    }
 
 def _invalid_form_response(form):
     response.status = '400 Bad Request'
@@ -67,7 +34,7 @@ def _invalid_form_response(form):
         'errors': form.errors,
     }
  
-def collection_view(model, plural=None):
+def collection_view(model, plural=None, filter=None):
     if plural is None:
         plural = model.__name__.lower()+'s'
     def view(db):
@@ -76,6 +43,8 @@ def collection_view(model, plural=None):
             return _invalid_form_response(form)
         else:
             query = db.query(model)
+            if filter is not None:
+                query = query.filter(filter)
             if form['sort']:
                 query = query.order_by(*form['sort'])
             if form['filter']:
@@ -153,7 +122,8 @@ app.route('/image/')(collection_view(Image))
 app.route('/recipient/')(collection_view(Recipient))
 app.route('/group/')(collection_view(Group))
 
-app.route('/category/')(collection_view(Category, 'categories'))
+app.route('/category/')(
+    collection_view(Category, 'categories', Category.category_id==None))
 app.route('/category/<id>')(item_view(Category, 'categories'))
 
 
