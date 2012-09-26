@@ -113,4 +113,3 @@ Ext.define('WebMailing.controller.Mailings', {
         });
     }
 });
-

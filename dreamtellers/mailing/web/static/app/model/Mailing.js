@@ -2,8 +2,7 @@ Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
     requires: [
-        'WebMailing.model.Item',
-        'WebMailing.store.ItemTreeStore'
+        'WebMailing.model.Item'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -35,15 +34,5 @@ Ext.define('WebMailing.model.Mailing', {
 
     getTitle: function() {
         return Ext.String.format("Envío #{0}", this.get('number')); //i18n
-    },
-
-    item_tree: function() {
-        if (!this._item_tree_store) {
-            this._item_tree_store = Ext.create(
-                'WebMailing.store.ItemTreeStore', {
-                    mailing: this
-            });
-        }
-        return this._item_tree_store;
     }
 });

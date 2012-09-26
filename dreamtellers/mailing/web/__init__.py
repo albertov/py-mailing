@@ -6,7 +6,8 @@ from bottle import Bottle, redirect, abort, response, static_file, request
 from ..models import (Mailing, NoResultFound, Item, Category, Recipient, Group,
                       Image, Template)
 from ..html import HTMLPageComposer
-from .validators import validate, ModelListValidator, MailingValidator
+from .validators import (validate, ModelListValidator, MailingValidator,
+                         CategoryValidator)
 
 app = Bottle()
 
@@ -125,6 +126,32 @@ app.route('/group/')(collection_view(Group))
 app.route('/category/')(
     collection_view(Category, 'categories', Category.category_id==None))
 app.route('/category/<id>')(item_view(Category, 'categories'))
+
+@app.route('/category/', method='POST')
+def new_category(db):
+    form = validate(CategoryValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    ob = Category()
+    for key in form:
+        setattr(ob, key, form[key])
+    db.add(ob)
+    db.commit()
+
+@app.route('/category/<id>', method='PUT')
+def update_categroy(id, db):
+    form = validate(CategoryValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    else:
+        ob = db.query(Category).get(id)
+        for key in form:
+            setattr(ob, key, form[key])
+        db.commit()
+        return {
+            'success': True,
+            'category': ob.__json__()
+        }
 
 
 def _get_composer(db, number):

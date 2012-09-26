@@ -3,5 +3,6 @@ Ext.define('WebMailing.model.ItemNode', {
     requires: [
         'WebMailing.model.Item'
     ],
+    fields: ["record"],
     proxy: {type:'memory'}
 });

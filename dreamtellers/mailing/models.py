@@ -115,7 +115,7 @@ class Category(Model):
             id=self.id,
             title=self.title,
             image_id=self.image_id,
-            children = [c.__json__() for c in self.subcategories],
+            categories = [c.__json__() for c in self.subcategories],
             category_id=self.category_id,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,

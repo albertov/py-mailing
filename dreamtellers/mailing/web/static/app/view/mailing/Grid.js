@@ -91,8 +91,7 @@ Ext.define('WebMailing.view.mailing.Grid', {
     },
 
     onItemCtxMenu: function(grid, record, item, index, ev) {
-        this.selectedRecord = record;
-        this._activateObjectActions();
+        this.onRowSelect(record);
         this.contextMenu.showAt(ev.getXY())
         ev.stopEvent();
         return false;

@@ -111,3 +111,11 @@ class MailingValidator(schema.Schema):
 
     date = ISO8601DateValidator(allow_empty=False)
     number = validators.Int(min=0)
+
+class CategoryValidator(schema.Schema):
+    allow_extra_fields = True
+    filter_extra_fields = True
+    ignore_key_missing = True
+
+    category_id = validators.Int(min=0)
+    title = validators.UnicodeString(allow_empty=False)
