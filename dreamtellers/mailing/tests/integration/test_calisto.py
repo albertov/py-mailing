@@ -124,7 +124,7 @@ def mailing_from_fixture(fname, number=0, date=datetime.datetime.now()):
                 item = ExternalLink(url=item_data['link'],
                                     title=item_data['title'])
             else:
-                item = Article(text=item_data['text'],
+                item = Article(content=item_data['text'],
                                title=item_data['title'])
                 image = item_data.get('image')
                 if image:

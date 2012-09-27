@@ -160,12 +160,12 @@ class ExternalLink(Item):
     __tablename__ = "external_link"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
     url = Column(Unicode, nullable=False)
-    text = Column(Unicode)
+    content = Column(Unicode)
     __mapper_args__ = {'polymorphic_identity':'ExternalLink'}
 
     def __json__(self):
         return dict(super(ExternalLink, self).__json__(),
-            text = self.text,
+            content = self.content,
             url = self.url,
             )
 
@@ -174,7 +174,7 @@ class Article(Item):
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
     image_id = Column(Integer, ForeignKey("image.id"))
 
-    text = Column(Unicode, nullable=False)
+    content = Column(Unicode, nullable=False)
     image = orm.relation(Image)
     image_position = Column(String(1), nullable=False, default="l")
 
@@ -191,13 +191,13 @@ class Article(Item):
 
     @property
     def html(self):
-        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
+        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.content))
         self._insert_image(dom)
         return '\n'.join(etree.tounicode(e, method='xml')
                          for e in dom.getchildren())
 
     def plain_text(self, width=79):
-        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.text))
+        dom = etree.HTML('<div>%s</div>' % markdown.markdown(self.content))
         for e in dom.xpath('//a'):
             if 'href' in e.attrib:
                 e.tag = 'span'
@@ -224,7 +224,7 @@ class Article(Item):
         return dict(super(Article, self).__json__(),
             image_id = self.image_id,
             image_position = self.image_position,
-            text = self.text,
+            content = self.content,
             )
 
 template_image_table = Table("template_image", Model.metadata,

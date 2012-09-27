@@ -13,8 +13,10 @@ Ext.define('WebMailing.store.ItemTreeStore', {
             title: this.mailing.getTitle()
         });
         this.mon(this.items, 'datachanged', this.onItemsChange, this);
+        this.mon(this.items, 'update', this.onStoreUpdate, this);
         this.mon(this.categories, 'append', this.onCategoriesLoad, this);
         this.mon(this.categories, 'update', this.onCategoriesLoad, this);
+        this.mon(this.categories, 'update', this.onStoreUpdate, this);
         this.mon(this.categories, 'remove', this.onCategoriesLoad, this);
         this.relayEvents(this.items, ['write']);
         this.relayEvents(this.categories, ['write']);
@@ -38,6 +40,15 @@ Ext.define('WebMailing.store.ItemTreeStore', {
     },
     onItemsChange: function() {
         this._updateItems();
+    },
+    onStoreUpdate: function(store, record) {
+        console.debug('onStoreUpdate', arguments);
+        Ext.each(this.tree.flatten(), function(node) {
+            var nodeRecord = node.get('record');
+            if (nodeRecord && nodeRecord.getId()==record.getId()) {
+                node.setRecord(nodeRecord);
+            }
+        });
     },
     onCategoriesLoad: function() {
         this._updateCategories();
@@ -71,10 +82,7 @@ Ext.define('WebMailing.store.ItemTreeStore', {
                     dNode = new WebMailing.model.ItemNode(data);
                     dst.appendChild(dNode);
                 } else {
-                    dNode.set('record', sNode);
-                    dNode.set('title', sNode.get('title'));
-                    dNode.set('modified', sNode.get('modified'));
-                    dNode.set('created', sNode.get('created'));
+                    dNode.setRecord(sNode);
                 }
                 copy_node(sNode, dNode);
             });
@@ -106,8 +114,12 @@ Ext.define('WebMailing.store.ItemTreeStore', {
             if (oldItem) {
                 oldItem.parentNode.replaceChild(newItem, oldItem);
             } else {
-                var catId = 'category-'+item.get('category_id');
-                var cat=root.findChild('id', catId, true);
+                var catId = item.get('category_id'), cat;
+                if (catId) {
+                    cat = root.findChild('id', 'category-'+catId, true);
+                } else {
+                    cat = root;
+                }
                 if (cat) {
                     var pos = newItem.get('position');
                     var c = cat;

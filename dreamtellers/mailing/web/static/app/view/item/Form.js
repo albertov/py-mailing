@@ -9,18 +9,19 @@ Ext.define('WebMailing.view.item.Form', {
             name: 'title',
             xtype: 'textfield',
             fieldLabel: 'Título', //i18n
-            anchor: '95%',
+            anchor: '95%'
         }, {
             name: 'url',
-            disabled: true,
             xtype: 'textfield',
             fieldLabel: 'Enlace', //i18n
-            anchor: '95%',
+            anchor: '95%'
         }, {
-            name: 'text',
+            name: 'content',
             xtype: 'textareafield',
+            grow: true,
+            growMax: 400,
             fieldLabel: 'Texto', //i18n
-            anchor: '95%',
+            anchor: '95%'
         }
     ],
     loadRecord: function(record) {
@@ -28,15 +29,24 @@ Ext.define('WebMailing.view.item.Form', {
         this.callParent(arguments);
     },
     setupFieldsForType: function(type) {
-        var func = this['setupFieldsFor'+type];
+        var funcName = 'setupFieldsFor'+(type||'Category');
+        var func = this[funcName];
         if (func) {
+            this.items.each(function(f) {f.enable(); f.show()});
             func.call(this);
         } else {
-            this.fields.each(function(f) {f.disable()});
+            this.items.each(function(f) {f.disable()});
         }
     },
     setupFieldsForArticle: function() {
-        this.findField('url').disable();
+        this.getForm().findField('url').hide();
+    },
+
+    setupFieldsForCategory: function() {
+        this.getForm().findField('content').hide();
+        this.getForm().findField('url').hide();
+    },
+    setupFieldsForExternalLink: function() {
     }
 
 });

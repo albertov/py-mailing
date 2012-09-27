@@ -26,7 +26,7 @@ Ext.define('WebMailing.controller.Mailings', {
                 'delete_mailing': this.onDeleteMailing
             },
             "mailing_form field": {
-                "change": this.onMailingFormDirtyChange
+                "blur": this.onMailingFormDirtyChange
             }
         });
         this.mailings = this.application.getStore('Mailings');

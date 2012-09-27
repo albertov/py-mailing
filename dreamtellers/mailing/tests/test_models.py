@@ -54,7 +54,7 @@ class TestMailing(BaseModelTest):
     def test_polymorphic_items(self):
         cat = self._makeCategory()
         item1 = self._makeExternalLink(title="Foo1", url="someurl", category=cat)
-        item2 = self._makeArticle(title="Foo2", text="sometext", category=cat)
+        item2 = self._makeArticle(title="Foo2", content="somecontent", category=cat)
         ob = self._makeOne(items=[item2, item1])
         self.session.add(ob)
         self.session.commit()
@@ -64,14 +64,14 @@ class TestMailing(BaseModelTest):
         items = retrieved.items
         self.failUnlessEqual(len(items), 2)
         self.failUnlessEqual(items[0].__class__.__name__, 'Article')
-        self.failUnlessEqual(items[0].text, 'sometext')
+        self.failUnlessEqual(items[0].content, 'somecontent')
         self.failUnlessEqual(items[1].__class__.__name__, 'ExternalLink')
         self.failUnlessEqual(items[1].url, 'someurl')
 
     def test_reverse_items(self):
         cat = self._makeCategory()
-        item1 = self._makeArticle(title="Foo1", text="sometext", category=cat)
-        item2 = self._makeArticle(title="Foo2", text="sometext", category=cat)
+        item1 = self._makeArticle(title="Foo1", content="somecontent", category=cat)
+        item2 = self._makeArticle(title="Foo2", content="somecontent", category=cat)
         ob = self._makeOne(items=[item1, item2])
         self.session.add(ob)
         self.session.commit()
