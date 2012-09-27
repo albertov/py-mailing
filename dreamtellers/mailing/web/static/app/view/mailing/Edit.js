@@ -1,29 +1,26 @@
 Ext.define('WebMailing.view.mailing.Edit', {
     extend: 'Ext.panel.Panel',
     requires: [
-        'WebMailing.store.ItemTreeStore'
+        'WebMailing.view.mailing.Form',
+        'WebMailing.view.item.Edit'
     ],
     alias: 'widget.mailing_edit',
-    layout: 'fit',
+    layout: 'border',
     border: false,
     items: [
         {
-            xtype: 'panel',
+            xtype: 'mailing_form',
+            region: 'north',
+            height: 100
+        }, {
+            xtype: 'item_edit',
+            title: 'Items', //i18n
+            region: 'center'
         }
     ],
     setRecord: function(record) {
         this.record = record;
-        var old = this.items.get(0);
-        Ext.destroy(old);
-        this.items.remove(old);
-        var tree = Ext.create('WebMailing.view.item.Tree', {
-            store: Ext.create('WebMailing.store.ItemTreeStore', {
-                mailing: record,
-                categories: Ext.getStore('Categories')
-            })
-        });
-        this.items.insert(0, tree);
-        this.doLayout();
+        this.down('mailing_form').loadRecord(record);
+        this.down('item_edit').setMailing(record);
     }
 });
-

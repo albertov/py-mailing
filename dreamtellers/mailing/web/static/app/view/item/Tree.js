@@ -11,19 +11,7 @@ Ext.define('WebMailing.view.item.Tree', {
             xtype: 'treecolumn',
             text: 'Título', //i18n
             dataIndex: 'title',
-            flex: true,
-            sortable: false
-        }, {
-            text: 'Modificado',
-            dataIndex: 'modified',
-            renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
-            width:150,
-            sortable: false
-        }, {
-            text: 'Creado',
-            dataIndex: 'created',
-            renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
-            width: 150,
+            flex: 1,
             sortable: false
         }
     ],

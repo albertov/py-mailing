@@ -21,8 +21,13 @@ Ext.define('WebMailing.view.mailing.Detail', {
     ],
     setRecord: function(record) {
         this.record = record;
-        this.items.get(0).setSrc(this.record.getViewUrl());
-        this.items.get(1).setRecord(this.record);
-        this.setTitle(record.getTitle());
+        this.refresh();
+    },
+    refresh: function() {
+        if (this.record) {
+            this.items.get('edit').setRecord(this.record);
+            this.items.get('view').setSrc(this.record.getViewUrl());
+            this.setTitle(this.record.getTitle());
+        }
     }
 });

@@ -13,7 +13,9 @@ Ext.define('WebMailing.store.ItemTreeStore', {
             title: this.mailing.getTitle()
         });
         this.mon(this.items, 'datachanged', this.onItemsChange, this);
-        this.mon(this.categories, 'load', this.onCategoriesLoad, this);
+        this.mon(this.categories, 'append', this.onCategoriesLoad, this);
+        this.mon(this.categories, 'update', this.onCategoriesLoad, this);
+        this.mon(this.categories, 'remove', this.onCategoriesLoad, this);
         this.relayEvents(this.items, ['write']);
         this.relayEvents(this.categories, ['write']);
         this._updateCategories();
@@ -35,7 +37,6 @@ Ext.define('WebMailing.store.ItemTreeStore', {
         }
     },
     onItemsChange: function() {
-        console.debug('onItemsChange');
         this._updateItems();
     },
     onCategoriesLoad: function() {
@@ -84,7 +85,7 @@ Ext.define('WebMailing.store.ItemTreeStore', {
         // Prune items not present in src
         Ext.each(this.tree.flatten(), function(node) {
             var nodeId = node.get('id');
-            if (nodeId && nodeId.indexOf('item-')<-1) {
+            if (nodeId && nodeId.indexOf('item-')>-1) {
                 var recId = parseInt(nodeId.slice(nodeId.indexOf('-')+1), 0)
                 if (!this.items.getById(recId)) {
                     node.remove()

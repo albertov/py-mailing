@@ -5,9 +5,6 @@ Ext.define('WebMailing.store.Categories', {
     remoteSort: true,
     autoLoad: true,
     autoSync: true,
-    listeners: {
-        write: function(store) {store.reload()}
-    },
     rootProperty: 'categories',
     defaultRootProperty: 'categories'
 });

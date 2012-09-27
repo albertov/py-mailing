@@ -1,7 +1,6 @@
 Ext.define('WebMailing.view.mailing.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
-        'Ext.grid.plugin.RowEditing',
         'Ext.form.TextField',
         'Ext.form.NumberField',
         'Ext.form.DateField',
@@ -9,23 +8,20 @@ Ext.define('WebMailing.view.mailing.Grid', {
     alias: 'widget.mailing_grid',
     store: 'Mailings',
     title: 'Envíos', //i18n
+    loadMask: true,
+    selModel: {
+        pruneRemoved: false
+    },
     columns: [
         {
             text: 'Número',
             dataIndex: 'number',
-            sortable: true,
-            field: {
-                xtype: 'numberfield'
-            }
+            sortable: true
         }, {
             text: 'Fecha',
             dataIndex: 'date',
             sortable: true,
-            renderer: Ext.util.Format.dateRenderer('Y/m/d'),
-            field: {
-                xtype: 'datefield',
-                format: 'Y/m/d'
-            }
+            renderer: Ext.util.Format.dateRenderer('Y/m/d')
         }, {
             text: 'Modificado',
             dataIndex: 'modified',
@@ -41,9 +37,12 @@ Ext.define('WebMailing.view.mailing.Grid', {
         }
     ],
     initComponent: function() {
-        this.rowEditor = Ext.create('Ext.grid.plugin.RowEditing');
-        this.plugins = [this.rowEditor];
         this.actions = {
+            'save': Ext.create('Ext.Action', {
+                text: 'Guardar', //18n
+                disabled: true,
+                handler: Ext.bind(this.fireEvent, this, ['save_mailings', this])
+            }),
             'new': Ext.create('Ext.Action', {
                 text: 'Nuevo', //18n
                 handler: Ext.bind(this.fireEvent, this, ['new_mailing', this])
@@ -64,6 +63,7 @@ Ext.define('WebMailing.view.mailing.Grid', {
         this.dockedItems = {
             xtype: 'toolbar',
             items: [
+                this.actions['save'],
                 this.actions['new'],
                 this.actions['delete'],
                 this.actions['edit']
@@ -76,7 +76,10 @@ Ext.define('WebMailing.view.mailing.Grid', {
             ]
         });
         this.callParent(arguments);
-        this.addEvents(['new_mailing', 'edit_mailing', 'delete_mailing']);
+        this.addEvents(['save_mailings', 'new_mailing', 'edit_mailing',
+                        'delete_mailing']);
+        this.mon(this.store, 'load', this._setSaveActionState, this);
+        this.mon(this.store, 'update', this._setSaveActionState, this);
         this.on('select', this.onRowSelect, this);
         this.on('deselect', this.onRowDeSelect, this);
         this.on('itemcontextmenu', this.onItemCtxMenu, this);
@@ -84,6 +87,13 @@ Ext.define('WebMailing.view.mailing.Grid', {
     onRowSelect: function(grid, record) {
         this.selectedRecord = record;
         this._activateObjectActions();
+    },
+    _setSaveActionState: function() {
+        if (this.store.getModifiedRecords().length>0) {
+            this.actions.save.enable();
+        } else {
+            this.actions.save.disable();
+        }
     },
     onRowDeSelect: function(grid, record) {
         this.selectedRecord = null;

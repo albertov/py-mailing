@@ -99,6 +99,10 @@ def new_mailing(db):
     ob.number = ob.next_number(db)
     db.add(ob)
     db.commit()
+    return {
+        'success': True,
+        'mailings': [ob.__json__()]
+    }
 
 app.route('/mailing/<id>')(item_view(Mailing))
 app.route('/mailing/<id>', method='DELETE')(item_delete(Mailing))
@@ -108,15 +112,14 @@ def update_mailing(id, db):
     form = validate(MailingValidator, json.load(request.body))
     if not form.is_valid:
         return _invalid_form_response(form)
-    else:
-        ob = db.query(Mailing).get(id)
-        for key in form:
-            setattr(ob, key, form[key])
-        db.commit()
-        return {
-            'success': True,
-            'mailing': ob.__json__()
-        }
+    ob = db.query(Mailing).get(id)
+    for key in form:
+        setattr(ob, key, form[key])
+    db.commit()
+    return {
+        'success': True,
+        'mailings': [ob.__json__()]
+    }
 
 app.route('/item/')(collection_view(Item))
 app.route('/image/')(collection_view(Image))
@@ -137,6 +140,10 @@ def new_category(db):
         setattr(ob, key, form[key])
     db.add(ob)
     db.commit()
+    return {
+        'success': True,
+        'categories': [ob.__json__()]
+    }
 
 @app.route('/category/<id>', method='PUT')
 def update_categroy(id, db):
@@ -150,7 +157,7 @@ def update_categroy(id, db):
         db.commit()
         return {
             'success': True,
-            'category': ob.__json__()
+            'categories': [ob.__json__()]
         }
 
 
