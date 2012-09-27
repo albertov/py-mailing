@@ -4,6 +4,14 @@ Ext.define('WebMailing.view.item.Form', {
     fieldDefaults: {
         labelAlign: 'top'
     },
+    requires: [
+        'Ext.ux.pagedown.Field'
+    ],
+    autoScroll: true,
+    trackResetOnLoad: true,
+    bodyStyle: {
+        padding: '5px'
+    },
     items: [
         {
             name: 'title',
@@ -17,9 +25,9 @@ Ext.define('WebMailing.view.item.Form', {
             anchor: '95%'
         }, {
             name: 'content',
-            xtype: 'textareafield',
+            xtype: 'markdownfield',
             grow: true,
-            growMax: 400,
+            growMax: 250,
             fieldLabel: 'Texto', //i18n
             anchor: '95%'
         }

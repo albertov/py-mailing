@@ -5,6 +5,9 @@ Ext.define('WebMailing.view.mailing.Form', {
         labelAlign: 'top'
     },
     trackResetOnLoad: true,
+    bodyStyle: {
+        padding: '5px'
+    },
     items: {
         xtype: 'container',
         layout: 'hbox',

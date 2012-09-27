@@ -9,12 +9,18 @@
           href="${static_url('extjs/resources/css/ext-all.css')}"/>
     <link rel="stylesheet"
           type="text/css"
-          href="${static_url('desktop/css/desktop.css')}"/>
+          href="${static_url('pagedown/style.css')}"/>
     <script type="text/javascript"
             src="${static_url('extjs/ext-debug.js')}"></script>
+    <script type="text/javascript"
+            src="${static_url('pagedown/Markdown.Converter.js')}"></script>
+    <script type="text/javascript"
+            src="${static_url('pagedown/Markdown.Sanitizer.js')}"></script>
+    <script type="text/javascript"
+            src="${static_url('pagedown/Markdown.Editor.js')}"></script>
     <script type="text/javascript">
         Ext.Loader.setPath({
-            'Ext.ux.desktop': '${static_url("desktop")}'
+            'Ext.ux.pagedown': '${static_url("pagedown")}'
         });
         window.appFolder ='${static_url("app")}';
     </script>
