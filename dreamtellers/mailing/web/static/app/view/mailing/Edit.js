@@ -11,10 +11,10 @@ Ext.define('WebMailing.view.mailing.Edit', {
         {
             xtype: 'mailing_form',
             region: 'north',
-            height: 100
+            height: 80,
+            split: true
         }, {
             xtype: 'item_edit',
-            title: 'Items', //i18n
             region: 'center'
         }
     ],

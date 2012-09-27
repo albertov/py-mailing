@@ -9,8 +9,9 @@ Ext.define('WebMailing.view.item.Edit', {
     layout: 'border',
     items: [
        { 
-            xtype: 'container',
+            xtype: 'panel',
             layout: 'fit',
+            title: 'Items', // i18n
             itemId: 'tree_container',
             region: 'west',
             width: 400,
