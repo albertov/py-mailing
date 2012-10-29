@@ -17,7 +17,7 @@ setup(
     license = 'GPLv3',
     packages = find_packages(exclude=['ez_setup']),
     include_package_data = True,
-    zip_safe = True,
+    zip_safe = False,
     namespace_packages = ['dreamtellers'],
     test_suite="nose.collector",
     tests_require=["nose"],
@@ -33,9 +33,12 @@ setup(
         "lxml",
         "cssutils",
         "ftputil",
+        "pastescript",
         ],
     entry_points = """
     [console_scripts]
     webmailing = dreamtellers.mailing.web.run:main
-        """,
+    [paste.app_factory]
+    main = dreamtellers.mailing.web.run:app_factory
+    """,
     )
