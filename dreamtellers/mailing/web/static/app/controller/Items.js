@@ -18,7 +18,8 @@ Ext.define('WebMailing.controller.Items', {
                 new_category: this.onNewCategory,
                 new_item: this.onNewItem,
                 delete_node: this.onDeleteNode,
-                edit_node: this.onEditNode
+                edit_node: this.onEditNode,
+                itemmove: this.updateItemPositions
             },
             "item_form field": {
                 blur: this.onItemFormChange
@@ -80,4 +81,12 @@ Ext.define('WebMailing.controller.Items', {
             record.store.remove(record);
         }
     },
+    updateItemPositions: function() {
+        var pos=0;
+        this.getTree().getStore().getRootNode().cascadeBy(function(n) {
+            if (n.isItem()) {
+                n.get('record').set('position', pos++);
+            }
+        });
+    }
 });

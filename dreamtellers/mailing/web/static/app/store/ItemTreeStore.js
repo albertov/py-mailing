@@ -59,11 +59,8 @@ Ext.define('WebMailing.store.ItemTreeStore', {
             if (!(src && dst)) return;
             // prune children from dst that are not in src
             dst.eachChild(function(dNode) {
-                if (!dNode) return;
-                var dNodeId = dNode.get('id');
-                if (dNodeId && dNodeId.indexOf('category-')>-1) {
-                    var sNodeId = parseInt(dNodeId.slice(dNodeId.indexOf('-')+1), 0)
-                    if (src.findChild(sNodeId)) {
+                if (dNode && dNode.isCategory()) {
+                    if (src.findChild(dNode.getRecordId())) {
                         dNode.remove();
                     }
                 }
@@ -92,10 +89,8 @@ Ext.define('WebMailing.store.ItemTreeStore', {
     _updateItems: function() {
         // Prune items not present in src
         Ext.each(this.tree.flatten(), function(node) {
-            var nodeId = node.get('id');
-            if (nodeId && nodeId.indexOf('item-')>-1) {
-                var recId = parseInt(nodeId.slice(nodeId.indexOf('-')+1), 0)
-                if (!this.items.getById(recId)) {
+            if (node.isItem()) {
+                if (!this.items.getById(node.getRecordId())) {
                     node.remove()
                 }
             }
@@ -129,7 +124,7 @@ Ext.define('WebMailing.store.ItemTreeStore', {
                     }
                     cat.appendChild(newItem);
                 } else {
-                    console.warn('could not find category');
+                    console.warn('could not find category', catId);
                     return false;
                 }
             }
