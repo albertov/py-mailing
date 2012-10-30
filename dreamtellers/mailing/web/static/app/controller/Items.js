@@ -19,7 +19,8 @@ Ext.define('WebMailing.controller.Items', {
                 new_item: this.onNewItem,
                 delete_node: this.onDeleteNode,
                 edit_node: this.onEditNode,
-                itemmove: this.updateItemPositions
+                itemmove: this.updateItemPositions,
+                beforedrop: this.onTreeBeforeDrop
             },
             "item_form field": {
                 blur: this.onItemFormChange
@@ -42,6 +43,14 @@ Ext.define('WebMailing.controller.Items', {
             }
         } else {
             this.setActiveRecord(null);
+        }
+    },
+    onTreeBeforeDrop: function(node, data, overModel, dropPosition) {
+        if (!data.records[0].isLeaf()) {
+            return !overModel.isLeaf() && (
+                dropPosition=="before" || dropPosition=="after");
+        } else {
+            return true;
         }
     },
     onItemFormChange: function() {

@@ -52,6 +52,7 @@ Ext.define('WebMailing.view.item.Tree', {
         });
         this.callParent(arguments);
         this.addEvents(['new_item', 'edit_node', 'delete_node']);
+        this.relayEvents(this.getView(), ['beforedrop']);
         this.on('select', this.onRowSelect, this);
         this.on('deselect', this.onRowDeSelect, this);
         this.on('itemcontextmenu', this.onItemCtxMenu, this);
