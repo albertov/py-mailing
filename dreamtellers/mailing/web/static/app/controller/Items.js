@@ -15,7 +15,7 @@ Ext.define('WebMailing.controller.Items', {
         this.control({
             item_tree: {
                 select: this.onEditNode,
-                new_category: this.onNewCategory,
+                itemremove: Ext.bind(this.setActiveRecord, this, [null]),
                 new_item: this.onNewItem,
                 delete_node: this.onDeleteNode,
                 edit_node: this.onEditNode,
@@ -30,29 +30,24 @@ Ext.define('WebMailing.controller.Items', {
     setActiveRecord: function(record) {
         if (record!==null) {
             this.getForm().loadRecord(record);
+        } else {
+            this.getForm().disable();
         }
     },
     onEditNode: function(tree, node) {
-        var record = node.get('record');
-        if (record) {
-            this.setActiveRecord(record);
+        if (node.isItem()) {
+            var record = node.get('record');
+            if (record) {
+                this.setActiveRecord(record);
+            }
+        } else {
+            this.setActiveRecord(null);
         }
     },
     onItemFormChange: function() {
         var form=this.getForm().getForm();
         if (form.isValid())
             form.updateRecord();
-    },
-    onNewCategory: function(tree, node) {
-        var parent = node.get('record');
-        if (!parent) {
-            var store=Ext.getStore('Categories');
-            parent=store.getRootNode();
-        }
-        var category = parent.appendChild({
-            title: 'Sin título', //i18n
-            category_id:parent?parent.get('id'):null
-        });
     },
     onNewItem: function(tree, node) {
         var parent = node.get('record'),

@@ -17,11 +17,6 @@ Ext.define('WebMailing.view.item.Tree', {
     ],
     initComponent: function() {
         this.actions = {
-            'new_category': Ext.create('Ext.Action', {
-                text: 'Nueva categoria', //18n
-                disabled: true,
-                handler: Ext.bind(this.fireEventWithRecord, this, ['new_category'])
-            }),
             'new_item': Ext.create('Ext.Action', {
                 text: 'Nuevo ítem', //18n
                 disabled: true,
@@ -43,7 +38,6 @@ Ext.define('WebMailing.view.item.Tree', {
         this.dockedItems = {
             xtype: 'toolbar',
             items: [
-                this.actions['new_category'],
                 this.actions['new_item'],
                 this.actions['delete'],
                 this.actions['edit']
@@ -51,14 +45,13 @@ Ext.define('WebMailing.view.item.Tree', {
         }
         this.contextMenu = Ext.create('Ext.menu.Menu', {
             items: [
-                this.actions['new_category'],
                 this.actions['new_item'],
                 this.actions['delete'],
                 this.actions['edit']
             ]
         });
         this.callParent(arguments);
-        this.addEvents(['new_category', 'new_item', 'edit_node', 'delete_node']);
+        this.addEvents(['new_item', 'edit_node', 'delete_node']);
         this.on('select', this.onRowSelect, this);
         this.on('deselect', this.onRowDeSelect, this);
         this.on('itemcontextmenu', this.onItemCtxMenu, this);
@@ -88,8 +81,6 @@ Ext.define('WebMailing.view.item.Tree', {
         this.actions.delete.enable();
     },
     _activateCategoryActions: function() {
-        this.actions.edit.enable();
-        this.actions.new_category.enable();
         this.actions.new_item.enable();
     },
 

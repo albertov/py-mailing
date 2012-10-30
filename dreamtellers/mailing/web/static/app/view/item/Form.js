@@ -32,28 +32,29 @@ Ext.define('WebMailing.view.item.Form', {
             anchor: '95%'
         }
     ],
+    disable: function() {
+        this.items.each(function(f) {f.hide()});
+        this.callParent(arguments)
+    },
     loadRecord: function(record) {
+        this.enable();
         this.setupFieldsForType(record.get('type'));
         this.callParent(arguments);
     },
     setupFieldsForType: function(type) {
-        var funcName = 'setupFieldsFor'+(type||'Category');
+        var funcName = 'setupFieldsFor'+type;
         var func = this[funcName];
         if (func) {
             this.items.each(function(f) {f.enable(); f.show()});
             func.call(this);
         } else {
-            this.items.each(function(f) {f.disable()});
+            this.disable();
         }
     },
     setupFieldsForArticle: function() {
         this.getForm().findField('url').hide();
     },
 
-    setupFieldsForCategory: function() {
-        this.getForm().findField('content').hide();
-        this.getForm().findField('url').hide();
-    },
     setupFieldsForExternalLink: function() {
     }
 
