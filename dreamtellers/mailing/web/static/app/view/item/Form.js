@@ -14,6 +14,27 @@ Ext.define('WebMailing.view.item.Form', {
     },
     items: [
         {
+            name: 'type',
+            xtype: 'combo',
+            fieldLabel: 'Tipo', //i18n
+            anchor: '95%',
+            queryMode: 'local',
+            displayField: 'text',
+            valueField: 'value',
+            store: Ext.create('Ext.data.Store', {
+                fields: ['value', 'text'],
+                data: [
+                    {
+                        value: 'Article',
+                        text: 'Artículo' // i18n
+                    }, {
+                        value: 'ExternalLink',
+                        text: 'Enlace' //i18n
+                    }
+                ]
+            })
+
+        }, {
             name: 'title',
             xtype: 'textfield',
             fieldLabel: 'Título', //i18n
@@ -32,6 +53,13 @@ Ext.define('WebMailing.view.item.Form', {
             anchor: '95%'
         }
     ],
+    initComponent: function() {
+        this.callParent(arguments);
+        this.getForm().findField('type').on('select', this.onTypeChange, this);
+    },
+    onTypeChange: function(field) {
+        this.setupFieldsForType(field.getValue());
+    },
     disable: function() {
         this.items.each(function(f) {f.hide()});
         this.callParent(arguments)
