@@ -127,6 +127,9 @@ Ext.define('WebMailing.controller.Mailings', {
                 );
             }
         }));
+        store.each(function(r) {
+            r.items().sync();
+        });
     },
     onMailingFormDirtyChange: function(field) {
         var form = this.getForm().getForm();
