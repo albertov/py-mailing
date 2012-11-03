@@ -164,6 +164,14 @@ class Item(Model):
             content = self.content,
             )
 
+@event.listens_for(Item, 'before_update', propagate=True)
+@event.listens_for(Item, 'before_delete', propagate=True)
+@event.listens_for(Item, 'before_insert', propagate=True)
+def update_mailing_modified_time(mapper, connection, instance):
+    stmt = Mailing.__table__.update().where(Mailing.id==instance.mailing_id)
+    stmt = stmt.values(modified=datetime.datetime.now())
+    connection.execute(stmt)
+
 class ExternalLink(Item):
     __tablename__ = "external_link"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)

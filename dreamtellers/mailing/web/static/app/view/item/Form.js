@@ -80,10 +80,18 @@ Ext.define('WebMailing.view.item.Form', {
         }
     },
     setupFieldsForArticle: function() {
-        this.getForm().findField('url').hide();
+        var url = this.getForm().findField('url')
+        url.allowBlank = true;
+        url.hide();
+        var content = this.getForm().findField('content')
+        content.allowBlank = false;
     },
 
     setupFieldsForExternalLink: function() {
+        var url = this.getForm().findField('url')
+        url.allowBlank = false;
+        var content = this.getForm().findField('content')
+        content.allowBlank = true;
     }
 
 });

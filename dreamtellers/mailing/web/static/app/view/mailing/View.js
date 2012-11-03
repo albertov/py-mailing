@@ -12,12 +12,20 @@ Ext.define('WebMailing.view.mailing.View', {
         }
     },
     setSrc: function(src) {
+        var me = this;
         this.src = src;
-        if (this.iframe) {
-            this.iframe.src = src;
-        } else {
-            console.warn("Cannot setUrl because iframe hasn't been rendered");
+        function setIt() {
+            if (me.iframe) {
+                me.iframe.src = me.src;
+            } else {
+                console.warn("Cannot setUrl because iframe hasn't been rendered");
+            }
         }
+         if (this.isVisible()) {
+             setIt();
+         } else {
+             this.on('activate', setIt, this, {single:true});
+         }
      }
 });
 

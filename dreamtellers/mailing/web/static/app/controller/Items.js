@@ -19,7 +19,7 @@ Ext.define('WebMailing.controller.Items', {
                 new_item: this.onNewItem,
                 delete_node: this.onDeleteNode,
                 edit_node: this.onEditNode,
-                itemmove: this.updateItemPositions,
+                itemmove: this.updateItemPositionsAndCategories,
                 beforedrop: this.onTreeBeforeDrop
             },
             "item_form field": {
@@ -46,11 +46,22 @@ Ext.define('WebMailing.controller.Items', {
         }
     },
     onTreeBeforeDrop: function(node, data, overModel, dropPosition) {
-        if (!data.records[0].isLeaf()) {
-            return !overModel.isLeaf() && (
-                dropPosition=="before" || dropPosition=="after");
+        var model = data.records[0];
+        console.debug('onTreeBeforeDrop', model.get('title'),
+                      overModel.get('title'), dropPosition);
+        if (!model.isLeaf()) {
+            // Si es una carpeta solo permitir moverla antes o despues de otra
+            // en el mismo nivel
+            return (!overModel.isLeaf() &&
+                    model.parentNode===overModel.parentNode && 
+                    (dropPosition=="before" || dropPosition=="after"));
         } else {
-            return true;
+            // Si es un item solo permitir moverlo dentro de la misma carpeta
+            // o a otra que no sea la raiz
+            return (overModel.isLeaf() || 
+                    (!overModel.isRoot() && dropPosition=='append') ||
+                    (!overModel.isRoot() && !overModel.parentNode.isRoot()  &&
+                     (dropPosition=="before" || dropPosition=="after")))
         }
     },
     onItemFormChange: function() {
@@ -63,9 +74,10 @@ Ext.define('WebMailing.controller.Items', {
             category_id = parent?parent.get('id'):null;
             item = tree.store.items.add({
                 id: null,
-                title: 'Sin título',
+                title: 'Sin título', // i18n
+                content: 'Texto', // i18n
                 category_id: category_id,
-                type: 'Article' //XXX Preguntar tipo en combo
+                type: 'Article'
             })[0];
             this.setActiveRecord(item);
     },
@@ -85,11 +97,13 @@ Ext.define('WebMailing.controller.Items', {
             record.store.remove(record);
         }
     },
-    updateItemPositions: function() {
+    updateItemPositionsAndCategories: function() {
         var pos=0;
         this.getTree().getStore().getRootNode().cascadeBy(function(n) {
             if (n.isItem()) {
                 n.get('record').set('position', pos++);
+                var cat = n.parentNode.get('record');
+                n.get('record').set('category_id', cat.getId());
             }
         });
     }

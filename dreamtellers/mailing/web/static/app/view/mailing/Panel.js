@@ -17,5 +17,11 @@ Ext.define('WebMailing.view.mailing.Panel', {
             xtype: 'mailing_detail',
             region: 'center'
         }
-    ]
+    ],
+    initComponent: function() {
+        this.callParent(arguments);
+        this.loadMask = Ext.create('Ext.LoadMask', this, {
+            msg: 'Por favor, espere....' //i18n
+        });
+    }
 });

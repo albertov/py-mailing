@@ -3,6 +3,9 @@ Ext.define('WebMailing.controller.Mailings', {
     views: ['mailing.Panel'],
     refs: [
         {
+            ref: 'panel',
+            selector: 'mailings'
+        }, {
             ref: 'grid',
             selector: 'mailing_grid'
         }, {
@@ -119,16 +122,51 @@ Ext.define('WebMailing.controller.Mailings', {
     },
     syncMailings: function(config) {
         var store = this.application.getStore('Mailings');
-        store.sync(Ext.applyIf(config, {
+        var mask = this.getPanel().loadMask;
+        mask.show();
+        function showAlert() {
+            Ext.Msg.alert(
+                'Error',
+                'Error sincronizando Mailings con el servidor' //i18n
+            );
+        }
+        store.sync({
             failure: function() {
-                Ext.Msg.alert(
-                    'Error',
-                    'Error sincronizando Mailings con el servidor' //i18n
-                );
+                mask.hide();
+                showAlert();
+            },
+            success: function() {
+                var syncing=0;
+                function maybeHide(decrement) {
+                    if (decrement) syncing--;
+                    if (syncing==0) {
+                        mask.hide();
+                    }
+                }
+                store.each(function(r) {
+                    var s = r.items();
+                    if (s.getModifiedRecords().length>0 ||
+                        s.getRemovedRecords().length>0) {
+                        syncing++;
+                        s.sync({
+                            success: function() {
+                                maybeHide(true);
+                                if (config.success) {
+                                    config.success();
+                                }
+                            },
+                            failure: function() {
+                                maybeHide(true);
+                                showAlert();
+                                if (config.failure) {
+                                    config.failure();
+                                }
+                            }
+                        });
+                    }
+                });
+                maybeHide(false);
             }
-        }));
-        store.each(function(r) {
-            r.items().sync();
         });
     },
     onMailingFormDirtyChange: function(field) {

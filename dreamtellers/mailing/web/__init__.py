@@ -144,7 +144,7 @@ def new_item(db):
     db.commit()
     return {
         'success': True,
-        'mailings': [ob.__json__()]
+        'items': [ob.__json__()]
     }
 
 @app.route('/item/<id>', method='PUT')
@@ -157,6 +157,7 @@ def update_item(id, db):
     cls = globals()[type]
     if ob.type != type:
         db.delete(ob)
+        db.flush()
         ob = cls(id=id)
         db.add(ob)
     for key in form:
@@ -165,7 +166,7 @@ def update_item(id, db):
     db.commit()
     return {
         'success': True,
-        'mailings': [ob.__json__()]
+        'items': [ob.__json__()]
     }
 
 app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
@@ -197,7 +198,7 @@ def new_category(db):
     }
 
 @app.route('/category/<id>', method='PUT')
-def update_categroy(id, db):
+def update_category(id, db):
     form = validate(CategoryValidator, json.load(request.body))
     if not form.is_valid:
         return _invalid_form_response(form)
