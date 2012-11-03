@@ -16,7 +16,7 @@ from pkg_resources import resource_filename
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
                         Table, LargeBinary, String, create_engine, MetaData,\
                         sql, event
-from sqlalchemy.orm import deferred
+from sqlalchemy.orm import deferred, joinedload_all
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base
@@ -133,6 +133,11 @@ class Item(Model):
     mailing_id = Column(Integer, ForeignKey('mailing.id', ondelete='CASCADE',
                                             onupdate='CASCADE'),
                        nullable=False)
+    image_id = Column(Integer, ForeignKey("image.id"))
+
+    image = orm.relation(Image)
+    image_position = Column(String(1), nullable=False, default="l")
+
 
     __mapper_args__ = {'polymorphic_on': type,
                        'polymorphic_identity': 'Item',
@@ -154,13 +159,16 @@ class Item(Model):
             mailing_id=self.mailing_id,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
+            image_id = self.image_id,
+            image_position = self.image_position,
+            content = self.content,
             )
 
 class ExternalLink(Item):
     __tablename__ = "external_link"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
+    content = Column(Unicode, nullable=True)
     url = Column(Unicode, nullable=False)
-    content = Column(Unicode)
     __mapper_args__ = {'polymorphic_identity':'ExternalLink'}
 
     def __json__(self):
@@ -170,15 +178,11 @@ class ExternalLink(Item):
             )
 
 class Article(Item):
-    __tablename__ = "article"
-    id = Column(Integer, ForeignKey("item.id"), primary_key=True)
-    image_id = Column(Integer, ForeignKey("image.id"))
-
-    content = Column(Unicode, nullable=False)
-    image = orm.relation(Image)
-    image_position = Column(String(1), nullable=False, default="l")
-
+    __tablename__ = 'article'
     __mapper_args__ = {'polymorphic_identity':'Article'}
+
+    id = Column(Integer, ForeignKey("item.id"), primary_key=True)
+    content = Column(Unicode, nullable=False)
 
     @property
     def url(self):
@@ -222,8 +226,6 @@ class Article(Item):
 
     def __json__(self):
         return dict(super(Article, self).__json__(),
-            image_id = self.image_id,
-            image_position = self.image_position,
             content = self.content,
             )
 
@@ -340,6 +342,18 @@ class Mailing(Model):
                              collection_class=attribute_mapped_collection('type'),
                              lazy=True)
 
+
+    @classmethod
+    def by_number(cls, session, number, eager=True):
+        q = session.query(cls).filter_by(number=number)
+        if eager:
+            q = q.options(
+                joinedload_all('items.image'),
+                joinedload_all('templates.images'),
+                joinedload_all('items.category.image'),
+                joinedload_all('items.category.subcategories'),
+            )
+        return q.one()
 
     @classmethod
     def next_number(cls, session):

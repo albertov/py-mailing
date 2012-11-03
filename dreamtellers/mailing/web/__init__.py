@@ -182,6 +182,7 @@ app.route('/category/<id>')(generic_item_view(Category, 'categories'))
 
 @app.route('/category/', method='POST')
 def new_category(db):
+
     form = validate(CategoryValidator, json.load(request.body))
     if not form.is_valid:
         return _invalid_form_response(form)
@@ -213,7 +214,7 @@ def update_categroy(id, db):
 
 def _get_composer(db, number):
     try:
-        m = db.query(Mailing).filter_by(number=number).one()
+        m = Mailing.by_number(db, number, eager=True)
     except NoResultFound:
         abort(404)
     return HTMLPageComposer(m)
