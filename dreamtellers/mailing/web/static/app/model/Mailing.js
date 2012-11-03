@@ -3,7 +3,7 @@ window.setDirtyMailing = function(store) {
     if (oneItem) {
         var m = Ext.getStore('Mailings').getById(oneItem.get('mailing_id'));
         m.setDirty()
-        m.store.fireEvent('update', [m.store, mailing, 'edit', ['items']]);
+        m.store.fireEvent('update', [m.store, m, 'edit', ['items']]);
     }
 }
 

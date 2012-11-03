@@ -1,13 +1,14 @@
 import json
 from pkg_resources import resource_filename
 
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from bottle import Bottle, redirect, abort, response, static_file, request
 
 from ..models import (Mailing, NoResultFound, Item, Category, Recipient, Group,
-                      Image, Template)
+                      Image, Template, ExternalLink, Article)
 from ..html import HTMLPageComposer
 from .validators import (validate, ModelListValidator, MailingValidator,
-                         CategoryValidator)
+                         CategoryValidator, ItemValidator)
 
 app = Bottle()
 
@@ -35,7 +36,7 @@ def _invalid_form_response(form):
         'errors': form.errors,
     }
  
-def collection_view(model, plural=None, filter=None):
+def generic_collection_view(model, plural=None, filter=None):
     if plural is None:
         plural = model.__name__.lower()+'s'
     def view(db):
@@ -61,7 +62,7 @@ def collection_view(model, plural=None, filter=None):
     view.func_name = 'list_'+plural
     return view
 
-def item_view(model, plural=None):
+def generic_item_view(model, plural=None):
     if plural is None:
         plural = model.__name__.lower()+'s'
     def view(id, db):
@@ -73,7 +74,7 @@ def item_view(model, plural=None):
         }
     return view
 
-def item_delete(model):
+def generic_item_delete(model):
     def delete(id, db):
         item = db.query(model).get(id.split('::'))
         db.delete(item)
@@ -83,7 +84,10 @@ def item_delete(model):
         }
     return delete
 
-app.route('/mailing/')(collection_view(Mailing))
+
+
+# Mailing views
+app.route('/mailing/')(generic_collection_view(Mailing))
 
 @app.route('/mailing/', method='POST')
 def new_mailing(db):
@@ -104,8 +108,8 @@ def new_mailing(db):
         'mailings': [ob.__json__()]
     }
 
-app.route('/mailing/<id>')(item_view(Mailing))
-app.route('/mailing/<id>', method='DELETE')(item_delete(Mailing))
+app.route('/mailing/<id>')(generic_item_view(Mailing))
+app.route('/mailing/<id>', method='DELETE')(generic_item_delete(Mailing))
 
 @app.route('/mailing/<id>', method='PUT')
 def update_mailing(id, db):
@@ -121,14 +125,60 @@ def update_mailing(id, db):
         'mailings': [ob.__json__()]
     }
 
-app.route('/item/')(collection_view(Item))
-app.route('/image/')(collection_view(Image))
-app.route('/recipient/')(collection_view(Recipient))
-app.route('/group/')(collection_view(Group))
+
+# Item views
+app.route('/item/')(generic_collection_view(Item))
+
+@app.route('/item/', method='POST')
+def new_item(db):
+    form = validate(ItemValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    type = form.pop('type')
+    cls = globals()[type]
+    ob = cls()
+    for key in form:
+        if isinstance(getattr(cls, key, None), InstrumentedAttribute):
+            setattr(ob, key, form[key])
+    db.add(ob)
+    db.commit()
+    return {
+        'success': True,
+        'mailings': [ob.__json__()]
+    }
+
+@app.route('/item/<id>', method='PUT')
+def update_item(id, db):
+    form = validate(ItemValidator, json.load(request.body))
+    if not form.is_valid:
+        return _invalid_form_response(form)
+    ob = db.query(Item).get(id)
+    type = form.pop('type')
+    cls = globals()[type]
+    if ob.type != type:
+        db.delete(ob)
+        ob = cls(id=id)
+        db.add(ob)
+    for key in form:
+        if isinstance(getattr(cls, key, None), InstrumentedAttribute):
+            setattr(ob, key, form[key])
+    db.commit()
+    return {
+        'success': True,
+        'mailings': [ob.__json__()]
+    }
+
+app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
+
+
+
+app.route('/image/')(generic_collection_view(Image))
+app.route('/recipient/')(generic_collection_view(Recipient))
+app.route('/group/')(generic_collection_view(Group))
 
 app.route('/category/')(
-    collection_view(Category, 'categories', Category.category_id==None))
-app.route('/category/<id>')(item_view(Category, 'categories'))
+    generic_collection_view(Category, 'categories', Category.category_id==None))
+app.route('/category/<id>')(generic_item_view(Category, 'categories'))
 
 @app.route('/category/', method='POST')
 def new_category(db):

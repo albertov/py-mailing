@@ -25,6 +25,10 @@ class validate(object):
     def __getitem__(self, name):
         return self.params[name]
 
+    def pop(self, *args):
+        return self.params.pop(*args)
+        
+
     def __iter__(self):
         return iter(self.params)
 
@@ -111,6 +115,52 @@ class MailingValidator(schema.Schema):
 
     date = ISO8601DateValidator(allow_empty=False)
     number = validators.Int(min=0)
+
+class ItemValidator(schema.Schema):
+    """
+    >>> base = dict(mailing_id=0, category_id=None, position=0)
+    >>> v = ItemValidator.to_python(dict(base, type='Article', title='foo', content='foo'))
+    >>> ItemValidator.to_python(dict(base, type='Article', title='foo'))
+    Traceback (most recent call last):
+    ...
+    Invalid: content: Please enter a value
+    >>> ItemValidator.to_python(dict(base, type='ExternalLink', title='foo'))
+    Traceback (most recent call last):
+    ...
+    Invalid: url: Please enter a value
+    >>> ItemValidator.to_python(dict(base, type='Foo', title='foo'))
+    Traceback (most recent call last):
+    ...
+    Invalid: type: Value must be one of: Article; ExternalLink (not 'Foo')
+    """
+    allow_extra_fields = True
+    filter_extra_fields = True
+
+    category_id = validators.Int(min=0, allow_empty=True, if_missing=None)
+    mailing_id = validators.Int(min=0, allow_empty=False)
+    title = validators.UnicodeString(allow_empty=False)
+    content = validators.UnicodeString(allow_empty=True, if_missing=None)
+    type = validators.OneOf(['Article', 'ExternalLink'])
+    position = validators.Int(min=0)
+    url = validators.URL(if_missing=None, check_exists=True)
+
+    def _to_python(self, value, state=None):
+        value = super(ItemValidator, self)._to_python(value, state)
+        if value['type']=='ExternalLink' and not value['url']:
+            error_dict = {
+                'url': api.Invalid(self.fields['url'].message('empty', state),
+                                   value, state)
+            }
+            raise api.Invalid(schema.format_compound_error(error_dict),
+                              value, state, error_dict=error_dict)
+        if value['type']=='Article' and not value['content']:
+            error_dict = {
+                'content': api.Invalid(self.fields['content'].message('empty', state),
+                                    value, state)
+            }
+            raise api.Invalid(schema.format_compound_error(error_dict),
+                              value, state, error_dict=error_dict)
+        return value
 
 class CategoryValidator(schema.Schema):
     allow_extra_fields = True
