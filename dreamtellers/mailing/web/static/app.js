@@ -3,7 +3,7 @@ Ext.application({
     appFolder: window.appFolder,
     models: ['ItemNode', 'Category', 'Item', 'Mailing'],
     stores: ['Mailings', 'Categories'],
-    controllers: ['Mailings', 'Items'],
+    controllers: ['Mailings', 'Items', 'Categories'],
     requires: [
         'Ext.tab.Panel',
         'Ext.container.Viewport',
@@ -25,6 +25,10 @@ Ext.application({
                         id: 'mailings',
                         xtype: 'mailings',
                         title: 'Envíos' // i18n
+                    }, {
+                        id: 'categories',
+                        xtype: 'categories',
+                        title: 'Categorías' // i18n
                     }
                 ]
             }

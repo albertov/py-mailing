@@ -25,17 +25,17 @@ Ext.define('WebMailing.controller.Mailings', {
                 'deselect': this.onRowDeSelect,
                 'afterrender': this.reloadStore,
                 'new_mailing': this.onNewMailing,
-                'edit_mailing': this.onEditMailing,
                 'delete_mailing': this.onDeleteMailing
             },
             "mailing_form field": {
                 "blur": this.onMailingFormDirtyChange
             }
         });
-        this.mailings = this.application.getStore('Mailings');
+        this.mailings = Ext.getStore('Mailings');
         this.mon(this.mailings, 'beforeload', this._saveSelection, this);
         this.mon(this.mailings, 'load', this._restoreSelection, this);
         this.mon(this.mailings, 'write', this.refreshView, this);
+        this.mon(Ext.getStore('Categories'), 'write', this.refreshView, this);
     },
 
     _saveSelection: function() {
@@ -92,10 +92,6 @@ Ext.define('WebMailing.controller.Mailings', {
         }
     },
 
-    onEditMailing: function(grid, record) {
-        this.setActiveRecord(record);
-        this.getDetail().setActiveTab('edit');
-    }, 
     onDeleteMailing: function(grid, record) {
         Ext.Msg.confirm(
             "Aviso",

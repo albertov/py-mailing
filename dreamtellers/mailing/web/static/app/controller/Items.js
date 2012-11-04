@@ -83,17 +83,7 @@ Ext.define('WebMailing.controller.Items', {
     },
     onDeleteNode: function(tree, node) {
         var record = node.get('record');
-        if(!record)
-            return;
-        Ext.Msg.confirm(
-            "Aviso",
-            Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
-                              record.get('title')),
-            Ext.bind(this._confirmDeleteHandler, this, [record], 0)
-        );
-    },
-    _confirmDeleteHandler: function(record, btn) {
-        if (btn=="yes") {
+        if (record) {
             record.store.remove(record);
         }
     },

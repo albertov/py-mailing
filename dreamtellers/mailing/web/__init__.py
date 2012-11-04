@@ -95,8 +95,7 @@ def new_mailing(db):
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = Mailing()
-    for key in form:
-        setattr(ob, key, form[key])
+    _update_from_form(ob, form)
 
     if 'xhtml' not in ob.templates:
         ob.templates['xhtml'] = Template.latest_by_type(db, 'xhtml')
@@ -117,8 +116,7 @@ def update_mailing(id, db):
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = db.query(Mailing).get(id)
-    for key in form:
-        setattr(ob, key, form[key])
+    _update_from_form(ob, form)
     db.commit()
     return {
         'success': True,
@@ -137,9 +135,7 @@ def new_item(db):
     type = form.pop('type')
     cls = globals()[type]
     ob = cls()
-    for key in form:
-        if isinstance(getattr(cls, key, None), InstrumentedAttribute):
-            setattr(ob, key, form[key])
+    _update_from_form(ob, form)
     db.add(ob)
     db.commit()
     return {
@@ -160,9 +156,7 @@ def update_item(id, db):
         db.flush()
         ob = cls(id=id)
         db.add(ob)
-    for key in form:
-        if isinstance(getattr(cls, key, None), InstrumentedAttribute):
-            setattr(ob, key, form[key])
+    _update_from_form(ob, form)
     db.commit()
     return {
         'success': True,
@@ -188,8 +182,7 @@ def new_category(db):
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = Category()
-    for key in form:
-        setattr(ob, key, form[key])
+    _update_from_form(ob, form)
     db.add(ob)
     db.commit()
     return {
@@ -204,8 +197,7 @@ def update_category(id, db):
         return _invalid_form_response(form)
     else:
         ob = db.query(Category).get(id)
-        for key in form:
-            setattr(ob, key, form[key])
+        _update_from_form(ob, form)
         db.commit()
         return {
             'success': True,
@@ -219,6 +211,16 @@ def _get_composer(db, number):
     except NoResultFound:
         abort(404)
     return HTMLPageComposer(m)
+
+
+def _update_from_form(ob, form):
+    cls = ob.__class__
+    for key in form:
+        old_value = getattr(ob, key, None)
+        new_value = form[key]
+        desc = getattr(cls, key, None)
+        if isinstance(desc, InstrumentedAttribute) and old_value != new_value:
+            setattr(ob, key, new_value)
 
 @app.route('/static/<filename:path>')
 def server_static(filename):
