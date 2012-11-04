@@ -11,6 +11,7 @@ Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
     requires: [
+        'WebMailing.Rest',
         'WebMailing.model.Item'
     ],
     fields: [
@@ -36,7 +37,7 @@ Ext.define('WebMailing.model.Mailing', {
         }
     ],
     proxy: {
-        type: 'rest',
+        type: 'rest2',
         url: 'mailing/',
         reader: {
             type: 'json',

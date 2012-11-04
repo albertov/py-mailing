@@ -124,16 +124,9 @@ Ext.define('WebMailing.controller.Mailings', {
         var store = this.application.getStore('Mailings');
         var mask = this.getPanel().loadMask;
         mask.show();
-        function showAlert() {
-            Ext.Msg.alert(
-                'Error',
-                'Error sincronizando Mailings con el servidor' //i18n
-            );
-        }
         store.sync({
             failure: function() {
                 mask.hide();
-                showAlert();
             },
             success: function() {
                 var syncing=0;
@@ -157,7 +150,6 @@ Ext.define('WebMailing.controller.Mailings', {
                             },
                             failure: function() {
                                 maybeHide(true);
-                                showAlert();
                                 if (config.failure) {
                                     config.failure();
                                 }
