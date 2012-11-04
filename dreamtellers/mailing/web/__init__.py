@@ -101,10 +101,11 @@ def new_mailing(db):
         ob.templates['xhtml'] = Template.latest_by_type(db, 'xhtml')
     ob.number = ob.next_number(db)
     db.add(ob)
+    mailings = [ob.__json__()]
     db.commit()
     return {
         'success': True,
-        'mailings': [ob.__json__()]
+        'mailings': mailings
     }
 
 app.route('/mailing/<id>')(generic_item_view(Mailing))
@@ -117,10 +118,11 @@ def update_mailing(id, db):
         return _invalid_form_response(form)
     ob = db.query(Mailing).get(id)
     _update_from_form(ob, form)
+    mailings = [ob.__json__()]
     db.commit()
     return {
         'success': True,
-        'mailings': [ob.__json__()]
+        'mailings': mailings
     }
 
 
@@ -129,39 +131,53 @@ app.route('/item/')(generic_collection_view(Item))
 
 @app.route('/item/', method='POST')
 def new_item(db):
-    form = validate(ItemValidator, json.load(request.body))
-    if not form.is_valid:
-        return _invalid_form_response(form)
+    data = json.load(request.body)
+    try:
+        if isinstance(data, dict):
+            items = [_create_one_item(db, data)]
+        else:
+            items = [_create_one_item(db, d) for d in data]
+    except InvalidForm, e:
+       return _invalid_form_response(e.form) 
+    items = [ob.__json__() for ob in items]
+    db.commit()
+    return {
+        'success': True,
+        'items': items
+    }
+
+def _create_one_item(db, data):
+    form = validate(ItemValidator, data, raises=True)
     type = form.pop('type')
     cls = globals()[type]
     ob = cls()
     _update_from_form(ob, form)
     db.add(ob)
-    db.commit()
-    return {
-        'success': True,
-        'items': [ob.__json__()]
-    }
+    return ob
 
 @app.route('/item/<id>', method='PUT')
 def update_item(id, db):
     data = json.load(request.body)
     try:
         if isinstance(data, dict):
-            items = [_update_one_item(id, db, data)]
+            ob = db.query(Item).get(id)
+            items = [_update_one_item(ob, db, data)]
         else:
-            items = [_update_one_item(d['id'], db, d) for d in data]
+            ids = [d['id'] for d in data]
+            obs = dict((o.id, o)
+                       for o in db.query(Item).filter(Item.id.in_(ids)).all())
+            items = [_update_one_item(obs[d['id']], db, d) for d in data]
     except InvalidForm, e:
        return _invalid_form_response(e.form) 
+    items = [ob.__json__() for ob in items]
     db.commit()
     return {
         'success': True,
-        'items': [ob.__json__() for ob in items]
+        'items': items
     }
 
-def _update_one_item(id, db, data):
+def _update_one_item(ob, db, data):
     form = validate(ItemValidator, data, raises=True)
-    ob = db.query(Item).get(id)
     type = form.pop('type')
     cls = globals()[type]
     if ob.type != type:
@@ -193,10 +209,11 @@ def new_category(db):
     ob = Category()
     _update_from_form(ob, form)
     db.add(ob)
+    categories = [ob.__json__()]
     db.commit()
     return {
         'success': True,
-        'categories': [ob.__json__()]
+        'categories': categories
     }
 
 @app.route('/category/<id>', method='PUT')
@@ -207,10 +224,11 @@ def update_category(id, db):
     else:
         ob = db.query(Category).get(id)
         _update_from_form(ob, form)
+        categories = [ob.__json__()]
         db.commit()
         return {
             'success': True,
-            'categories': [ob.__json__()]
+            'categories': categories
         }
 
 
@@ -225,11 +243,12 @@ def _get_composer(db, number):
 def _update_from_form(ob, form):
     cls = ob.__class__
     for key in form:
-        old_value = getattr(ob, key, None)
         new_value = form[key]
         desc = getattr(cls, key, None)
-        if isinstance(desc, InstrumentedAttribute) and old_value != new_value:
-            setattr(ob, key, new_value)
+        if isinstance(desc, InstrumentedAttribute):
+            old_value = getattr(ob, key, None)
+            if old_value != new_value:
+                setattr(ob, key, new_value)
 
 @app.route('/static/<filename:path>')
 def server_static(filename):
