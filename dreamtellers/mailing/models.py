@@ -366,7 +366,7 @@ class Mailing(Model):
     @classmethod
     def next_number(cls, session):
         query = sql.select([sql.func.max(cls.number)])
-        return session.execute(query).scalar() + 1
+        return (session.execute(query).scalar() or 0) + 1
 
     @property
     def grouped_items(self):
