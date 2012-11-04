@@ -16,6 +16,7 @@ Ext.define('WebMailing.view.item.Form', {
         {
             name: 'type',
             xtype: 'combo',
+            editable: false,
             fieldLabel: 'Tipo', //i18n
             anchor: '95%',
             queryMode: 'local',

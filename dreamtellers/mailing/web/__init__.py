@@ -101,8 +101,8 @@ def new_mailing(db):
         ob.templates['xhtml'] = Template.latest_by_type(db, 'xhtml')
     ob.number = ob.next_number(db)
     db.add(ob)
-    mailings = [ob.__json__()]
     db.commit()
+    mailings = [ob.__json__()]
     return {
         'success': True,
         'mailings': mailings
@@ -139,8 +139,8 @@ def new_item(db):
             items = [_create_one_item(db, d) for d in data]
     except InvalidForm, e:
        return _invalid_form_response(e.form) 
-    items = [ob.__json__() for ob in items]
     db.commit()
+    items = [ob.__json__() for ob in items]
     return {
         'success': True,
         'items': items
@@ -183,7 +183,7 @@ def _update_one_item(ob, db, data):
     if ob.type != type:
         db.delete(ob)
         db.flush()
-        ob = cls(id=id)
+        ob = cls(id=ob.id)
         db.add(ob)
     _update_from_form(ob, form)
     return ob
@@ -209,8 +209,8 @@ def new_category(db):
     ob = Category()
     _update_from_form(ob, form)
     db.add(ob)
-    categories = [ob.__json__()]
     db.commit()
+    categories = [ob.__json__()]
     return {
         'success': True,
         'categories': categories
