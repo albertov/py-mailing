@@ -3,13 +3,23 @@ from formencode import api, schema, validators
 from sqlalchemy import sql
 from iso8601 import parse_date, ParseError
 
+class InvalidForm(StandardError):
+    def __init__(self, form):
+        self.form = form
+
+    def __unicode__(self):
+        return self.form.message
+
 class validate(object):
-    def __init__(self, validator, params):
+    def __init__(self, validator, params, raises=False):
         self.params = dict(params)
         self.errors = None
         self.message = ''
         self.validator = validator
+        self.raises = raises
         self._validate()
+        if not self.is_valid:
+            raise InvalidForm(self)
 
     @property
     def is_valid(self):

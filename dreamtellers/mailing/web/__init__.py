@@ -8,7 +8,7 @@ from ..models import (Mailing, NoResultFound, Item, Category, Recipient, Group,
                       Image, Template, ExternalLink, Article)
 from ..html import HTMLPageComposer
 from .validators import (validate, ModelListValidator, MailingValidator,
-                         CategoryValidator, ItemValidator)
+                         CategoryValidator, ItemValidator, InvalidForm)
 
 app = Bottle()
 
@@ -145,9 +145,22 @@ def new_item(db):
 
 @app.route('/item/<id>', method='PUT')
 def update_item(id, db):
-    form = validate(ItemValidator, json.load(request.body))
-    if not form.is_valid:
-        return _invalid_form_response(form)
+    data = json.load(request.body)
+    try:
+        if isinstance(data, dict):
+            items = [_update_one_item(id, db, data)]
+        else:
+            items = [_update_one_item(d['id'], db, d) for d in data]
+    except InvalidForm, e:
+       return _invalid_form_response(e.form) 
+    db.commit()
+    return {
+        'success': True,
+        'items': [ob.__json__() for ob in items]
+    }
+
+def _update_one_item(id, db, data):
+    form = validate(ItemValidator, data, raises=True)
     ob = db.query(Item).get(id)
     type = form.pop('type')
     cls = globals()[type]
@@ -157,11 +170,7 @@ def update_item(id, db):
         ob = cls(id=id)
         db.add(ob)
     _update_from_form(ob, form)
-    db.commit()
-    return {
-        'success': True,
-        'items': [ob.__json__()]
-    }
+    return ob
 
 app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
 

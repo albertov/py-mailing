@@ -36,6 +36,7 @@ Ext.define('WebMailing.model.Item', {
     proxy: {
         type: 'rest2',
         url: 'item/',
+        batchActions: true,
         reader: {
             type: 'json',
             root: 'items',

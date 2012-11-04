@@ -12,23 +12,6 @@
 	border: 1px solid DarkGray;
 }
 
-.wmd-preview 
-{ 
-	background-color: #c0e0ff; 
-	border: 1px solid DarkGray;
-}
-.wmd-preview p
-{ 
-    margin-bottom: .8em;
-}
-.wmd-preview em {
-    font-style: italic;
-}
-.wmd-preview blockquote {
-    padding-left: 15px;
-    border-left: solid 2px DarkGray;
-    font-style: italic;
-}
 
 .wmd-button-row 
 {
@@ -118,3 +101,52 @@
 	font-weight: bold;
 }
 
+
+.wmd-preview 
+{ 
+	background-color: #c0e0ff; 
+	border: 1px solid DarkGray;
+}
+.wmd-preview p
+{ 
+    margin-bottom: .8em;
+}
+.wmd-preview em {
+    font-style: italic;
+}
+.wmd-preview blockquote {
+    padding-left: 15px;
+    border-left: solid 2px DarkGray;
+    font-style: italic;
+}
+.wmd-preview strong {
+    font-weight: bold;
+}
+
+.wmd-preview h1 {
+    font-size: 1.5em;
+}
+.wmd-preview h2 {
+    font-size: 1.4em;
+}
+.wmd-preview h3 {
+    font-size: 1.3em;
+}
+.wmd-preview h4 {
+    font-size: 1.2em;
+}
+.wmd-preview h5 {
+    font-size: 1.1em;
+}
+
+.wmd-preview ul, .wmd-preview ol {
+    padding-left: 15px;
+}
+
+.wmd-preview ul {
+    list-style: disc;
+}
+
+.wmd-preview ol {
+    list-style: decimal;
+}
