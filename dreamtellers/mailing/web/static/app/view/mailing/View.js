@@ -16,6 +16,10 @@ Ext.define('WebMailing.view.mailing.View', {
         this.src = src;
         function setIt() {
             if (me.iframe) {
+                var pos = Ext.fly(me.iframe.contentDocument.body).getXY()
+                Ext.fly(me.iframe).on('load', function() {
+                    me.iframe.contentWindow.scrollTo(-pos[0], -pos[1]);
+                }, me, {single:true});
                 me.iframe.src = me.src;
             } else {
                 console.warn("Cannot setUrl because iframe hasn't been rendered");
