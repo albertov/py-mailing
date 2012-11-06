@@ -6,5 +6,9 @@ Ext.define('WebMailing.store.Categories', {
     autoLoad: true,
     autoSync: true,
     rootProperty: 'categories',
-    defaultRootProperty: 'categories'
+    defaultRootProperty: 'categories',
+    root: {
+        title: 'Categorías', // i18n
+        expanded: true
+    }
 });

@@ -9,13 +9,7 @@ Ext.define('WebMailing.view.category.Tree', {
             }
         ]
     },
-    plugins: [
-        {
-            ptype: 'rowediting'
-        }
-    ],
     store: 'Categories',
-    rootVisible: false,
     columns: [
         {
             xtype: 'treecolumn',
@@ -68,6 +62,8 @@ Ext.define('WebMailing.view.category.Tree', {
                 this.actions['delete']
             ]
         });
+        this.rowEditor = Ext.create('Ext.grid.plugin.RowEditing');
+        this.plugins = [this.rowEditor];
         this.callParent(arguments);
         this.addEvents(['new_node', 'delete_node']);
         this.relayEvents(this.getView(), ['beforedrop']);
@@ -93,7 +89,9 @@ Ext.define('WebMailing.view.category.Tree', {
 
     _activateCategoryActions: function() {
         this.actions.new.enable();
-        this.actions.delete.enable();
+        if (!this.selectedRecord.isRoot()) {
+            this.actions.delete.enable();
+        }
     },
 
     _deactivateObjectActions: function() {

@@ -93,7 +93,8 @@ class Category(Model):
     image = orm.relation(Image, lazy=True)
     subcategories = orm.relation("Category",
         backref = orm.backref('category', remote_side=[id]),
-        lazy='joined', join_depth=3)
+        lazy='joined',
+        join_depth=3)
                             
     @classmethod
     def roots(cls, db):
@@ -143,7 +144,9 @@ class Item(Model):
                        'polymorphic_identity': 'Item',
                        'with_polymorphic': '*'}
 
-    category = orm.relation(Category, backref='items', lazy=True)
+    category = orm.relation( Category,
+        backref=orm.backref('items', cascade='all,delete-orphan'),
+        lazy=True)
 
     def __repr__(self):
         data = (self.id, self.title, self.category.title)

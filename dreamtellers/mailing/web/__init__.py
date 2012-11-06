@@ -77,8 +77,9 @@ def generic_item_view(model, plural=None):
 def generic_item_delete(model):
     def delete(id, db):
         item = db.query(model).get(id.split('::'))
-        db.delete(item)
-        db.commit()
+        if item is not None:
+            db.delete(item)
+            db.commit()
         return {
             'success': True,
         }
@@ -196,6 +197,9 @@ app.route('/image/')(generic_collection_view(Image))
 app.route('/recipient/')(generic_collection_view(Recipient))
 app.route('/group/')(generic_collection_view(Group))
 
+
+# Category views
+
 app.route('/category/')(
     generic_collection_view(Category, 'categories', Category.category_id==None))
 app.route('/category/<id>')(generic_item_view(Category, 'categories'))
@@ -231,6 +235,17 @@ def update_category(id, db):
             'categories': categories
         }
 
+app.route('/category/<id>', method='DELETE')(generic_item_delete(Category))
+
+
+
+@app.route('/static/<filename:path>')
+def server_static(filename):
+    return static_file(filename, root=resource_filename(__name__, 'static'))
+
+
+
+
 
 def _get_composer(db, number):
     try:
@@ -249,7 +264,3 @@ def _update_from_form(ob, form):
             old_value = getattr(ob, key, None)
             if old_value != new_value:
                 setattr(ob, key, new_value)
-
-@app.route('/static/<filename:path>')
-def server_static(filename):
-    return static_file(filename, root=resource_filename(__name__, 'static'))
