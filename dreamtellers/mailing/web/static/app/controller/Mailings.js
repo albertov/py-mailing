@@ -21,11 +21,11 @@ Ext.define('WebMailing.controller.Mailings', {
         this.control({
             "mailing_grid": {
                 'select': this.onRowSelect,
-                'save_mailings': this.syncMailings,
+                'save_items': this.syncMailings,
                 'deselect': this.onRowDeSelect,
                 'afterrender': this.reloadStore,
-                'new_mailing': this.onNewMailing,
-                'delete_mailing': this.onDeleteMailing
+                'new_item': this.onNewMailing,
+                'delete_item': this.onDeleteMailing
             },
             "mailing_form field": {
                 "blur": this.onMailingFormDirtyChange

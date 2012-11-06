@@ -302,6 +302,8 @@ class Group(Model):
         return dict(
             id=self.id,
             title=self.title,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
             )
 
 class Recipient(Model):
@@ -326,6 +328,8 @@ class Recipient(Model):
             name=self.name,
             email=self.email,
             group_id=self.group_id,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
             )
 
 

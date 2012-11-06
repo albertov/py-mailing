@@ -1,9 +1,9 @@
 Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
-    models: ['ItemNode', 'Category', 'Item', 'Mailing'],
-    stores: ['Mailings', 'Categories'],
-    controllers: ['Mailings', 'Items', 'Categories'],
+    models: ['ItemNode', 'Category', 'Item', 'Mailing', 'Recipient'],
+    stores: ['Mailings', 'Categories', 'Recipients'],
+    controllers: ['Mailings', 'Items', 'Categories', 'Recipients'],
     requires: [
         'Ext.tab.Panel',
         'Ext.container.Viewport',
@@ -29,6 +29,10 @@ Ext.application({
                         id: 'categories',
                         xtype: 'categories',
                         title: 'Categorías' // i18n
+                    }, {
+                        id: 'recipients',
+                        xtype: 'recipients',
+                        title: 'Suscriptores' // i18n
                     }
                 ]
             }

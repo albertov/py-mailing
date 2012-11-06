@@ -23,7 +23,7 @@ class validate(object):
             raise InvalidForm(self)
 
     def _decode_params(self, params):
-        if hasattr(params, 'read'):
+        if hasattr(params.__class__, 'read'):
             try:
                 return json.load(params)
             except ValueError:
