@@ -8,7 +8,7 @@ Ext.define('WebMailing.view.mailing.Grid', {
     ],
     alias: 'widget.mailing_grid',
     store: 'Mailings',
-    title: 'Envíos', //i18n
+    title: 'Boletines', //i18n
     columns: [
         {
             text: 'Número',

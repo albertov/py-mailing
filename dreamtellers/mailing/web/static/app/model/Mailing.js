@@ -50,6 +50,6 @@ Ext.define('WebMailing.model.Mailing', {
     },
 
     getTitle: function() {
-        return Ext.String.format("Envío #{0}", this.get('number')); //i18n
+        return Ext.String.format("Boletín #{0}", this.get('number')); //i18n
     }
 });
