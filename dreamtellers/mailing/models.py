@@ -290,7 +290,8 @@ class Template(Model):
 class Group(Model):
     __tablename__ = "group"
     id = Column(Integer, primary_key=True)
-    title = Column(Unicode, nullable=False)
+    name = Column(Unicode, nullable=False)
+    description = Column(Unicode)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
@@ -301,7 +302,8 @@ class Group(Model):
     def __json__(self):
         return dict(
             id=self.id,
-            title=self.title,
+            name=self.name,
+            description=self.description,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
             )

@@ -9,7 +9,7 @@ from ..models import (Session, Mailing, NoResultFound, Item, Category,
 from ..html import HTMLPageComposer
 from .validators import (validate, ModelListValidator, MailingValidator,
                          CategoryValidator, ItemValidator, InvalidForm,
-                         RecipientValidator)
+                         RecipientValidator, GroupValidator)
 
 app = Bottle()
 
@@ -266,6 +266,19 @@ app.route('/recipient/<id>', method='PUT')(
     generic_item_update(Recipient,
                         generic_updater(RecipientValidator), 'recipients'))
 app.route('/recipient/<id>', method='DELETE')(generic_item_delete(Recipient))
+
+# Group views
+
+app.route('/group/')(generic_collection_view(Group, 'groups'))
+app.route('/group/', method='POST')(
+    generic_new_item(
+        generic_creator(Group, GroupValidator),
+        'groups'))
+app.route('/group/<id>')(generic_item_view(Group, 'groups'))
+app.route('/group/<id>', method='PUT')(
+    generic_item_update(Group,
+                        generic_updater(GroupValidator), 'groups'))
+app.route('/group/<id>', method='DELETE')(generic_item_delete(Group))
 
 # Static view
 

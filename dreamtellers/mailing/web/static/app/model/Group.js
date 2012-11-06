@@ -1,4 +1,4 @@
-Ext.define('WebMailing.model.Recipient', {
+Ext.define('WebMailing.model.Group', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
     requires: [
@@ -7,17 +7,16 @@ Ext.define('WebMailing.model.Recipient', {
     fields: [
         {name:'id', type: 'int'},
         {name:'name', type: 'string'},
-        {name:'email', type: 'string'},
-        {name:'group_id'},
+        {name:'description', type: 'string'},
         {name:'created', type: 'date',  dateFormat: 'c', persist:false},
         {name:'modified', type: 'date',  dateFormat: 'c', persist:false}
     ],
     proxy: {
         type: 'rest2',
-        url: 'recipient/',
+        url: 'group/',
         reader: {
             type: 'json',
-            root: 'recipients'
+            root: 'groups'
         }
     }
 });

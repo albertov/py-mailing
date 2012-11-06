@@ -28,6 +28,26 @@ Ext.define('WebMailing.view.recipient.Grid', {
                 vtype: 'email'
             }
         }, {
+            text: 'Group',
+            dataIndex: 'group_id',
+            sortable: true,
+            width: 100,
+            renderer: function(id) {
+                if (id!==null) {
+                    var g = Ext.getStore('Groups').getById(id);
+                    if (g) {
+                        return g.get('name');
+                    }
+                }
+                return '';
+            },
+            field: {
+                xtype: 'combo',
+                store: 'Groups',
+                valueField: 'id',
+                displayField: 'name'
+            }
+        }, {
             text: 'Modificado',
             dataIndex: 'modified',
             sortable: true,
@@ -40,5 +60,9 @@ Ext.define('WebMailing.view.recipient.Grid', {
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width: 150
         }
-    ]
+    ],
+    initComponent: function() {
+        Ext.getStore('Groups').load();
+        this.callParent(arguments);
+    }
 });

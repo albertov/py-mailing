@@ -200,3 +200,11 @@ class RecipientValidator(schema.Schema):
     name = validators.UnicodeString(allow_empty=False)
     email = validators.Email(allow_empty=False)
     group_id = validators.Int(min=0)
+
+class GroupValidator(schema.Schema):
+    allow_extra_fields = True
+    filter_extra_fields = True
+    ignore_key_missing = True
+
+    name = validators.UnicodeString(allow_empty=False)
+    description = validators.UnicodeString(allow_empty=True)
