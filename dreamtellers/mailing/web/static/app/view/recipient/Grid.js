@@ -6,7 +6,6 @@ Ext.define('WebMailing.view.recipient.Grid', {
     ],
     alias: 'widget.recipient_grid',
     store: 'Recipients',
-    title: 'Suscriptores', //i18n
     columns: [
         {
             text: 'Nombre',

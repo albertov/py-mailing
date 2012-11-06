@@ -6,7 +6,6 @@ Ext.define('WebMailing.view.group.Grid', {
     ],
     alias: 'widget.group_grid',
     store: 'Groups',
-    title: 'Grupos', //i18n
     columns: [
         {
             text: 'Nombre', //i18n
