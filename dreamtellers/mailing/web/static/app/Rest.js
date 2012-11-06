@@ -1,5 +1,6 @@
 Ext.define('WebMailing.Rest', {
     extend: 'Ext.data.proxy.Rest',
+    requires: 'Ext.window.MessageBox',
     alias: 'proxy.rest2',
     listeners: {
         exception: function(proxy, response, operation) {
