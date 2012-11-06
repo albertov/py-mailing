@@ -8,7 +8,8 @@ from ..models import (Session, Mailing, NoResultFound, Item, Category,
                       Recipient, Group, Image, Template, ExternalLink, Article)
 from ..html import HTMLPageComposer
 from .validators import (validate, ModelListValidator, MailingValidator,
-                         CategoryValidator, ItemValidator, InvalidForm)
+                         CategoryValidator, ItemValidator, InvalidForm,
+                         RecipientValidator)
 
 app = Bottle()
 
@@ -25,9 +26,7 @@ _ = lambda s: s
 class ErrorResponse(StandardError):
     pass
  
-def generic_collection_view(model, plural=None, filter=None):
-    if plural is None:
-        plural = model.__name__.lower()+'s'
+def generic_collection_view(model, plural, filter=None):
     def view():
         form = validate(ModelListValidator(model), request.params)
         if not form.is_valid:
@@ -51,9 +50,7 @@ def generic_collection_view(model, plural=None, filter=None):
     view.func_name = 'list_'+plural
     return view
 
-def generic_item_view(model, plural=None):
-    if plural is None:
-        plural = model.__name__.lower()+'s'
+def generic_item_view(model, plural):
     def view(id):
         item = model.query.get(id.split('::'))
         return {
@@ -61,6 +58,7 @@ def generic_item_view(model, plural=None):
             'total': 1,
              plural: [item.__json__()]
         }
+    view.func_name = 'show_'+plural
     return view
 
 def generic_creator(model, validator):
@@ -71,9 +69,7 @@ def generic_creator(model, validator):
         return ob
     return func
 
-def generic_new_item(creator, plural=None):
-    if plural is None:
-        plural = model.__name__.lower()+'s'
+def generic_new_item(creator, plural):
     def view():
         try:
             data = json.load(request.body)
@@ -96,6 +92,7 @@ def generic_new_item(creator, plural=None):
             'success': True,
             plural: items
         }
+    view.func_name = 'new_'+plural
     return view
 
 def generic_updater(validator):
@@ -105,9 +102,7 @@ def generic_updater(validator):
         return ob
     return func
 
-def generic_item_update(model, updater, plural=None):
-    if plural is None:
-        plural = model.__name__.lower()+'s'
+def generic_item_update(model, updater, plural):
     def view(id):
         try:
             data = json.load(request.body)
@@ -165,8 +160,8 @@ def _get_composer(number):
     return HTMLPageComposer(m)
 
 
-app.route('/mailing/')(generic_collection_view(Mailing))
-app.route('/mailing/<id>')(generic_item_view(Mailing))
+app.route('/mailing/')(generic_collection_view(Mailing, 'mailings'))
+app.route('/mailing/<id>')(generic_item_view(Mailing, 'mailings'))
 app.route('/mailing/<id>', method='DELETE')(generic_item_delete(Mailing))
 
 def _create_mailing(data):
@@ -191,8 +186,8 @@ app.route('/mailing/<id>', method='PUT')(
 
 
 # Item views
-app.route('/item/')(generic_collection_view(Item))
-app.route('/item/<id>')(generic_item_view(Item))
+app.route('/item/')(generic_collection_view(Item, 'items'))
+app.route('/item/<id>')(generic_item_view(Item, 'items'))
 app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
 
 def _create_item(data):
@@ -261,8 +256,15 @@ def update_category(id):
 
 # Recipient views
 
-app.route('/recipient/')(generic_collection_view(Recipient))
+app.route('/recipient/')(generic_collection_view(Recipient, 'recipients'))
+app.route('/recipient/', method='POST')(
+    generic_new_item(
+        generic_creator(Recipient, RecipientValidator),
+        'recipients'))
 app.route('/recipient/<id>')(generic_item_view(Recipient, 'recipients'))
+app.route('/recipient/<id>', method='PUT')(
+    generic_item_update(Recipient,
+                        generic_updater(RecipientValidator), 'recipients'))
 app.route('/recipient/<id>', method='DELETE')(generic_item_delete(Recipient))
 
 # Static view

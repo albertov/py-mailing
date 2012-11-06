@@ -291,6 +291,8 @@ class Group(Model):
     __tablename__ = "group"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False)
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
     def __repr__(self):
         data = (self.id, self.title)
@@ -308,6 +310,8 @@ class Recipient(Model):
     name = Column(Unicode, nullable=False)
     email = Column(Unicode, nullable=False)
     group_id = Column(Integer, ForeignKey("group.id"))
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
     group = orm.relation(Group, backref="recipients")
     

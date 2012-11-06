@@ -191,3 +191,12 @@ class CategoryValidator(schema.Schema):
 
     category_id = validators.Int(min=0)
     title = validators.UnicodeString(allow_empty=False)
+
+class RecipientValidator(schema.Schema):
+    allow_extra_fields = True
+    filter_extra_fields = True
+    ignore_key_missing = True
+
+    name = validators.UnicodeString(allow_empty=False)
+    email = validators.Email(allow_empty=False)
+    group_id = validators.Int(min=0)
