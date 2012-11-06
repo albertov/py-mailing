@@ -9,8 +9,6 @@ from email.MIMEImage import MIMEImage
 from email import Encoders
 from email.Header import Header
 
-import cssutils
-
 from lxml import etree
 
 from .util import collapse_styles

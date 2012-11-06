@@ -185,17 +185,14 @@ class Magic(object):
         # XXX: string case and white space compaction option not implemented
         # XXX: Not very used ...
         if kind.startswith("string/"):
-            NOT_DONE_YET=kind[7:]
             kind="string"
 
         # XXX: No idea what are those extension
         if kind.startswith("ldate-"):
-            NOT_DONE_YET=kind[6:]
             kind="ldate"
 
         # XXX: No idea what are those extension
         if kind.startswith("regex"):
-            NOT_DONE_YET=kind[5:]
             kind="regex"
     
     
@@ -235,7 +232,6 @@ class Magic(object):
     def __data (self,kind,result):
         pos = 0
         data = list('')
-        prev = ''
 
         while pos < len(result):
             if convert.is_c_escape(result[pos:]):
@@ -384,7 +380,7 @@ class Magic(object):
 
     # classify subfuntions
 
-    def __indirect_offset (self,file,type,offset):
+    def __indirect_offset (self,f,type,offset):
         # Raise file error if file too short    
         f.seek(offset)
         if type == 'l':
@@ -515,9 +511,6 @@ class Magic(object):
         # Are we still looking for the ruleset to apply or are we in a rule
         found_rule = 0
 
-        # When we found the rule, what is the level that we successfull passed
-        in_level = 0
-
         # If we failed part of the rule there is no point looking for higher level subrule
         allow_next = 0
 
@@ -551,7 +544,6 @@ class Magic(object):
             direct = self._direct[i]
             offset_type = self._offset_type[i]
             offset_delta = self._offset_delta[i]
-            offset_relatif = self._offset_relatif[i]
             endian = self._endian[i]
             kind = self._kind[i]
             oper = self._oper[i]
@@ -689,7 +681,6 @@ class Magic(object):
                 
                 if success:
                     found_rule = 1
-                    in_level = level
                     allow_next = level+1
 
                     if replace is not None:
@@ -703,7 +694,7 @@ class Magic(object):
                         result += ' '
                 else:
                     raise Failed()
-            except Failed, IOError:
+            except (Failed, IOError):
                 allow_next = level
             except:
                 # The code must not raise any exception when it fails.

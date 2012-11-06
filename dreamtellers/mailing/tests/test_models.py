@@ -40,6 +40,16 @@ class BaseModelTest(TestCase):
         kw.setdefault('title', 'CategoryTitle')
         return Category(**kw)
 
+    def _makeGroup(self, **kw):
+        from ..models import Group
+        return Group(**kw)
+
+    def _makeRecipient(self, **kw):
+        from ..models import Recipient
+        return Recipient(**kw)
+
+
+
 class TestMailing(BaseModelTest):
     _makeOne = BaseModelTest._makeMailing
 

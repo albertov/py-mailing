@@ -1,5 +1,4 @@
 #coding: utf8
-import os, os.path
 from itertools import groupby, chain
 from operator import attrgetter
 import textwrap
@@ -11,11 +10,9 @@ from lxml import etree, builder
 
 import markdown
 
-from pkg_resources import resource_filename
-
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, String, create_engine, MetaData,\
-                        sql, event
+                        Table, LargeBinary, String, MetaData,\
+                        sql, event, create_engine
 from sqlalchemy.orm import deferred, joinedload_all
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
@@ -57,12 +54,12 @@ class Image(Model):
         return self._data
 
     @data.setter
-    def data(self, value):
+    def data_setter(self, value):
         self.content_type = sniff_content_type(value)
         self._data = value
 
     @data.expression
-    def data(cls):
+    def data_expr(cls):
         return cls._data
 
     def __repr__(self):
@@ -145,6 +142,15 @@ class Item(Model):
         backref=orm.backref('items'),
         lazy=True)
 
+    @classmethod
+    def create_subclass(cls, type, **kw):
+        subcls = orm.class_mapper(cls).polymorphic_map[type].class_
+        return subcls(**kw)
+
+    @classmethod
+    def available_types(cls):
+        return list(orm.class_mapper(cls).polymorphic_map)
+
     def __repr__(self):
         data = (self.id, self.title, self.category.title)
         return self.__class__.__name__ + repr(data)
@@ -175,7 +181,7 @@ def update_mailing_modified_time(mapper, connection, instance):
 class ExternalLink(Item):
     __tablename__ = "external_link"
     id = Column(Integer, ForeignKey("item.id"), primary_key=True)
-    content = Column(Unicode, nullable=True)
+    content = Column(Unicode)
     url = Column(Unicode, nullable=False)
     __mapper_args__ = {'polymorphic_identity':'ExternalLink'}
 
@@ -296,14 +302,14 @@ class Group(Model):
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
     def __repr__(self):
-        data = (self.id, self.title)
+        data = (self.id, self.name)
         return self.__class__.__name__ + repr(data)
 
     def __json__(self):
         return dict(
             id=self.id,
             name=self.name,
-            description=self.description,
+            description=self.description or None,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
             )
@@ -371,7 +377,10 @@ class Mailing(Model):
                 joinedload_all('items.category.image'),
                 joinedload_all('items.category.subcategories'),
             )
-        return q.one()
+        try:
+            return q.one()
+        except NoResultFound:
+            return None
 
     @classmethod
     def next_number(cls):

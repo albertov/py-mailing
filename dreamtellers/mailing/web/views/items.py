@@ -1,4 +1,4 @@
-from ...models import Session, Item, Article, ExternalLink
+from ...models import Session, Item
 
 from .. import app
 from ..validators import (

@@ -61,7 +61,7 @@ class TestCalistoMailing(BaseModelTest):
     def test_renders_valid_xhtml(self):
         m = self._makeMailing()
         html = m.render('xhtml')
-        dom = etree.fromstring(html)
+        etree.fromstring(html)
 
     def test_contains_expected_elements(self):
         m = self._makeMailing()

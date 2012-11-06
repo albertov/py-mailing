@@ -29,13 +29,12 @@ __all__ = [
     'URL',
     'Email',
     'UnicodeString',
+    'OneOf',
     'SortValidator',
     'JsonValidator',
     'ModelListValidator',
     'ISO8601DateValidator',
 ]
-
-
 
 class InvalidForm(StandardError):
     def __init__(self, form):
@@ -100,6 +99,7 @@ class JsonValidator(FancyValidator):
     def _from_python(self, value):
         return json.dumps(value)
     
+
 class SortValidator(JsonValidator):
     if_missing = None
 
@@ -116,6 +116,7 @@ class SortValidator(JsonValidator):
                     col = sql.desc(col)
                 ret.append(col)
             return ret
+
 
 class FilterValidator(JsonValidator):
     if_missing = None
@@ -137,9 +138,8 @@ class Schema(Schema):
     allow_extra_fields = True
     filter_extra_fields = True
 
+
 class ModelListValidator(Schema):
-    allow_extra_fields = True
-    filter_extra_fields = True
     if_key_missing = None
 
     def __init__(self, model):
@@ -155,6 +155,7 @@ class ModelListValidator(Schema):
     page = Int(min=1, if_missing=1)
     start = Int(min=0, if_missing=0)
 
+
 class ISO8601DateValidator(FancyValidator):
     messages = {
         'invalid': 'Invalid format'
@@ -167,6 +168,3 @@ class ISO8601DateValidator(FancyValidator):
             except (ParseError, TypeError):
                 raise Invalid(self.message('invalid', state), value, state)
         return value
-
-
-

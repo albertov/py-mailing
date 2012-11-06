@@ -1,7 +1,7 @@
-from ...models import Category, Session
+from ...models import Category
 
 from .. import app
-from ..validators import validate, Schema, Int, UnicodeString
+from ..validators import Schema, Int, UnicodeString
 from .base import rest_views
 
 class CategoryValidator(Schema):

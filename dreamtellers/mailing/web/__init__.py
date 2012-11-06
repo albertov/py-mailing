@@ -6,7 +6,7 @@ from bottle import Bottle
 from paste.deploy.converters import asbool
 from sqlalchemy import engine_from_config
 
-from ..models import metadata, Plugin as SAPlugin
+from ..models import Plugin as SAPlugin
 from .template import Plugin as GenshiPlugin
 
 

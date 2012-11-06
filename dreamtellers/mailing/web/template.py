@@ -1,4 +1,3 @@
-import inspect
 from genshi.template import TemplateLoader
 from pkg_resources import resource_filename
 

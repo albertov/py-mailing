@@ -7,7 +7,6 @@ from . import mailings, items, category, group, recipient
 def index():
     return {}
 
-# Static view
 STATIC_ROOT = resource_filename('dreamtellers.mailing.web', 'static')
 @app.route('/static/<filename:path>')
 def server_static(filename):

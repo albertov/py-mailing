@@ -1,4 +1,4 @@
-from ...models import Mailing, NoResultFound, Template
+from ...models import Mailing, Template
 from ...html import HTMLPageComposer
 
 from .. import app
@@ -27,11 +27,11 @@ def mailing_file(number, filename):
     return f.data
 
 def _get_composer(number):
-    try:
-        m = Mailing.by_number(number, eager=True)
-    except NoResultFound:
+    m = Mailing.by_number(number, eager=True)
+    if m is not None:
+        return HTMLPageComposer(m)
+    else:
         abort(404)
-    return HTMLPageComposer(m)
 
 def _create_mailing(data):
     form = validate(MailingValidator, data)

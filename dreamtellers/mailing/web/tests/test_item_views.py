@@ -17,6 +17,20 @@ class TestNewItem(BaseViewTest):
             self.assertEqual(item[k], data[k])
         self.assertIsInstance(Item.query.one(), Article)
 
+    def test_create_a_good_external_link(self):
+        m = self._makeMailing()
+        self.session.add(m)
+        self.session.flush()
+        data = dict(title='foo', type='ExternalLink', mailing_id=m.id,
+                    url='http://www.google.es')
+        resp = self.app.post_json('/item/', data)
+        self.assertTrue(resp.json['success'])
+        self.assertEqual(len(resp.json['items']), 1)
+        item = resp.json['items'][0]
+        for k in data:
+            self.assertEqual(item[k], data[k])
+        self.assertIsInstance(Item.query.one(), ExternalLink)
+
     def test_create_two_articles(self):
         m = self._makeMailing()
         self.session.add(m)
