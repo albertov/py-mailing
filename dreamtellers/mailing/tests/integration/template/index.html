@@ -289,7 +289,7 @@
             <tbody>
             <tr class="seccion-ct"
                  py:for="(cat, items) in mailing.grouped_items">
-                <td class="seccion-img"><img py:if="cat.image"
+                <td class="seccion-img"><img py:if="cat and cat.image"
                      py:attrs="dict(src=cat.image.filename, alt=cat.title)"
                      src="actividad.gif" alt="Actividad" /></td>
                 <td class="seccion">
@@ -322,7 +322,7 @@
                  <a href="#top" class="goto-top">
                     <img src="arrow.png" alt="Subir" title="Subir" />
                  </a>
-                 <h2 py:content="cat.title">Nombre cat</h2>
+                 <h2 py:content="cat.title if cat else '&nbsp;'">Nombre cat</h2>
                  <div py:for="article in articles"
                       class="articulo">
                      <h3>

@@ -93,10 +93,13 @@ def _get_composer(number):
 
 
 app.route('/mailing/')(generic_collection_view(Mailing))
+app.route('/mailing/<id>')(generic_item_view(Mailing))
+app.route('/mailing/<id>', method='DELETE')(generic_item_delete(Mailing))
+
 
 @app.route('/mailing/', method='POST')
 def new_mailing():
-    form = validate(MailingValidator, json.load(request.body))
+    form = validate(MailingValidator, request.body)
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = Mailing()
@@ -107,7 +110,7 @@ def new_mailing():
         if tpl is not None:
             ob.templates['xhtml'] = tpl
         else:
-            return _invalid_response(
+            return _error_response(
                 _('Could not assign a default xhtml template. Please create one first'))
     ob.number = ob.next_number()
     Session.add(ob)
@@ -118,12 +121,9 @@ def new_mailing():
         'mailings': mailings
     }
 
-app.route('/mailing/<id>')(generic_item_view(Mailing))
-app.route('/mailing/<id>', method='DELETE')(generic_item_delete(Mailing))
-
 @app.route('/mailing/<id>', method='PUT')
 def update_mailing(id):
-    form = validate(MailingValidator, json.load(request.body))
+    form = validate(MailingValidator, request.body)
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = Mailing.query.get(id)
@@ -138,10 +138,15 @@ def update_mailing(id):
 
 # Item views
 app.route('/item/')(generic_collection_view(Item))
+app.route('/item/<id>')(generic_item_view(Item))
+app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
 
 @app.route('/item/', method='POST')
 def new_item():
-    data = json.load(request.body)
+    try:
+        data = json.load(request.body)
+    except ValueError:
+        return _error_response('Invalid JSON data')
     try:
         if isinstance(data, dict):
             items = [_create_one_item(data)]
@@ -167,7 +172,10 @@ def _create_one_item(data):
 
 @app.route('/item/<id>', method='PUT')
 def update_item(id):
-    data = json.load(request.body)
+    try:
+        data = json.load(request.body)
+    except ValueError:
+        return _error_response('Invalid JSON data')
     try:
         if isinstance(data, dict):
             ob = Item.query.get(id)
@@ -198,8 +206,6 @@ def _update_one_item(ob, data):
     _update_from_form(ob, form)
     return ob
 
-app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
-
 
 
 # Category views
@@ -207,11 +213,13 @@ app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
 app.route('/category/')(
     generic_collection_view(Category, 'categories', Category.category_id==None))
 app.route('/category/<id>')(generic_item_view(Category, 'categories'))
+app.route('/category/<id>', method='DELETE')(generic_item_delete(Category))
+
 
 @app.route('/category/', method='POST')
 def new_category():
 
-    form = validate(CategoryValidator, json.load(request.body))
+    form = validate(CategoryValidator, request.body)
     if not form.is_valid:
         return _invalid_form_response(form)
     ob = Category()
@@ -226,7 +234,7 @@ def new_category():
 
 @app.route('/category/<id>', method='PUT')
 def update_category(id):
-    form = validate(CategoryValidator, json.load(request.body))
+    form = validate(CategoryValidator, request.body)
     if not form.is_valid:
         return _invalid_form_response(form)
     else:
@@ -239,13 +247,12 @@ def update_category(id):
             'categories': categories
         }
 
-app.route('/category/<id>', method='DELETE')(generic_item_delete(Category))
-
 
 # Recipient views
 
 app.route('/recipient/')(generic_collection_view(Recipient))
 app.route('/recipient/<id>')(generic_item_view(Recipient, 'recipients'))
+app.route('/recipient/<id>', method='DELETE')(generic_item_delete(Recipient))
 
 # Static view
 
@@ -258,9 +265,9 @@ def server_static(filename):
 # Utilities
 
 def _invalid_form_response(form):
-    return _invalid_response(form.message, form.errors)
+    return _error_response(form.message, form.errors)
 
-def _invalid_response(message, errors=None):
+def _error_response(message, errors=None):
     response.status = '400 Bad Request'
     return {
         'success':False,

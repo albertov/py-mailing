@@ -39,6 +39,7 @@ Ext.define('WebMailing.store.ItemTreeStore', {
         }
     },
     onItemsChange: function() {
+        this._updateCategories();
         this._updateItems();
     },
     onStoreUpdate: function(store, record) {
@@ -115,18 +116,14 @@ Ext.define('WebMailing.store.ItemTreeStore', {
                 } else {
                     cat = root;
                 }
-                if (cat) {
-                    var pos = newItem.get('position');
-                    var c = cat;
-                    while (c.parentNode) {
-                        c.set('position', pos);
-                        c = c.parentNode;
-                    }
-                    cat.appendChild(newItem);
-                } else {
-                    console.warn('could not find category', catId);
-                    return false;
+                cat = cat?cat:root;
+                var pos = newItem.get('position');
+                var c = cat;
+                while (c.parentNode) {
+                    c.set('position', pos);
+                    c = c.parentNode;
                 }
+                cat.appendChild(newItem);
             }
         }, this);
         root.sort(function(a,b) {

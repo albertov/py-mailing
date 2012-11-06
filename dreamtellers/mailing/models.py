@@ -32,29 +32,6 @@ Session = orm.scoped_session(
     )
 Model.query = Session.query_property()
 
-class Plugin(object):
-    name = 'sqlalchemy'
-    api = 2
-
-    def __init__(self, engine, **kw):
-        Session.configure(**dict(kw, bind=engine))
-
-    def setup(self, app):
-        pass
-
-    def close(self):
-        pass
-
-    def apply(self, callback, route):
-        def wrapper(*args, **kw):
-            try:
-                return callback(*args, **kw)
-            finally:
-                Session.remove()
-        return wrapper
-
-
-
 class MissingTemplate(StandardError):
     pass
 
@@ -148,7 +125,7 @@ class Item(Model):
     title = Column(Unicode, nullable=False)
     type = Column(String(20), nullable=False)
     position = Column(Integer, nullable=False, default=0)
-    category_id = Column(Integer, ForeignKey('category.id'), nullable=False)
+    category_id = Column(Integer, ForeignKey('category.id'))
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     mailing_id = Column(Integer, ForeignKey('mailing.id', ondelete='CASCADE',
@@ -165,7 +142,7 @@ class Item(Model):
                        'with_polymorphic': '*'}
 
     category = orm.relation( Category,
-        backref=orm.backref('items', cascade='all,delete-orphan'),
+        backref=orm.backref('items'),
         lazy=True)
 
     def __repr__(self):
@@ -362,7 +339,7 @@ class Mailing(Model):
 
     id = Column(Integer, primary_key=True)
     number = Column(Integer, unique=True, nullable=False, default=0)
-    date = Column(DateTime, nullable=False)
+    date = Column(DateTime, nullable=False, default=datetime.datetime.now)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
@@ -407,7 +384,7 @@ class Mailing(Model):
         for t in self.templates.values():
             images.update(t.images)
         for i in self.items:
-            if i.category.image:
+            if i.category and i.category.image:
                 images.add(i.category.image)
             if hasattr(i, 'image') and i.image is not None:
                 images.add(i.image)
@@ -477,3 +454,27 @@ class SentMailing(Model):
     @property
     def all_recipients(self):
         return chain(self.recipients, *(g.recipients for g in self.groups))
+
+class Plugin(object):
+    name = 'sqlalchemy'
+    api = 2
+
+    def __init__(self, engine, **kw):
+        Session.configure(**dict(kw, bind=engine))
+
+    def setup(self, app):
+        pass
+
+    def close(self):
+        pass
+
+    def apply(self, callback, route):
+        def wrapper(*args, **kw):
+            try:
+                return callback(*args, **kw)
+            finally:
+                Session.remove()
+        return wrapper
+
+
+

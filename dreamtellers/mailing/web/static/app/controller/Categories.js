@@ -38,8 +38,8 @@ Ext.define('WebMailing.controller.Categories', {
         Ext.Msg.confirm(
             "Aviso",
             Ext.String.format(
-                'Se borrara permanentemente "{0}". <strong>TODOS</strong> '+
-                'los ítems y subcategorias asociadas se eliminarán también. '+
+                'Se borrara permanentemente "{0}". <strong>TODAS</strong> '+
+                'las subcategorias se eliminarán también. '+
                  '¿Seguro?',
                  record.get('title')),
             Ext.bind(this._confirmDeleteHandler, this, [record], 0)

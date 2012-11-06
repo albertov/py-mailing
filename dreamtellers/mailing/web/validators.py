@@ -12,18 +12,30 @@ class InvalidForm(StandardError):
 
 class validate(object):
     def __init__(self, validator, params, raises=False):
-        self.params = dict(params)
         self.errors = None
         self.message = ''
         self.validator = validator
         self.raises = raises
-        self._validate()
+        self.params = self._decode_params(params)
+        if self.params is not None:
+            self._validate()
         if raises and not self.is_valid:
             raise InvalidForm(self)
 
+    def _decode_params(self, params):
+        if hasattr(params, 'read'):
+            try:
+                return json.load(params)
+            except ValueError:
+                self.message = 'Invalid JSON data'
+                self.errors = {}
+                return None
+        else:
+            return dict(params)
+
     @property
     def is_valid(self):
-        return not self.errors
+        return self.errors is None
 
     def _validate(self):
         try:
@@ -128,7 +140,7 @@ class MailingValidator(schema.Schema):
 
 class ItemValidator(schema.Schema):
     """
-    >>> base = dict(mailing_id=0, category_id=None, position=0)
+    >>> base = dict(mailing_id=0, category_id=None)
     >>> v = ItemValidator.to_python(dict(base, type='Article', title='foo', content='foo'))
     >>> ItemValidator.to_python(dict(base, type='Article', title='foo'))
     Traceback (most recent call last):
@@ -151,7 +163,7 @@ class ItemValidator(schema.Schema):
     title = validators.UnicodeString(allow_empty=False)
     content = validators.UnicodeString(allow_empty=True, if_missing=None)
     type = validators.OneOf(['Article', 'ExternalLink'])
-    position = validators.Int(min=0)
+    position = validators.Int(min=0, if_missing=0)
     url = validators.URL(if_missing=None, check_exists=True)
 
     def _to_python(self, value, state=None):

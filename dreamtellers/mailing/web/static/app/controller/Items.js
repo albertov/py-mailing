@@ -93,7 +93,7 @@ Ext.define('WebMailing.controller.Items', {
             if (n.isItem()) {
                 n.get('record').set('position', pos++);
                 var cat = n.parentNode.get('record');
-                n.get('record').set('category_id', cat.getId());
+                n.get('record').set('category_id', cat?cat.getId():null);
             }
         });
     }
