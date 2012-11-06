@@ -18,7 +18,7 @@ class validate(object):
         self.validator = validator
         self.raises = raises
         self._validate()
-        if not self.is_valid:
+        if raises and not self.is_valid:
             raise InvalidForm(self)
 
     @property
@@ -114,7 +114,7 @@ class ISO8601DateValidator(validators.FancyValidator):
         if value:
             try:
                 value = parse_date(value).replace(tzinfo=None)
-            except ParseError:
+            except (ParseError, TypeError):
                 raise api.Invalid(self.message('invalid', state), value, state)
         return value
 

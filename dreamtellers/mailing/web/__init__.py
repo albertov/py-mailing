@@ -18,6 +18,8 @@ def index():
     return {}
 
 # Generic views
+
+_ = lambda s: s
  
 def generic_collection_view(model, plural=None, filter=None):
     if plural is None:
@@ -101,7 +103,12 @@ def new_mailing():
     _update_from_form(ob, form)
 
     if 'xhtml' not in ob.templates:
-        ob.templates['xhtml'] = Template.latest_by_type('xhtml')
+        tpl = Template.latest_by_type('xhtml')
+        if tpl is not None:
+            ob.templates['xhtml'] = tpl
+        else:
+            return _invalid_response(
+                _('Could not assign a default xhtml template. Please create one first'))
     ob.number = ob.next_number()
     Session.add(ob)
     Session.commit()
@@ -251,11 +258,14 @@ def server_static(filename):
 # Utilities
 
 def _invalid_form_response(form):
+    return _invalid_response(form.message, form.errors)
+
+def _invalid_response(message, errors=None):
     response.status = '400 Bad Request'
     return {
         'success':False,
-        'message': form.message,
-        'errors': form.errors,
+        'message': message,
+        'errors': errors,
     }
 
 

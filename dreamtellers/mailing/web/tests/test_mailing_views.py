@@ -14,3 +14,28 @@ class TestMailingByNumber(BaseViewTest):
 
     def test_when_it_doesnt_exist(self):
         self.app.get('/m/0/', status=404)
+
+class TestNewMailing(BaseViewTest):
+    def test_create_a_good_one(self):
+        tpl = self._makeTemplate(
+            title='default',
+            body='<html><body>${mailing.number}</body></html>')
+        self.session.add(tpl)
+        self.session.flush()
+        data = dict(number=0, date='2010-01-01T00:00:00')
+        resp = self.app.post_json('/mailing/', data)
+        self.assertTrue(resp.json['success'])
+        self.assertEqual(len(resp.json['mailings']), 1)
+        item = resp.json['mailings'][0]
+        self.assertEqual(item['date'], data['date'])
+        self.assertEqual(item['number'], 1) #uses next_number()
+
+    def test_no_default_template(self):
+        data = dict(number=0, date='2010-01-01T00:00:00')
+        resp = self.app.post_json('/mailing/', data, status=400)
+        self.assertFalse(resp.json['success'])
+
+    def test_create_a_bad_one(self):
+        data = dict(number=0, date='2010-01-Z')
+        resp = self.app.post_json('/mailing/', data, status=400)
+        self.assertFalse(resp.json['success'])
