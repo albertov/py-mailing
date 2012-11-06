@@ -20,10 +20,9 @@ setup(
     zip_safe = False,
     namespace_packages = ['dreamtellers'],
     test_suite="nose.collector",
-    tests_require=["nose"],
+    tests_require=["nose", "WebTest", "unittest2"],
     install_requires = [
         "bottle",
-        "bottle_sqlalchemy",
         "formencode",
         "markdown",
         "mako",

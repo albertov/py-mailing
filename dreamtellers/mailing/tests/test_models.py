@@ -1,15 +1,18 @@
 import datetime
-from unittest import TestCase
+from unittest2 import TestCase
 
 
 class BaseModelTest(TestCase):
 
     def setUp(self):
-        self.session = self._makeSession()
+        from ..models import Session, metadata, create_engine
+        self.engine = create_engine('sqlite://')
+        metadata.create_all(self.engine)
+        Session.configure(bind=self.engine)
+        self.session = Session
 
-    def _makeSession(self):
-        from ..models import create_sessionmaker
-        return create_sessionmaker()()
+    def tearDown(self):
+        self.session.remove()
 
     def _makeMailing(self, **kw):
         from ..models import Mailing

@@ -1,14 +1,4 @@
-from unittest2 import TestCase
-from webtest import TestApp
-
-class BaseViewTest(TestCase):
-    def setUp(self):
-        from dreamtellers.mailing.web.run import app_factory
-        app = app_factory({
-            'sqlalchemy.url': 'sqlite://',
-            'sqlalchemy.echo': True
-        })
-        self.app = TestApp(app)
+from . import BaseViewTest
 
 
 class TestRootView(BaseViewTest):

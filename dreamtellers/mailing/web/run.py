@@ -6,20 +6,16 @@ from paste.deploy.converters import asbool
 
 from sqlalchemy import engine_from_config
 
-from bottle.ext.sqlalchemy import Plugin as SAPlugin
-
-from ..models import metadata
+from ..models import metadata, Plugin as SAPlugin
 from .template import Plugin as GenshiPlugin
 from . import app
 
 def configure_sqlalchemy(app, config, prefix='sqlalchemy.'):
-    plugin = SAPlugin(
-        engine_from_config(config, prefix),
-        metadata,
-        keyword='db',
-        create=True,
-        commit=False,
-        )
+    if 'engine' in config:
+        engine = config['engine']
+    else:
+        engine = engine_from_config(config, prefix)
+    plugin = SAPlugin(engine)
     app.install(plugin)
 
 def configure_genshi(app, config, prefix='genshi.'):

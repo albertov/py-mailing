@@ -1,12 +1,13 @@
 import os
 import datetime
 import json
-from unittest import TestCase
 from glob import glob
 
 from pkg_resources import resource_filename
 
 from lxml import etree
+
+from ..test_models import BaseModelTest
 
                       
         
@@ -15,14 +16,8 @@ def fixture(s):
     return resource_filename(__name__, s)
 
 
-class TestCalistoMailing(TestCase):
+class TestCalistoMailing(BaseModelTest):
 
-    def setUp(self):
-        self.session = self._makeSession()
-
-    def _makeSession(self):
-        from ...models import create_sessionmaker
-        return create_sessionmaker()()
 
     def _makeMailing(self):
         return mailing_from_fixture(fixture('data.json'))

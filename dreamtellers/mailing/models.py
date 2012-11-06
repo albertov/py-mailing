@@ -25,15 +25,35 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from .util import sniff_content_type
 
-def create_sessionmaker(dburl="sqlite:///:memory:", create_tables=True,
-                        echo=True):
-    engine = create_engine(dburl, echo=echo)
-    if create_tables:
-        Model.metadata.create_all(engine)
-    return orm.sessionmaker(bind=engine)
-    
 metadata = MetaData()
 Model = declarative_base(metadata=metadata)
+Session = orm.scoped_session(
+    orm.sessionmaker(autoflush=False, autocommit=False)
+    )
+Model.query = Session.query_property()
+
+class Plugin(object):
+    name = 'sqlalchemy'
+    api = 2
+
+    def __init__(self, engine, **kw):
+        Session.configure(**dict(kw, bind=engine))
+
+    def setup(self, app):
+        pass
+
+    def close(self):
+        pass
+
+    def apply(self, callback, route):
+        def wrapper(*args, **kw):
+            try:
+                return callback(*args, **kw)
+            finally:
+                Session.remove()
+        return wrapper
+
+
 
 class MissingTemplate(StandardError):
     pass
@@ -97,8 +117,8 @@ class Category(Model):
         join_depth=3)
                             
     @classmethod
-    def roots(cls, db):
-        return db.query(cls).filter_by(category_id=None)
+    def roots(cls):
+        return cls.query.filter_by(category_id=None)
 
     @property
     def path(self):
@@ -263,8 +283,8 @@ class Template(Model):
         )
 
     @classmethod
-    def latest_by_type(cls, session, type):
-        q =session.query(cls).filter_by(type=type)
+    def latest_by_type(cls, type):
+        q = cls.query.filter_by(type=type)
         q = q.order_by(sql.desc(cls.modified))
         return q.first()
 
@@ -355,8 +375,8 @@ class Mailing(Model):
 
 
     @classmethod
-    def by_number(cls, session, number, eager=True):
-        q = session.query(cls).filter_by(number=number)
+    def by_number(cls, number, eager=True):
+        q = cls.query.filter_by(number=number)
         if eager:
             q = q.options(
                 joinedload_all('items.image'),
@@ -367,9 +387,9 @@ class Mailing(Model):
         return q.one()
 
     @classmethod
-    def next_number(cls, session):
+    def next_number(cls):
         query = sql.select([sql.func.max(cls.number)])
-        return (session.execute(query).scalar() or 0) + 1
+        return (Session.execute(query).scalar() or 0) + 1
 
     @property
     def grouped_items(self):
