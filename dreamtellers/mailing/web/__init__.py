@@ -20,6 +20,10 @@ def index():
 # Generic views
 
 _ = lambda s: s
+
+
+class ErrorResponse(StandardError):
+    pass
  
 def generic_collection_view(model, plural=None, filter=None):
     if plural is None:
@@ -56,6 +60,75 @@ def generic_item_view(model, plural=None):
             'success': True,
             'total': 1,
              plural: [item.__json__()]
+        }
+    return view
+
+def generic_creator(model, validator):
+    def func(data):
+        form = validate(validator, data)
+        ob = model()
+        _update_from_form(ob, form)
+        return ob
+    return func
+
+def generic_new_item(creator, plural=None):
+    if plural is None:
+        plural = model.__name__.lower()+'s'
+    def view():
+        try:
+            data = json.load(request.body)
+        except ValueError:
+            return _error_response('Invalid JSON data')
+        try:
+            if isinstance(data, dict):
+                items = [creator(data)]
+            else:
+                items = [creator(d) for d in data]
+        except InvalidForm, e:
+           return _invalid_form_response(e.form) 
+        except ErrorResponse, e:
+            return _error_response(str(e))
+        for ob in items:
+            Session.add(ob)
+        Session.commit()
+        items = [ob.__json__() for ob in items]
+        return {
+            'success': True,
+            plural: items
+        }
+    return view
+
+def generic_updater(validator):
+    def func(ob, data):
+        form = validate(validator, data)
+        _update_from_form(ob, form)
+        return ob
+    return func
+
+def generic_item_update(model, updater, plural=None):
+    if plural is None:
+        plural = model.__name__.lower()+'s'
+    def view(id):
+        try:
+            data = json.load(request.body)
+        except ValueError:
+            return _error_response('Invalid JSON data')
+        try:
+            if isinstance(data, dict):
+                ob = model.query.get(id)
+                items = [updater(ob, data)]
+            else:
+                ids = [d['id'] for d in data]
+                obs = dict((o.id, o)
+                           for o in model.query.filter(model.id.in_(ids)).all())
+                items = [updater(obs[d['id']], d) for d in data]
+        except InvalidForm, e:
+           return _invalid_form_response(e.form) 
+        items = [ob.__json__() for ob in items]
+        Session.commit()
+        return {
+            'success': True,
+            plural: items
         }
     return view
 
@@ -96,44 +169,25 @@ app.route('/mailing/')(generic_collection_view(Mailing))
 app.route('/mailing/<id>')(generic_item_view(Mailing))
 app.route('/mailing/<id>', method='DELETE')(generic_item_delete(Mailing))
 
-
-@app.route('/mailing/', method='POST')
-def new_mailing():
-    form = validate(MailingValidator, request.body)
-    if not form.is_valid:
-        return _invalid_form_response(form)
+def _create_mailing(data):
+    form = validate(MailingValidator, data)
     ob = Mailing()
     _update_from_form(ob, form)
-
     if 'xhtml' not in ob.templates:
         tpl = Template.latest_by_type('xhtml')
         if tpl is not None:
             ob.templates['xhtml'] = tpl
         else:
-            return _error_response(
+            raise ErrorResponse(
                 _('Could not assign a default xhtml template. Please create one first'))
     ob.number = ob.next_number()
-    Session.add(ob)
-    Session.commit()
-    mailings = [ob.__json__()]
-    return {
-        'success': True,
-        'mailings': mailings
-    }
+    return ob
 
-@app.route('/mailing/<id>', method='PUT')
-def update_mailing(id):
-    form = validate(MailingValidator, request.body)
-    if not form.is_valid:
-        return _invalid_form_response(form)
-    ob = Mailing.query.get(id)
-    _update_from_form(ob, form)
-    mailings = [ob.__json__()]
-    Session.commit()
-    return {
-        'success': True,
-        'mailings': mailings
-    }
+app.route('/mailing/', method='POST')(
+    generic_new_item(_create_mailing, 'mailings'))
+
+app.route('/mailing/<id>', method='PUT')(
+    generic_item_update(Mailing, generic_updater(MailingValidator), 'mailings'))
 
 
 # Item views
@@ -141,61 +195,17 @@ app.route('/item/')(generic_collection_view(Item))
 app.route('/item/<id>')(generic_item_view(Item))
 app.route('/item/<id>', method='DELETE')(generic_item_delete(Item))
 
-@app.route('/item/', method='POST')
-def new_item():
-    try:
-        data = json.load(request.body)
-    except ValueError:
-        return _error_response('Invalid JSON data')
-    try:
-        if isinstance(data, dict):
-            items = [_create_one_item(data)]
-        else:
-            items = [_create_one_item(d) for d in data]
-    except InvalidForm, e:
-       return _invalid_form_response(e.form) 
-    Session.commit()
-    items = [ob.__json__() for ob in items]
-    return {
-        'success': True,
-        'items': items
-    }
-
-def _create_one_item(data):
-    form = validate(ItemValidator, data, raises=True)
+def _create_item(data):
+    form = validate(ItemValidator, data)
     type = form.pop('type')
     cls = globals()[type]
     ob = cls()
     _update_from_form(ob, form)
-    Session.add(ob)
     return ob
+app.route('/item/', method='POST')(generic_new_item(_create_item, 'items'))
 
-@app.route('/item/<id>', method='PUT')
-def update_item(id):
-    try:
-        data = json.load(request.body)
-    except ValueError:
-        return _error_response('Invalid JSON data')
-    try:
-        if isinstance(data, dict):
-            ob = Item.query.get(id)
-            items = [_update_one_item(ob, data)]
-        else:
-            ids = [d['id'] for d in data]
-            obs = dict((o.id, o)
-                       for o in Item.query.filter(Item.id.in_(ids)).all())
-            items = [_update_one_item(obs[d['id']], d) for d in data]
-    except InvalidForm, e:
-       return _invalid_form_response(e.form) 
-    items = [ob.__json__() for ob in items]
-    Session.commit()
-    return {
-        'success': True,
-        'items': items
-    }
-
-def _update_one_item(ob, data):
-    form = validate(ItemValidator, data, raises=True)
+def _update_item(ob, data):
+    form = validate(ItemValidator, data)
     type = form.pop('type')
     cls = globals()[type]
     if ob.type != type:
@@ -205,7 +215,8 @@ def _update_one_item(ob, data):
         Session.add(ob)
     _update_from_form(ob, form)
     return ob
-
+app.route('/item/<id>', method='PUT')(
+    generic_item_update(Item, _update_item, 'items'))
 
 
 # Category views

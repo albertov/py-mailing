@@ -39,3 +39,20 @@ class TestNewMailing(BaseViewTest):
         data = dict(number=0, date='2010-01-Z')
         resp = self.app.post_json('/mailing/', data, status=400)
         self.assertFalse(resp.json['success'])
+
+class TestUpdateMailing(BaseViewTest):
+    def test_update_a_good_one(self):
+        tpl = self._makeTemplate(
+            title='default',
+            body='<html><body>${mailing.number}</body></html>')
+        mailing = self._makeMailing(number=0)
+        mailing.templates['xhtml'] = tpl
+        self.session.add(mailing)
+        self.session.flush()
+        data = dict(mailing.__json__(), number=1000)
+        resp = self.app.put_json('/mailing/%s'%mailing.id, data)
+        self.assertTrue(resp.json['success'])
+        self.assertEqual(len(resp.json['mailings']), 1)
+        item = resp.json['mailings'][0]
+        for k in data:
+            self.assertEqual(item[k], data[k])

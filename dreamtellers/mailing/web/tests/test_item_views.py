@@ -1,4 +1,5 @@
 from . import BaseViewTest
+from ...models import Item, Article, ExternalLink
 
 
 class TestNewItem(BaseViewTest):
@@ -14,6 +15,7 @@ class TestNewItem(BaseViewTest):
         item = resp.json['items'][0]
         for k in data:
             self.assertEqual(item[k], data[k])
+        self.assertIsInstance(Item.query.one(), Article)
 
     def test_create_two_articles(self):
         m = self._makeMailing()

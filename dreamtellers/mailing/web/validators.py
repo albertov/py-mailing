@@ -11,7 +11,7 @@ class InvalidForm(StandardError):
         return self.form.message
 
 class validate(object):
-    def __init__(self, validator, params, raises=False):
+    def __init__(self, validator, params, raises=True):
         self.errors = None
         self.message = ''
         self.validator = validator
