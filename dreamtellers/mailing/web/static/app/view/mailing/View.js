@@ -6,10 +6,17 @@ Ext.define('WebMailing.view.mailing.View', {
     listeners: {
         afterrender: function() {
             this.iframe = this.getEl().query('iframe')[0];
+            Ext.fly(this.iframe).on('load', this.loadMask.hide, this.loadMask);
             if (this.src) {
                 this.setSrc(this.src);
             }
         }
+    },
+    initComponent: function() {
+        this.callParent(arguments);
+        this.loadMask = Ext.create('Ext.LoadMask', this, {
+            msg: 'Por favor, espere....' //i18n
+        });
     },
     setSrc: function(src) {
         var me = this;
@@ -19,6 +26,7 @@ Ext.define('WebMailing.view.mailing.View', {
                 if (me._isSameUrl(src)) {
                    me._restoreScrollPositionOnLoad();
                 }
+                me.loadMask.show();
                 me.iframe.src = me.src;
             } else {
                 console.warn("Cannot setUrl because iframe hasn't been rendered");

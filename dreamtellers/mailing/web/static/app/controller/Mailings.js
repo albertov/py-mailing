@@ -120,42 +120,52 @@ Ext.define('WebMailing.controller.Mailings', {
         var store = this.application.getStore('Mailings');
         var mask = this.getPanel().loadMask;
         mask.show();
-        store.sync({
-            failure: function() {
-                mask.hide();
-            },
-            success: function() {
-                var syncing=0;
-                function maybeHide(decrement) {
-                    if (decrement) syncing--;
-                    if (syncing==0) {
+
+        var syncing=0;
+        function maybeDone(decrement) {
+            if (decrement) syncing--;
+            if (syncing==0) {
+                store.sync({
+                    failure: function() {
                         mask.hide();
-                    }
-                }
-                store.each(function(r) {
-                    var s = r.items();
-                    if (s.getModifiedRecords().length>0 ||
-                        s.getRemovedRecords().length>0) {
-                        syncing++;
-                        s.sync({
-                            success: function() {
-                                maybeHide(true);
-                                if (config.success) {
-                                    config.success();
-                                }
-                            },
-                            failure: function() {
-                                maybeHide(true);
-                                if (config.failure) {
-                                    config.failure();
-                                }
-                            }
-                        });
+                        if (config.failure) {
+                            config.failure();
+                        }
+                    },
+                    success: function() {
+                        mask.hide();
+                        if (config.success) {
+                            config.success();
+                        }
                     }
                 });
-                maybeHide(false);
+            }
+        }
+        store.each(function(r) {
+            if (r.phantom) {
+                return
+            }
+            var s = r.items();
+            if (s.getModifiedRecords().length>0 ||
+                s.getRemovedRecords().length>0) {
+                syncing++;
+                s.sync({
+                    success: function() {
+                        maybeDone(true);
+                        if (config.success) {
+                            config.success();
+                        }
+                    },
+                    failure: function() {
+                        maybeDone(true);
+                        if (config.failure) {
+                            config.failure();
+                        }
+                    }
+                });
             }
         });
+        maybeDone(false);
     },
     onMailingFormDirtyChange: function(field) {
         var form = this.getForm().getForm();
