@@ -12,8 +12,6 @@ Ext.define('WebMailing.view.recipient.Panel', {
     ],
     initComponent: function() {
         this.callParent(arguments);
-        this.loadMask = Ext.create('Ext.LoadMask', this, {
-            msg: 'Por favor, espere....' //i18n
-        });
+        this.loadMask = Ext.create('WebMailing.LoadMask', this);
     }
 });

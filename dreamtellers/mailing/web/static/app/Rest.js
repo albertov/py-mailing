@@ -22,9 +22,10 @@ Ext.define('WebMailing.Rest', {
                     buttons: Ext.Msg.OK
                 });
             } else {
+                var e = operation.getError();
                 Ext.MessageBox.show({
                     title: "Error desconocido del servidor", // i18n
-                    msg: operation.getError(),
+                    msg: Ext.String.format("{0}: {1}", e.status, e.statusText),
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK
                 });
