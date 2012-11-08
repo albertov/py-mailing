@@ -116,9 +116,10 @@ def generic_update_item(model, updater, plural):
             return error_response('Invalid JSON data')
         try:
             if isinstance(data, dict):
-                ob = model.query.get(id)
+                ob = model.query.get(id.split('::'))
                 items = [updater(ob, data)]
             else:
+                #FIXME: Implement support for composite pks
                 ids = [d['id'] for d in data]
                 obs = dict((o.id, o)
                            for o in model.query.filter(model.id.in_(ids)).all())

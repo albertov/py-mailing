@@ -48,6 +48,10 @@ class BaseModelTest(TestCase):
         from ..models import Recipient
         return Recipient(**kw)
 
+    def _makeSentMailing(self, **kw):
+        from ..models import SentMailing
+        return SentMailing(**kw)
+
 
 
 class TestMailing(BaseModelTest):
@@ -112,3 +116,46 @@ class TestMailing(BaseModelTest):
 
         retrieved = self.session.query(ob.__class__).one()
         self.failUnlessEqual(retrieved.templates[TYPE].type, TYPE)
+
+class TestSentMailing(BaseModelTest):
+    _makeOne = BaseModelTest._makeSentMailing
+
+    def test_create(self):
+        programmed_date = datetime.datetime(2010,1,1)
+        ob = self._makeOne(mailing=self._makeMailing(),
+                           programmed_date=programmed_date)
+        self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        retrieved = self.session.query(ob.__class__).one()
+        self.failUnlessEqual(programmed_date, retrieved.programmed_date)
+
+    def test_recipients(self):
+        programmed_date = datetime.datetime(2010,1,1)
+        ob = self._makeOne(mailing=self._makeMailing(),
+                           programmed_date=programmed_date)
+        ob.groups = [
+            self._makeGroup(
+                name = 'group_a',
+                recipients=[self._makeRecipient(name='foo',
+                                                email='a@example.com'),
+                            self._makeRecipient(name='bar',
+                                                email='b@example.com')]),
+            self._makeGroup(
+                name = 'group_b',
+                recipients=[self._makeRecipient(name='foo2',
+                                                email='a2@example.com'),
+                            self._makeRecipient(name='bar2',
+                                                email='b2@example.com')]),
+        ]
+        self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        retrieved = self.session.query(ob.__class__).one()
+        self.failUnlessEqual(2, len(retrieved.groups))
+        self.failUnlessEqual(4, len(retrieved.recipients))
+        from ..models import Recipient
+        for r in retrieved.recipients:
+            self.assertIsInstance(r, Recipient)

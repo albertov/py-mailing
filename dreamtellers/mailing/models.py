@@ -16,7 +16,7 @@ from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
 from sqlalchemy.orm import deferred, joinedload_all
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -323,7 +323,7 @@ class Recipient(Model):
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
-    group = orm.relation(Group, backref="recipients")
+    group = orm.relation(Group,  backref='recipients')
     
     def __repr__(self):
         data = (self.id, self.name, self.email)
@@ -443,36 +443,49 @@ class Mailing(Model):
             modified=self.modified.isoformat() if self.modified else None,
         )
         
-group_sent_mailing_table = Table("group_sent_mailing", Model.metadata,
-    Column('group_id', Integer, ForeignKey('group.id', ondelete="CASCADE"),
-            primary_key=True),
-    Column('sent_mailing_id', Integer,
-           ForeignKey('sent_mailing.id', ondelete="CASCADE"),
-           primary_key=True)
-)
-recipient_sent_mailing_table = Table("recipient_sent_mailing", Model.metadata,
-    Column('recipient_id', Integer, ForeignKey('recipient.id', ondelete="CASCADE"),
-            primary_key=True),
-    Column('sent_mailing_id', Integer,
-           ForeignKey('sent_mailing.id', ondelete="CASCADE"),
-           primary_key=True)
-)
+class GroupSentMailing(Model):
+    __tablename__ = 'group_sent_mailing'
+    group_id = Column(Integer, ForeignKey('group.id', ondelete="CASCADE"),
+                      primary_key=True)
+    sent_mailing_id = Column(Integer,
+                             ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+                             primary_key=True)
+    def __json__(self):
+        return dict(
+            id='::'.join(map(str, [self.group_id, self.sent_mailing_id])),
+            group_id=self.group_id,
+            sent_mailing_id=self.sent_mailing_id,
+        )
 
 class SentMailing(Model):
     __tablename__ = 'sent_mailing'
 
     id = Column(Integer, primary_key=True)
-    mailing_id = Column(Integer, ForeignKey('mailing.id'),
-                      nullable=False)
-    time = Column(DateTime, nullable=False, default=datetime.datetime.now)
-    groups = orm.relation(Group, secondary=group_sent_mailing_table)
-    recipients = orm.relation(Recipient, secondary=recipient_sent_mailing_table)
+    mailing_id = Column(Integer, ForeignKey('mailing.id'), nullable=False)
+    programmed_date = Column(DateTime, nullable=False)
+    sent_date = Column(DateTime)
+    groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
 
     mailing = orm.relation(Mailing)
 
-    @property
-    def all_recipients(self):
-        return chain(self.recipients, *(g.recipients for g in self.groups))
+    recipients = orm.relation(Recipient,
+        secondary = GroupSentMailing.__table__.join(
+            Group.__table__.join(Recipient.__table__).alias('group_recipient')
+            ).alias('recipient_group_sent_mailing_table'),
+        viewonly=True,
+        lazy=True
+        )
+
+    def __json__(self):
+        return dict(
+            id=self.id,
+            mailing_id=self.mailing_id,
+            programmed_date=self.programmed_date.isoformat(),
+            sent_date=self.sent_date.isoformat() if self.sent_date else None,
+        )
+
+
+
 
 class Plugin(object):
     name = 'sqlalchemy'
