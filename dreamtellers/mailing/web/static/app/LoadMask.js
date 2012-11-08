@@ -13,7 +13,7 @@ Ext.define('WebMailing.LoadMask', {
             Ext.Function.bind(store.onBatchException, store),
             Ext.Function.bind(this.hide, this)
         );
-        this.callParent(store);
+        this.callParent(arguments);
     },
     _unbindStore: function() {
         var store = this.store;
