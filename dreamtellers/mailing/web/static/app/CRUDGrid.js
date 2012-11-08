@@ -50,10 +50,16 @@ Ext.define('WebMailing.CRUDGrid', {
         this.on('select', this.onRowSelect, this);
         this.on('deselect', this.onRowDeSelect, this);
         this.on('itemcontextmenu', this.onItemCtxMenu, this);
+        this.on('render', this._loadStoreIfEmpty, this, {single:true});
     },
     onRowSelect: function(grid, record) {
         this.selectedRecord = record;
         this._activateObjectActions();
+    },
+    _loadStoreIfEmpty: function() {
+        if (this.store && this.store.getCount()==0) {
+            this.store.load();
+        }
     },
     _setSaveActionState: function() {
         if (this.store.getModifiedRecords().length>0 ||

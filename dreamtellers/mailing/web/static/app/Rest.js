@@ -15,9 +15,11 @@ Ext.define('WebMailing.Rest', {
                         error: resp.errors[k]
                     });
                 }
+                var msg = (Ext.isEmpty(errors)?
+                    resp.message : proxy.tpl.apply(errors));
                 Ext.MessageBox.show({
-                    title: "Error de validación del servidor", // i18n
-                    msg: proxy.tpl.apply(errors),
+                    title: "Error del servidor", // i18n
+                    msg: msg,
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK
                 });

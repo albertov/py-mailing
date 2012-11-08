@@ -1,7 +1,9 @@
 import json
+from functools import wraps
 
 from bottle import redirect, abort, response, static_file, request
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.exc import IntegrityError
 
 from ...models import Session
 from ..validators import validate, ModelListValidator, InvalidForm
@@ -31,28 +33,38 @@ _ = lambda s: s
 
 class ErrorResponse(StandardError):
     pass
+
+def error_handler(f):
+    @wraps(f)
+    def wrapper(*args, **kw):
+        try:
+            return f(*args, **kw)
+        except InvalidForm, e:
+            return invalid_form_response(e.form) 
+        except (ErrorResponse, IntegrityError), e:
+            return error_response(str(e))
+    return wrapper
+
  
 def generic_collection_view(model, plural, filter=None):
+    @error_handler
     def view():
         form = validate(ModelListValidator(model), request.params)
-        if not form.is_valid:
-            return invalid_form_response(form)
-        else:
-            query = model.query
-            if filter is not None:
-                query = query.filter(filter)
-            if form['sort']:
-                query = query.order_by(*form['sort'])
-            if form['filter']:
-                for f in form['filter']:
-                    query = query.filter(f)
-            total = query.count()
-            query = query.limit(form['limit']).offset(form['start'])
-            return {
-                'success': True,
-                'total': total,
-                 plural: [m.__json__() for m in query]
-            }
+        query = model.query
+        if filter is not None:
+            query = query.filter(filter)
+        if form['sort']:
+            query = query.order_by(*form['sort'])
+        if form['filter']:
+            for f in form['filter']:
+                query = query.filter(f)
+        total = query.count()
+        query = query.limit(form['limit']).offset(form['start'])
+        return {
+            'success': True,
+            'total': total,
+             plural: [m.__json__() for m in query]
+        }
     view.func_name = 'list_'+plural
     return view
 
@@ -76,20 +88,16 @@ def generic_creator(model, validator):
     return func
 
 def generic_create_item(creator, plural):
+    @error_handler
     def view():
         try:
             data = json.load(request.body)
         except ValueError:
             return error_response('Invalid JSON data')
-        try:
-            if isinstance(data, dict):
-                items = [creator(data)]
-            else:
-                items = [creator(d) for d in data]
-        except InvalidForm, e:
-           return invalid_form_response(e.form) 
-        except ErrorResponse, e:
-            return error_response(str(e))
+        if isinstance(data, dict):
+            items = [creator(data)]
+        else:
+            items = [creator(d) for d in data]
         for ob in items:
             Session.add(ob)
         Session.commit()
@@ -109,23 +117,21 @@ def generic_updater(validator):
     return func
 
 def generic_update_item(model, updater, plural):
+    @error_handler
     def view(id):
         try:
             data = json.load(request.body)
         except ValueError:
             return error_response('Invalid JSON data')
-        try:
-            if isinstance(data, dict):
-                ob = model.query.get(id.split('::'))
-                items = [updater(ob, data)]
-            else:
-                #FIXME: Implement support for composite pks
-                ids = [d['id'] for d in data]
-                obs = dict((o.id, o)
-                           for o in model.query.filter(model.id.in_(ids)).all())
-                items = [updater(obs[d['id']], d) for d in data]
-        except InvalidForm, e:
-           return invalid_form_response(e.form) 
+        if isinstance(data, dict):
+            ob = model.query.get(id.split('::'))
+            items = [updater(ob, data)]
+        else:
+            #FIXME: Implement support for composite pks
+            ids = [d['id'] for d in data]
+            obs = dict((o.id, o)
+                       for o in model.query.filter(model.id.in_(ids)).all())
+            items = [updater(obs[d['id']], d) for d in data]
         items = [ob.__json__() for ob in items]
         Session.commit()
         return {
@@ -135,6 +141,7 @@ def generic_update_item(model, updater, plural):
     return view
 
 def generic_delete_item(model):
+    @error_handler
     def delete(id):
         item = model.query.get(id.split('::'))
         if item is not None:

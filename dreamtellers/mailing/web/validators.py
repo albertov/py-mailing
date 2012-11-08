@@ -12,6 +12,7 @@ from formencode.validators import (
     String,
     URL,
     Email,
+    FieldStorageUploadConverter,
 )
 
 from .iso8601 import parse_date, ParseError
@@ -34,6 +35,7 @@ __all__ = [
     'JsonValidator',
     'ModelListValidator',
     'ISO8601DateValidator',
+    'FieldStorageUploadConverter',
 ]
 
 class InvalidForm(StandardError):

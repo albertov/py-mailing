@@ -1,6 +1,8 @@
 #coding: utf8
 from itertools import groupby, chain
 from operator import attrgetter
+from cStringIO import StringIO
+from hashlib import md5
 import textwrap
 import datetime
 
@@ -42,12 +44,20 @@ def update_modified_time(mapper, connection, instance):
 class Image(Model):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
+    hash = Column(String(32), unique=True, nullable=False)
     filename = Column(Unicode(255), nullable=False)
     title = Column(Unicode(512))
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     _data = deferred(Column('data', LargeBinary(), nullable=False))
     content_type = Column(String(20), nullable=False)
+
+    @classmethod
+    def by_hash(cls, hash):
+        try:
+            return cls.query.filter_by(hash=hash).one()
+        except NoResultFound:
+            return None
 
     @hybrid_property
     def data(self):
@@ -56,11 +66,44 @@ class Image(Model):
     @data.setter
     def data_setter(self, value):
         self.content_type = sniff_content_type(value)
+        self.hash = md5(value).hexdigest()
         self._data = value
 
     @data.expression
     def data_expr(cls):
         return cls._data
+
+    @property
+    def url(self):
+        return '/image/%s/view'%self.hash
+
+    PIL_MAP = {
+        'image/jpeg': 'JPEG',
+        'image/gif': 'GIF',
+        'image/png': 'PNG',
+    }
+    def thumbnail(self, width, height):
+        import Image
+        img = Image.open(StringIO(self.data))
+        img.thumbnail((width, height), Image.ANTIALIAS)
+        return self._dump_image(img, self.content_type)
+
+    @classmethod
+    def _dump_image(cls, img, content_type):
+        buf = StringIO()
+        try:
+            format = cls.PIL_MAP[content_type]
+        except IndexError:
+            return None
+        img.save(buf, format)
+        return buf.getvalue()
+        
+    @classmethod
+    def blank_image(cls, width, height, content_type='image/png'):
+        import Image
+        img = Image.new('RGBA', (width, height))
+        return cls._dump_image(img, content_type)
+        
 
     def __repr__(self):
         data = (self.id, self.title, self.filename)
@@ -71,8 +114,10 @@ class Image(Model):
             id=self.id,
             title=self.title,
             filename=self.filename,
+            content_type=self.content_type,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
+            url=self.url,
             )
 
 class Category(Model):

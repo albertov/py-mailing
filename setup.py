@@ -23,6 +23,7 @@ setup(
     tests_require=["nose", "WebTest", "unittest2"],
     install_requires = [
         "bottle",
+        "PIL",
         "formencode",
         "markdown",
         "mako",
