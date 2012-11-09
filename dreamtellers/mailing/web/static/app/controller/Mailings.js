@@ -21,7 +21,6 @@ Ext.define('WebMailing.controller.Mailings', {
         this.control({
             "mailing_grid": {
                 'select': this.onRowSelect,
-                'save_items': this.syncMailings,
                 'deselect': this.onRowDeSelect,
                 'afterrender': this.reloadStore,
                 'new_item': this.onNewMailing,
@@ -105,72 +104,11 @@ Ext.define('WebMailing.controller.Mailings', {
             var s = record.store;
             this.setActiveRecord(null);
             s.remove(record);
-            this.syncMailings();
         }
     },
     onNewMailing: function(grid) {
         var store = this.application.getStore('Mailings'),
             rec = store.add({date: new Date})[0];
-        this.setActiveRecord(null);
-        this.syncMailings({
-            success: Ext.bind(this.setActiveRecord, this, [rec])
-        });
-    },
-    syncMailings: function(config) {
-        var store = this.application.getStore('Mailings');
-        var mask = this.getPanel().loadMask;
-        mask.show();
-
-        var syncing=0;
-        function maybeDone(decrement) {
-            if (decrement) syncing--;
-            if (syncing==0) {
-                store.sync({
-                    failure: function() {
-                        mask.hide();
-                        if (config.failure) {
-                            config.failure();
-                        }
-                    },
-                    success: function() {
-                        mask.hide();
-                        if (config.success) {
-                            config.success();
-                        }
-                    }
-                });
-            }
-        }
-        store.each(function(r) {
-            if (r.phantom) {
-                return
-            }
-            var s = r.items();
-            if (s.getModifiedRecords().length>0 ||
-                s.getRemovedRecords().length>0) {
-                syncing++;
-                s.sync({
-                    success: function() {
-                        maybeDone(true);
-                        if (config.success) {
-                            config.success();
-                        }
-                    },
-                    failure: function() {
-                        maybeDone(true);
-                        if (config.failure) {
-                            config.failure();
-                        }
-                    }
-                });
-            }
-        });
-        maybeDone(false);
-    },
-    onMailingFormDirtyChange: function(field) {
-        var form = this.getForm().getForm();
-        if (form.isValid()) {
-            form.updateRecord();
-        }
+        this.setActiveRecord(rec);
     }
 });

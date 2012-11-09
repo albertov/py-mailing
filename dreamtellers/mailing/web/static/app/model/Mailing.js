@@ -1,12 +1,3 @@
-window.setDirtyMailing = function(store) {
-    var oneItem = store.getAt(0);
-    if (oneItem) {
-        var m = Ext.getStore('Mailings').getById(oneItem.get('mailing_id'));
-        m.setDirty()
-        m.store.fireEvent('update', [m.store, m, 'edit', ['items']]);
-    }
-}
-
 Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
@@ -26,14 +17,7 @@ Ext.define('WebMailing.model.Mailing', {
             model: 'WebMailing.model.Item',
             foreignKey: 'mailing_id',
             name:'items',
-            primaryKey:'id',
-            storeConfig: {
-                listeners: {
-                    update: setDirtyMailing,
-                    remove: setDirtyMailing,
-                    add: setDirtyMailing
-                }
-            }
+            primaryKey:'id'
         }
     ],
     proxy: {

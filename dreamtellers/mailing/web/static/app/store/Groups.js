@@ -4,6 +4,7 @@ Ext.define('WebMailing.store.Groups', {
     model: 'WebMailing.model.Group',
     remoteSort: true,
     buffered: true,
+    autoSync: true,
     pageSize: 100,
     sorters: [{
         property: 'name',

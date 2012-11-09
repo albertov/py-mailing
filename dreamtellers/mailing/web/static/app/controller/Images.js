@@ -18,8 +18,7 @@ Ext.define('WebMailing.controller.Images', {
             },
             "image_grid": {
                 new_item: this.showNewImageWindow,
-                delete_item: this.onDeleteImage,
-                save_items: this.onSaveImages
+                delete_item: this.onDeleteImage
             }
         });
     },
@@ -65,10 +64,16 @@ Ext.define('WebMailing.controller.Images', {
     },
 
     onDeleteImage: function(grid, record) {
-        record.store.remove(record);
+        Ext.Msg.confirm(
+            "Aviso",
+            Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
+                              record.get('filename')),
+            Ext.bind(this._confirmDeleteHandler, this, [record], 0)
+        );
     },
-
-    onSaveImages: function(grid) {
-        grid.store.sync();
+    _confirmDeleteHandler: function(record, btn) {
+        if (btn=="yes") {
+            record.store.remove(record);
+        }
     }
 });

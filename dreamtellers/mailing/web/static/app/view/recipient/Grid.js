@@ -1,11 +1,18 @@
 Ext.define('WebMailing.view.recipient.Grid', {
-    extend: 'WebMailing.CRUDGrid',
+    extend: 'Ext.grid.Panel',
     requires: [
-        'WebMailing.CRUDGrid',
+        'WebMailing.CRUDPlugin',
         'Ext.form.TextField'
+    ],
+    plugins: [
+        {
+            ptype: 'crud',
+            actions: 'new,delete'
+        }
     ],
     alias: 'widget.recipient_grid',
     store: 'Recipients',
+    actions: 'new,delete',
     columns: [
         {
             text: 'Nombre',

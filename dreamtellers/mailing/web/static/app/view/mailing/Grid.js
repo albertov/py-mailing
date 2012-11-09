@@ -1,7 +1,7 @@
 Ext.define('WebMailing.view.mailing.Grid', {
-    extend: 'WebMailing.CRUDGrid',
+    extend: 'Ext.grid.Panel',
     requires: [
-        'WebMailing.CRUDGrid',
+        'WebMailing.CRUDPlugin',
         'Ext.form.TextField',
         'Ext.form.NumberField',
         'Ext.form.DateField'
@@ -9,6 +9,12 @@ Ext.define('WebMailing.view.mailing.Grid', {
     alias: 'widget.mailing_grid',
     store: 'Mailings',
     title: 'Boletines', //i18n
+    plugins: [
+        {
+            ptype: 'crud',
+            actions: 'new,delete'
+        }
+    ],
     columns: [
         {
             text: 'Número',

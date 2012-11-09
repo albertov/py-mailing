@@ -5,6 +5,7 @@ Ext.define('WebMailing.store.Recipients', {
     remoteSort: true,
     buffered: true,
     pageSize: 100,
+    autoSync: true,
     sorters: [{
         property: 'name',
         direction: 'ASC'

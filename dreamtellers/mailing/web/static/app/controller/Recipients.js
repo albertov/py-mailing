@@ -9,8 +9,7 @@ Ext.define('WebMailing.controller.Recipients', {
             },
             "recipient_grid": {
                 new_item: this.onNewRecipient,
-                delete_item: this.onDeleteRecipient,
-                save_items: this.onSaveRecipients
+                delete_item: this.onDeleteRecipient
             }
         });
     },
@@ -30,10 +29,16 @@ Ext.define('WebMailing.controller.Recipients', {
     },
 
     onDeleteRecipient: function(grid, record) {
-        record.store.remove(record);
+        Ext.Msg.confirm(
+            "Aviso",
+            Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
+                              record.get('name')),
+            Ext.bind(this._confirmDeleteHandler, this, [record], 0)
+        );
     },
-
-    onSaveRecipients: function(grid) {
-        grid.store.sync();
+    _confirmDeleteHandler: function(record, btn) {
+        if (btn=="yes") {
+            record.store.remove(record);
+        }
     }
 });

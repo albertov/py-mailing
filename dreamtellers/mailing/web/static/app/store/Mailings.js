@@ -3,6 +3,7 @@ Ext.define('WebMailing.store.Mailings', {
     requires: 'WebMailing.model.Mailing',
     model: 'WebMailing.model.Mailing',
     remoteSort: true,
+    autoSync: true,
     autoLoad: true,
     buffered: true,
     pageSize: 100,

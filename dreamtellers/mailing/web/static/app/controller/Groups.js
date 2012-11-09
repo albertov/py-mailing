@@ -9,8 +9,7 @@ Ext.define('WebMailing.controller.Groups', {
             },
             "group_grid": {
                 new_item: this.onNewGroup,
-                delete_item: this.onDeleteGroup,
-                save_items: this.onSaveGroups
+                delete_item: this.onDeleteGroup
             }
         });
     },
@@ -29,10 +28,17 @@ Ext.define('WebMailing.controller.Groups', {
     },
 
     onDeleteGroup: function(grid, record) {
-        record.store.remove(record);
+        Ext.Msg.confirm(
+            "Aviso",
+            Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
+                              record.get('name')),
+            Ext.bind(this._confirmDeleteHandler, this, [record], 0)
+        );
     },
-
-    onSaveGroups: function(grid) {
-        grid.store.sync();
+    _confirmDeleteHandler: function(record, btn) {
+        if (btn=="yes") {
+            record.store.remove(record);
+        }
     }
+
 });

@@ -2,6 +2,10 @@ Ext.define('WebMailing.Rest', {
     extend: 'Ext.data.proxy.Rest',
     requires: 'Ext.window.MessageBox',
     alias: 'proxy.rest2',
+    writer: {
+        type: 'json',
+        writeAllFields: false
+    },
     listeners: {
         exception: function(proxy, response, operation) {
             if (response.status==400) {

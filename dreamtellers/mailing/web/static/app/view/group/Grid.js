@@ -1,11 +1,17 @@
 Ext.define('WebMailing.view.group.Grid', {
-    extend: 'WebMailing.CRUDGrid',
+    extend: 'Ext.grid.Panel',
     requires: [
-        'WebMailing.CRUDGrid',
+        'WebMailing.CRUDPlugin',
         'Ext.form.TextField'
     ],
     alias: 'widget.group_grid',
     store: 'Groups',
+    plugins: [
+        {
+            ptype: 'crud',
+            actions: 'new,delete'
+        }
+    ],
     columns: [
         {
             text: 'Nombre', //i18n

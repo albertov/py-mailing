@@ -1,11 +1,17 @@
 Ext.define('WebMailing.view.image.Grid', {
-    extend: 'WebMailing.CRUDGrid',
+    extend: 'Ext.grid.Panel',
     requires: [
-        'WebMailing.CRUDGrid',
+        'WebMailing.CRUDPlugin',
         'Ext.form.TextField'
     ],
     alias: 'widget.image_grid',
     store: 'Images',
+    plugins: [
+        {
+            ptype: 'crud',
+            actions: 'new,delete'
+        }
+    ],
     columns: [
         {
             text: 'Título', //i18n

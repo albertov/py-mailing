@@ -4,6 +4,7 @@ Ext.define('WebMailing.store.Images', {
     model: 'WebMailing.model.Image',
     remoteSort: true,
     buffered: true,
+    autoSync: true,
     pageSize: 100,
     sorters: [{
         property: 'title',
