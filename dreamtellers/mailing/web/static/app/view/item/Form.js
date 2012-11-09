@@ -54,6 +54,22 @@ Ext.define('WebMailing.view.item.Form', {
             anchor: '95%'
         }
     ],
+    buttons: [
+        {
+            text: 'Guardar', // i18n
+            handler: function() {
+                var form = this.up('form').getForm();
+                if (form.isValid())
+                    form.updateRecord();
+            }
+        }, {
+            text: 'Cancelar', // i18n
+            handler: function() {
+                var form = this.up('form').getForm();
+                form.reset();
+            }
+        }
+    ],
     initComponent: function() {
         this.callParent(arguments);
         this.getForm().findField('type').on('select', this.onTypeChange, this);

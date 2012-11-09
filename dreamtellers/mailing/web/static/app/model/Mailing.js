@@ -17,7 +17,16 @@ Ext.define('WebMailing.model.Mailing', {
             model: 'WebMailing.model.Item',
             foreignKey: 'mailing_id',
             name:'items',
-            primaryKey:'id'
+            primaryKey:'id',
+            storeConfig: {
+                autoSync: true,
+                listeners: {
+                    write: function() {
+                        var s = Ext.getStore('Mailings');
+                        s.fireEvent('write', s);
+                    }
+                }
+            }
         }
     ],
     proxy: {

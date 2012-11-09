@@ -8,13 +8,14 @@ class TestNewItem(BaseViewTest):
         self.session.add(m)
         self.session.flush()
         data = dict(title='foo', type='Article', mailing_id=m.id,
-                    content='content')
+                    content='content', category_id=None, url=None)
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['items']), 1)
         item = resp.json['items'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k in item:
+                self.assertEqual(item[k], data[k])
         self.assertIsInstance(Item.query.one(), Article)
 
     def test_create_a_good_external_link(self):
@@ -22,13 +23,14 @@ class TestNewItem(BaseViewTest):
         self.session.add(m)
         self.session.flush()
         data = dict(title='foo', type='ExternalLink', mailing_id=m.id,
-                    url='http://www.google.es')
+                    url='http://www.google.es', content=None, category_id=None)
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['items']), 1)
         item = resp.json['items'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k in item:
+                self.assertEqual(item[k], data[k], k)
         self.assertIsInstance(Item.query.one(), ExternalLink)
 
     def test_create_two_articles(self):
@@ -36,15 +38,18 @@ class TestNewItem(BaseViewTest):
         self.session.add(m)
         self.session.flush()
         data = [
-            dict(title='foo', type='Article', mailing_id=m.id, content='ct'),
-            dict(title='bar', type='Article', mailing_id=m.id, content='ct'),
+            dict(title='foo', type='Article', mailing_id=m.id, content='ct',
+                 category_id=None, url=None),
+            dict(title='bar', type='Article', mailing_id=m.id, content='ct',
+                 category_id=None, url=None),
             ]
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['items']), 2)
         for item, data in zip(resp.json['items'], data):
             for k in data:
-                self.assertEqual(item[k], data[k])
+                if k in item:
+                    self.assertEqual(item[k], data[k])
 
 class TestUpdateItem(BaseViewTest):
     def test_update_a_good_article(self):

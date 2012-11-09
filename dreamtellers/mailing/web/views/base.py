@@ -111,7 +111,7 @@ def generic_create_item(creator, plural):
 
 def generic_updater(validator):
     def func(ob, data):
-        form = validate(validator, data)
+        form = validate(validator(ignore_key_missing=True), data)
         update_from_form(ob, form)
         return ob
     return func

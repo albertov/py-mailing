@@ -14,8 +14,8 @@ Ext.define('WebMailing.controller.Categories', {
                 render: this.onPanelRender
             },
             "category_tree": {
-                new_node: this.onNewCategory,
-                delete_node: this.onDeleteCategory,
+                new_item: this.onNewCategory,
+                delete_item: this.onDeleteCategory
             }
         });
     },

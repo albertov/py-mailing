@@ -139,7 +139,6 @@ class FilterValidator(JsonValidator):
 class Schema(Schema):
     allow_extra_fields = True
     filter_extra_fields = True
-    ignore_key_missing = True
 
 
 class ModelListValidator(Schema):

@@ -17,13 +17,10 @@ Ext.define('WebMailing.controller.Items', {
                 select: this.onEditNode,
                 itemremove: Ext.bind(this.setActiveRecord, this, [null]),
                 new_item: this.onNewItem,
-                delete_node: this.onDeleteNode,
-                edit_node: this.onEditNode,
+                delete_item: this.onDeleteNode,
+                edit_item: this.onEditNode,
                 itemmove: this.updateItemPositionsAndCategories,
                 beforedrop: this.onTreeBeforeDrop
-            },
-            "item_form field": {
-                blur: this.onItemFormChange
             }
 
         });
@@ -64,12 +61,8 @@ Ext.define('WebMailing.controller.Items', {
                      (dropPosition=="before" || dropPosition=="after")))
         }
     },
-    onItemFormChange: function() {
-        var form=this.getForm().getForm();
-        if (form.isValid())
-            form.updateRecord();
-    },
     onNewItem: function(tree, node) {
+        console.debug('onNewItem', arguments);
         var parent = node.get('record'),
             category_id = parent?parent.get('id'):null;
             item = tree.store.items.add({
@@ -84,17 +77,31 @@ Ext.define('WebMailing.controller.Items', {
     onDeleteNode: function(tree, node) {
         var record = node.get('record');
         if (record) {
+            Ext.Msg.confirm(
+                "Aviso",
+                Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
+                                  record.get('title')),
+                Ext.bind(this._confirmDeleteHandler, this, [record], 0)
+            );
+        }
+    },
+    _confirmDeleteHandler: function(record, btn) {
+        if (btn=="yes") {
             record.store.remove(record);
         }
     },
     updateItemPositionsAndCategories: function() {
         var pos=0;
-        this.getTree().getStore().getRootNode().cascadeBy(function(n) {
+        var treeStore = this.getTree().getStore();
+        treeStore.items.suspendAutoSync();
+        treeStore.getRootNode().cascadeBy(function(n) {
             if (n.isItem()) {
                 n.get('record').set('position', pos++);
                 var cat = n.parentNode.get('record');
                 n.get('record').set('category_id', cat?cat.getId():null);
             }
         });
+        treeStore.items.resumeAutoSync();
+        treeStore.items.sync();
     }
 });

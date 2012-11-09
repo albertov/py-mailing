@@ -6,6 +6,7 @@ Ext.define('WebMailing.CRUDPlugin', {
     ],
     alias: 'plugin.crud',
     actions: "save,new,edit,delete",
+    context_actions: "edit,delete",
     enable_row_edit: true,
 
     constructor: function(config) {
@@ -23,7 +24,7 @@ Ext.define('WebMailing.CRUDPlugin', {
             }),
             'new': Ext.create('Ext.Action', {
                 text: 'Nuevo', //18n
-                handler: Ext.bind(panel.fireEvent, panel, ['new_item', panel])
+                handler: Ext.bind(this.fireEventWithRecord, this, ['new_item'])
             }),
             'delete': Ext.create('Ext.Action', {
                 text: 'Eliminar', //18n
@@ -73,7 +74,7 @@ Ext.define('WebMailing.CRUDPlugin', {
         var items = [], names = actions.split(',');
         for (var i=0; i<names.length; i++) {
             var name = names[i];
-            if (name=='delete' || name=='edit') {
+            if (this.context_actions.indexOf(name)>-1) {
                 items.push(this.actions[name]);
             }
         }

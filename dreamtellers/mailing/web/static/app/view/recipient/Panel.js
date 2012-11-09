@@ -1,7 +1,8 @@
 Ext.define('WebMailing.view.recipient.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
-        'WebMailing.view.recipient.Grid'
+        'WebMailing.view.recipient.Grid',
+        'WebMailing.LoadMask'
     ],
     alias: 'widget.recipients',
     layout: 'fit',

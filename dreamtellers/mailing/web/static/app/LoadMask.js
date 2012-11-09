@@ -4,7 +4,7 @@ Ext.define('WebMailing.LoadMask', {
     msg: 'Por favor, espere....', // i18n
     bindStore: function(store, initial) {
         if (!initial && this.store) {
-            this._ubindStore();
+            this._unbindStore();
         }
         this.mon(store, 'beforesync', this.show, this);
         this.mon(store, 'write', this.hide, this);

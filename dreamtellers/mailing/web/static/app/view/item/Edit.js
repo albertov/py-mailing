@@ -3,7 +3,8 @@ Ext.define('WebMailing.view.item.Edit', {
     requires: [
         'WebMailing.store.ItemTreeStore',
         'WebMailing.view.item.Form',
-        'WebMailing.view.item.Tree'
+        'WebMailing.view.item.Tree',
+        'WebMailing.LoadMask'
     ],
     alias: 'widget.item_edit',
     layout: 'border',
@@ -22,8 +23,13 @@ Ext.define('WebMailing.view.item.Edit', {
             region: 'center'
         }
     ],
+    initComponent: function() {
+        this.callParent(arguments);
+        this.loadMask = Ext.create('WebMailing.LoadMask', this);
+    },
     setMailing: function(record) {
         this._createAndSwapTree(record);
+        this.loadMask.bindStore(record.items());
     },
     _createAndSwapTree: function(record) {
         var container = this.items.get('tree_container'),

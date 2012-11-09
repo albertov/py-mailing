@@ -232,7 +232,7 @@ class ExternalLink(Item):
 
     def __json__(self):
         return dict(super(ExternalLink, self).__json__(),
-            content = self.content,
+            content = self.content or None,
             url = self.url,
             )
 
