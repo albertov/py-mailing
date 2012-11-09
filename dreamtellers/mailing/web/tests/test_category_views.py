@@ -3,7 +3,7 @@ from . import BaseViewTest
 
 class TestCategoryViews(BaseViewTest):
     def test_create_a_good_one(self):
-        data = dict(title='foo')
+        data = dict(title='foo', image_id=None, category_id=None)
         resp = self.app.post_json('/category/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['categories']), 1)

@@ -3,6 +3,7 @@ Ext.define('WebMailing.store.Images', {
     requires: 'WebMailing.model.Image',
     model: 'WebMailing.model.Image',
     remoteSort: true,
+    remoteFilter: true,
     buffered: true,
     autoSync: true,
     pageSize: 100,

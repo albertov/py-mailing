@@ -51,7 +51,9 @@ Ext.define('WebMailing.view.recipient.Grid', {
                 xtype: 'combo',
                 store: 'Groups',
                 valueField: 'id',
-                displayField: 'name'
+                displayField: 'name',
+                editable: false,
+                queryMode: 'local'
             }
         }, {
             text: 'Modificado',

@@ -15,7 +15,8 @@ Ext.define('WebMailing.model.Item', {
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'},
         {name:'category_id', defaultValue:null},
-        {name:'mailing_id', defaultValue:null}
+        {name:'mailing_id', defaultValue:null},
+        {name:'image_id', defaultValue:null}
     ],
     belongsTo: [
         {

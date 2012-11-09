@@ -46,6 +46,11 @@ Ext.define('WebMailing.view.item.Form', {
             fieldLabel: 'Enlace', //i18n
             anchor: '95%'
         }, {
+            name: 'image_id',
+            xtype: 'image_combo',
+            fieldLabel: 'Imágen', //i18n
+            anchor: '95%'
+        }, {
             name: 'content',
             xtype: 'markdownfield',
             grow: true,

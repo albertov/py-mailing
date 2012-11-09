@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import sql
+from sqlalchemy import sql, types, func
 
 from formencode.api import Invalid
 from formencode.schema import Schema, format_compound_error
@@ -132,7 +132,11 @@ class FilterValidator(JsonValidator):
             ret = []
             for v in value:
                 col = getattr(self.model, v['property'])
-                ret.append(col==v['value'])
+                if isinstance(col.property.columns[0].type,
+                              (types.Unicode, types.String)):
+                    ret.append(func.lower((col).startswith(v['value'].lower())))
+                else:
+                    ret.append(col==v['value'])
             return ret
 
 
@@ -155,7 +159,7 @@ class ModelListValidator(Schema):
     id = String(if_missing=None)
     limit = Int(min=0, max=100, if_missing=25)
     page = Int(min=1, if_missing=1)
-    start = Int(min=0, if_missing=0)
+    #start = Int(min=0, if_missing=0)
 
 
 class ISO8601DateValidator(FancyValidator):

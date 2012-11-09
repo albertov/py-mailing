@@ -5,7 +5,8 @@ from ..validators import Schema, Int, UnicodeString
 from .base import rest_views
 
 class CategoryValidator(Schema):
-    category_id = Int(min=0, if_missing=None)
+    category_id = Int(min=0)
+    image_id = Int(min=0)
     title = UnicodeString(allow_empty=False)
 
 rest_views(app, Category, '/category/', 'categories',

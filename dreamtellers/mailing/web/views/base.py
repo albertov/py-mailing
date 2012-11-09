@@ -59,7 +59,9 @@ def generic_collection_view(model, plural, filter=None):
             for f in form['filter']:
                 query = query.filter(f)
         total = query.count()
-        query = query.limit(form['limit']).offset(form['start'])
+        limit = form['limit']
+        offset = (form['page']-1)*limit
+        query = query.limit(limit).offset(offset)
         return {
             'success': True,
             'total': total,

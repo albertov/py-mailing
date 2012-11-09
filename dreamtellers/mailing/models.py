@@ -45,7 +45,7 @@ class Image(Model):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
     hash = Column(String(32), unique=True, nullable=False)
-    filename = Column(Unicode(255), nullable=False)
+    filename = Column(Unicode(255), nullable=False, unique=True)
     title = Column(Unicode(512))
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
@@ -274,9 +274,9 @@ class Article(Item):
             ps = dom.xpath('//p[1]')
             if ps:
                 p = ps[0]
-                img = builder.E.img(src=self.image.filename,
-                                    title=self.image.title,
-                                    alt=self.image.title)
+                img = builder.E.img(src=self.image.filename)
+                if self.image.title:
+                    img.attrib['title'] = img.attrib['alt'] = self.image.title
                 class_ = 'left' if self.image_position=='l' else 'right'
                 img.attrib["class"] = class_
                 p.insert(0, img)

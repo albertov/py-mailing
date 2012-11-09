@@ -8,7 +8,8 @@ class TestNewItem(BaseViewTest):
         self.session.add(m)
         self.session.flush()
         data = dict(title='foo', type='Article', mailing_id=m.id,
-                    content='content', category_id=None, url=None)
+                    content='content', category_id=None, url=None,
+                    position=0, image_id=None)
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['items']), 1)
@@ -23,7 +24,8 @@ class TestNewItem(BaseViewTest):
         self.session.add(m)
         self.session.flush()
         data = dict(title='foo', type='ExternalLink', mailing_id=m.id,
-                    url='http://www.google.es', content=None, category_id=None)
+                    url='http://www.google.es', content=None, category_id=None,
+                    position=0, image_id=None)
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['items']), 1)
@@ -39,9 +41,9 @@ class TestNewItem(BaseViewTest):
         self.session.flush()
         data = [
             dict(title='foo', type='Article', mailing_id=m.id, content='ct',
-                 category_id=None, url=None),
+                 category_id=None, url=None, position=0, image_id=None),
             dict(title='bar', type='Article', mailing_id=m.id, content='ct',
-                 category_id=None, url=None),
+                 category_id=None, url=None, position=0, image_id=None),
             ]
         resp = self.app.post_json('/item/', data)
         self.assertTrue(resp.json['success'])

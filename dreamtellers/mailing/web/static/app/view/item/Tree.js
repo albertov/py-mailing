@@ -4,6 +4,9 @@ Ext.define('WebMailing.view.item.Tree', {
     requires: [
         'WebMailing.CRUDPlugin'
     ],
+    selModel: {
+        mode: 'SINGLE'
+    },
     viewConfig: {
         plugins: {
             ptype: 'treeviewdragdrop'

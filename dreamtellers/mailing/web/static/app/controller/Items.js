@@ -19,11 +19,13 @@ Ext.define('WebMailing.controller.Items', {
                 new_item: this.onNewItem,
                 delete_item: this.onDeleteNode,
                 edit_item: this.onEditNode,
-                itemmove: this.updateItemPositionsAndCategories,
+                itemmove: this.onItemMove,
                 beforedrop: this.onTreeBeforeDrop
             }
 
         });
+        this._delayedUpdate = new Ext.util.DelayedTask(
+            this.updateItemPositionsAndCategories, this);
     },
     setActiveRecord: function(record) {
         if (record!==null) {
@@ -43,22 +45,27 @@ Ext.define('WebMailing.controller.Items', {
         }
     },
     onTreeBeforeDrop: function(node, data, overModel, dropPosition) {
-        var model = data.records[0];
-        console.debug('onTreeBeforeDrop', model.get('title'),
-                      overModel.get('title'), dropPosition);
-        if (!model.isLeaf()) {
-            // Si es una carpeta solo permitir moverla antes o despues de otra
-            // en el mismo nivel
-            return (!overModel.isLeaf() &&
-                    model.parentNode===overModel.parentNode && 
-                    (dropPosition=="before" || dropPosition=="after"));
-        } else {
-            // Si es un item solo permitir moverlo dentro de la misma carpeta
-            // o a otra que no sea la raiz
-            return (overModel.isLeaf() || 
-                    (!overModel.isRoot() && dropPosition=='append') ||
-                    (!overModel.isRoot() && !overModel.parentNode.isRoot()  &&
-                     (dropPosition=="before" || dropPosition=="after")))
+        for (var i=0; i<data.records.length; i++) {
+            var model = data.records[i], allow;
+            if (!model.isLeaf()) {
+                // Si es una carpeta solo permitir moverla antes o despues de otra
+                // en el mismo nivel
+                allow = (!overModel.isLeaf() &&
+                         model.parentNode===overModel.parentNode && 
+                         (dropPosition=="before" || dropPosition=="after"));
+            } else {
+                // Si es un item solo permitir moverlo dentro de la misma carpeta
+                // o a otra que no sea la raiz
+                allow = (overModel.isLeaf() || 
+                         (!overModel.isRoot() && dropPosition=='append') ||
+                         (!overModel.isRoot() && !overModel.parentNode.isRoot()  &&
+                          (dropPosition=="before" || dropPosition=="after")))
+            }
+
+            if (!allow) {
+                return false;
+            }
+
         }
     },
     onNewItem: function(tree, node) {
@@ -89,6 +96,9 @@ Ext.define('WebMailing.controller.Items', {
         if (btn=="yes") {
             record.store.remove(record);
         }
+    },
+    onItemMove: function() {
+        this._delayedUpdate.delay(10);
     },
     updateItemPositionsAndCategories: function() {
         var pos=0;

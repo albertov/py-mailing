@@ -42,14 +42,16 @@ Ext.define('WebMailing.store.ItemTreeStore', {
         this._updateCategories();
         this._updateItems();
     },
-    onStoreUpdate: function(store, record) {
-        console.debug('onStoreUpdate', arguments);
-        Ext.each(this.tree.flatten(), function(node) {
-            var nodeRecord = node.get('record');
-            if (nodeRecord && nodeRecord.getId()==record.getId()) {
-                node.setRecord(nodeRecord);
-            }
-        });
+    onStoreUpdate: function(store, record, action) {
+        if (action=="commit") {
+            console.debug('onStoreUpdate', arguments);
+            Ext.each(this.tree.flatten(), function(node) {
+                var nodeRecord = node.get('record');
+                if (nodeRecord && nodeRecord.getId()==record.getId()) {
+                    node.setRecord(nodeRecord);
+                }
+            });
+        }
     },
     onCategoriesLoad: function() {
         this._updateCategories();

@@ -1,7 +1,10 @@
 Ext.define('WebMailing.view.category.Tree', {
     extend: 'Ext.tree.Panel',
     alias: 'widget.category_tree',
-    requires: ['WebMailing.CRUDPlugin'],
+    requires: [
+        'WebMailing.CRUDPlugin',
+        'WebMailing.view.image.Combo',
+    ],
     viewConfig: {
         plugins: [
             {
@@ -20,6 +23,26 @@ Ext.define('WebMailing.view.category.Tree', {
             field: {
                 xtype: 'textfield',
                 allowBlank: false
+            }
+        }, {
+            text: 'Imagen', //i18n
+            dataIndex: 'image_id',
+            width: 150,
+            sortable: false,
+            field: {
+                xtype: 'image_combo'
+            },
+            renderer: function(image_id, meta, record) {
+                var image = Ext.getStore('Images').getById(image_id);
+                //var image = record.getImage();
+                if (!image) {
+                    return '&nbsp';
+                } else {
+                    return Ext.String.format(
+                        '<img src="{0}?width=120&height=120" alt="{1}" title="{1}" />',
+                        image.get('url'), image.get('title')
+                    );
+                }
             }
         }, {
             text: 'Modificado',
@@ -54,6 +77,11 @@ Ext.define('WebMailing.view.category.Tree', {
         });
         this.plugins = [p];
         this.callParent(arguments);
+        this.on('beforeedit', this.onRowBeforeEdit, this);
+        Ext.getStore('Images').load();
     },
 
+    onRowBeforeEdit: function(p, o) {
+        return !o.record.isRoot();
+    }
 });

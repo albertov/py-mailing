@@ -19,10 +19,7 @@ class MailingValidator(Schema):
 
 @app.route('/m/<number:int>/')
 def mailing_by_number(number):
-    try:
-        return _get_composer(number).get_file('index.html').data
-    except LookupError:
-        abort(404)
+    return _get_composer(number).get_file('index.html').data
 
 @app.route('/m/<number:int>/<filename:re:.+>')
 def mailing_file(number, filename):

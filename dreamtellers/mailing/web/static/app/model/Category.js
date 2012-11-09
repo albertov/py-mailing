@@ -7,6 +7,7 @@ Ext.define('WebMailing.model.Category', {
     fields: [
         {name:'id', type: 'int'},
         {name:'category_id', defaultValue:null},
+        {name:'image_id', defaultValue:null},
         {name:'title', type: 'string'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}
@@ -32,6 +33,13 @@ Ext.define('WebMailing.model.Category', {
             name: 'category',
             setterName: 'setCategory',
             getterName: 'getCategory'
+        }, {
+            model: 'WebMailing.model.Image',
+            foreignKey: 'image_id',
+            primaryKey:'id',
+            name: 'image',
+            setterName: 'setImage',
+            getterName: 'getImage'
         }
     ],
     proxy: {

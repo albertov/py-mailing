@@ -15,7 +15,8 @@ from .base import rest_views, update_from_form
 
 class ItemValidator(Schema):
     """
-    >>> base = dict(mailing_id=0, category_id=None, content=None, url=None)
+    >>> base = dict(mailing_id=0, category_id=None, content=None, url=None,
+    ...             position=0, image_id=None)
     >>> v = ItemValidator.to_python(dict(base, type='Article', title='foo', content='foo'))
     >>> ItemValidator.to_python(dict(base, type='Article', title='foo'))
     Traceback (most recent call last):
@@ -32,10 +33,11 @@ class ItemValidator(Schema):
     """
     category_id = Int(min=0, allow_empty=True)
     mailing_id = Int(min=0, allow_empty=False)
+    image_id = Int(min=0)
     title = UnicodeString(allow_empty=False)
     content = UnicodeString(allow_empty=True)
     type = OneOf(Item.available_types())
-    position = Int(min=0, if_missing=0)
+    position = Int(min=0)
     url = URL(check_exists=True)
 
     def _to_python(self, value, state=None):

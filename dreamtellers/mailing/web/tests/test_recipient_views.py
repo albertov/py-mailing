@@ -3,7 +3,7 @@ from . import BaseViewTest
 
 class TestRecipientViews(BaseViewTest):
     def test_create_a_good_one(self):
-        data = dict(name='foo', email='foo@example.com')
+        data = dict(name='foo', email='foo@example.com', group_id=None)
         resp = self.app.post_json('/recipient/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['recipients']), 1)
