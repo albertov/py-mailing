@@ -27,6 +27,10 @@ Ext.define('WebMailing.view.item.Tree', {
             actions: 'new,delete',
             context_actions: 'new,delete',
             enable_row_edit: false,
+            init: function() {
+                WebMailing.CRUDPlugin.prototype.init.apply(this, arguments);
+                this.actions['new'].disable();
+            },
             onRowSelect: function(tree, record) {
                 this.selectedRecord = record;
                 if (record.isLeaf()) {
