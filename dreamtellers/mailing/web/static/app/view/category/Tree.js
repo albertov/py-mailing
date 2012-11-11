@@ -63,6 +63,10 @@ Ext.define('WebMailing.view.category.Tree', {
         var p = Ext.create('WebMailing.CRUDPlugin', {
             actions: 'new,delete',
             context_actions: 'new,delete',
+            init: function() {
+                WebMailing.CRUDPlugin.prototype.init.apply(this, arguments);
+                this.actions['new'].disable();
+            },
             _activateObjectActions: function() {
                 this.actions["new"].enable();
                 if (!this.selectedRecord.isRoot()) {
