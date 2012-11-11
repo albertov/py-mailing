@@ -2,6 +2,7 @@ Ext.define('WebMailing.view.item.Tree', {
     extend: 'Ext.tree.Panel',
     alias: 'widget.item_tree',
     requires: [
+        'Ext.tree.plugin.TreeViewDragDrop',
         'WebMailing.CRUDPlugin'
     ],
     selModel: {
@@ -36,10 +37,10 @@ Ext.define('WebMailing.view.item.Tree', {
             },
             _activateItemActions: function() {
                 this.actions.edit.enable();
-                this.actions.delete.enable();
+                this.actions["delete"].enable();
             },
             _activateCategoryActions: function() {
-                this.actions.new.enable();
+                this.actions["new"].enable();
             },
             _deactivateObjectActions: function() {
                 for (var k in this.actions) {

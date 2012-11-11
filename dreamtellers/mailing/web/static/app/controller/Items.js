@@ -1,6 +1,7 @@
 Ext.define('WebMailing.controller.Items', {
     extend: 'Ext.app.Controller',
     views: ['item.Tree'],
+    models: ['Item'],
     refs: [
         {
             ref: 'tree',

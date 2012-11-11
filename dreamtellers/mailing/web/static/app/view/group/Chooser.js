@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.group.Chooser', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Border',
         'Ext.grid.plugin.DragDrop',
         'WebMailing.view.group.Grid'
     ],

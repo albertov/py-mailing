@@ -1,6 +1,8 @@
 Ext.define('WebMailing.view.item.Edit', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Border',
+        'Ext.layout.container.Fit',
         'WebMailing.store.ItemTreeStore',
         'WebMailing.view.item.Form',
         'WebMailing.view.item.Tree',

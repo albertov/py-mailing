@@ -1,6 +1,8 @@
 Ext.define('WebMailing.controller.Images', {
     extend: 'Ext.app.Controller',
     views: ['image.Panel', 'image.NewImageWindow'],
+    models: ['Image'],
+    stores: ['Images'],
     refs: [
         {
             ref: 'grid',

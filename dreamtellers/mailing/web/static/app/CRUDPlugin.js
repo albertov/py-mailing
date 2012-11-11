@@ -1,5 +1,6 @@
 Ext.define('WebMailing.CRUDPlugin', {
     requires: [
+        'Ext.Action',
         'Ext.grid.plugin.RowEditing',
         'Ext.toolbar.Toolbar',
         'Ext.menu.Menu'

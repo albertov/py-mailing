@@ -1,6 +1,8 @@
 Ext.define('WebMailing.controller.Recipients', {
     extend: 'Ext.app.Controller',
     views: ['recipient.Panel'],
+    models: ['Recipient'],
+    stores: ['Recipients'],
 
     init: function() {
         this.control({

@@ -1,13 +1,12 @@
 Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
-    models: ['ItemNode', 'Category', 'Item', 'Mailing', 'Recipient', 'Group', 'Image'],
-    stores: ['Mailings', 'Categories', 'Recipients', 'Groups', 'Images'],
     controllers: ['Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images'],
     requires: [
+        'Ext.app.Application',
         'Ext.tab.Panel',
         'Ext.container.Viewport',
-        'WebMailing.view.Home',
+        'WebMailing.view.Home'
     ],
 
     launch: function() {

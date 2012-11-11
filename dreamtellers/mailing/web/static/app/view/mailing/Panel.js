@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.mailing.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Border',
         'WebMailing.view.mailing.Grid',
         'WebMailing.view.mailing.Detail'
     ],

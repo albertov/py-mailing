@@ -14,6 +14,7 @@ app = Bottle()
 
 from . import views
 
+
 def configure_sqlalchemy(app, config, prefix='sqlalchemy.'):
     if 'engine' in config:
         engine = config['engine']
@@ -35,6 +36,8 @@ def configure_genshi(app, config, prefix='genshi.'):
 def app_factory(global_config, **local_config):
     app.catchall = False
     config = dict(global_config, **local_config)
+    config['debug'] = asbool(config.get('debug', False))
+    app.config = config
     configure_sqlalchemy(app, config)
     configure_genshi(app, config)
     return app.wsgi
@@ -47,10 +50,10 @@ parser.add_option('-d', '--db', dest='db', default='~/.mailing.db')
 def main(args=None):
     from paste.httpserver import serve
     opts = parser.parse_args(args)[0]
-    configure_sqlalchemy(app,
-        {'sqlalchemy.url': 'sqlite:///'+os.path.expanduser(opts.db)}
-        )
-    configure_genshi(app, {'genshi.auto_reload':False})
+    app = app_factory({
+        'sqlalchemy.url': 'sqlite:///'+os.path.expanduser(opts.db),
+        'genshi.auto_reload': False
+    })
     host, port = opts.bind.split(':')
     serve(app, host=host, port=int(port), use_threadpool=True)
 

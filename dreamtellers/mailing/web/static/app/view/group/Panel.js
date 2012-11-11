@@ -1,7 +1,8 @@
 Ext.define('WebMailing.view.group.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
-        'Ext.LoadMask',
+        'WebMailing.LoadMask',
+        'Ext.layout.container.Fit',
         'WebMailing.view.group.Grid'
     ],
     alias: 'widget.groups',

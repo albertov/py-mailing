@@ -1,6 +1,8 @@
 Ext.define('WebMailing.controller.Categories', {
     extend: 'Ext.app.Controller',
     views: ['category.Panel'],
+    models: ['Category'],
+    stores: ['Categories'],
     refs: [
         {
             ref: 'panel',

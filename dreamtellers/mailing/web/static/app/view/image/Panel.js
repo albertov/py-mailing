@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.image.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Fit',
         'WebMailing.view.image.Grid'
     ],
     alias: 'widget.images',

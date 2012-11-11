@@ -5,6 +5,11 @@ Ext.define('WebMailing.view.image.NewImageWindow', {
     alias: 'widget.new_image_window',
     width: 400,
     modal: true,
+    requires: [
+        'Ext.layout.container.Fit',
+        'Ext.form.field.File',
+        'Ext.form.field.Text'
+    ],
     items: {
         xtype: 'form',
         bodyPadding: 10,

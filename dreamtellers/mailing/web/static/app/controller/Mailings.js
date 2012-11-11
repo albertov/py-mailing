@@ -1,6 +1,8 @@
 Ext.define('WebMailing.controller.Mailings', {
     extend: 'Ext.app.Controller',
     views: ['mailing.Panel'],
+    stores: ['Mailings', 'Categories'],
+    models: ['Mailing'],
     refs: [
         {
             ref: 'panel',
@@ -109,6 +111,7 @@ Ext.define('WebMailing.controller.Mailings', {
     onNewMailing: function(grid) {
         var store = this.application.getStore('Mailings'),
             rec = store.add({date: new Date})[0];
-        this.setActiveRecord(rec);
+        store.on('write', Ext.bind(this.setActiveRecord, this, [rec]),
+                 this, {single:true})
     }
 });

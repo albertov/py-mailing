@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.category.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Fit',
         'WebMailing.view.category.Tree'
     ],
     alias: 'widget.categories',

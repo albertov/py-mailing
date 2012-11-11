@@ -11,7 +11,7 @@
           type="text/css"
           href="${static_url('pagedown/style.css')}"/>
     <script type="text/javascript"
-            src="${static_url('extjs/ext-debug.js')}"></script>
+            src="${static_url('extjs/ext-debug.js' if debug else 'extjs/ext.js')}"></script>
     <script type="text/javascript"
             src="${static_url('pagedown/Markdown.Converter.js')}"></script>
     <script type="text/javascript"
@@ -23,9 +23,12 @@
             'Ext.ux.pagedown': '${static_url("pagedown")}',
             'Ext.ux.datetime': '${static_url("datetime")}'
         });
+        Ext.Loader.setConfig({
+            enabled: ${'true' if debug else 'false'}
+        });
         window.appFolder ='${static_url("app")}';
     </script>
-    <script type="text/javascript" src="${static_url('app.js')}"></script>
+    <script type="text/javascript" src="${static_url('app.js' if debug else 'app-all.js')}"></script>
 </head>
 <body></body>
 </html>

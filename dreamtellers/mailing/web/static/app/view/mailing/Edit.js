@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.mailing.Edit', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'Ext.layout.container.Fit',
         'WebMailing.view.item.Edit'
     ],
     alias: 'widget.mailing_edit',

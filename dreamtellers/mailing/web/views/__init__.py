@@ -16,7 +16,9 @@ _import_views()
 
 @app.route('/', template='index.html')
 def index():
-    return {}
+    return {
+        'debug': app.config['debug']
+    }
 
 STATIC_ROOT = resource_filename('dreamtellers.mailing.web', 'static')
 @app.route('/static/<filename:path>')

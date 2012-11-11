@@ -2,6 +2,7 @@ Ext.define('WebMailing.view.category.Tree', {
     extend: 'Ext.tree.Panel',
     alias: 'widget.category_tree',
     requires: [
+        'Ext.tree.plugin.TreeViewDragDrop',
         'WebMailing.CRUDPlugin',
         'WebMailing.view.image.Combo',
     ],
@@ -63,9 +64,9 @@ Ext.define('WebMailing.view.category.Tree', {
             actions: 'new,delete',
             context_actions: 'new,delete',
             _activateObjectActions: function() {
-                this.actions.new.enable();
+                this.actions["new"].enable();
                 if (!this.selectedRecord.isRoot()) {
-                    this.actions.delete.enable();
+                    this.actions["delete"].enable();
                 }
             },
 

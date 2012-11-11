@@ -5,3 +5,6 @@ Env
 *.pyc
 *.sqlite
 .coverage
+dreamtellers/mailing/web/static/all-classes.js
+dreamtellers/mailing/web/static/app-all.js
+dreamtellers/mailing/web/static/app.jsb3*

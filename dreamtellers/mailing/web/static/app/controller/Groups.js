@@ -1,6 +1,8 @@
 Ext.define('WebMailing.controller.Groups', {
     extend: 'Ext.app.Controller',
     views: ['group.Panel'],
+    models: ['Group'],
+    stores: ['Groups'],
 
     init: function() {
         this.control({
