@@ -507,7 +507,7 @@ class SentMailing(Model):
 
     id = Column(Integer, primary_key=True)
     mailing_id = Column(Integer, ForeignKey('mailing.id'), nullable=False)
-    programmed_date = Column(DateTime, nullable=False)
+    programmed_date = Column(DateTime)
     sent_date = Column(DateTime)
     groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
 
@@ -525,7 +525,8 @@ class SentMailing(Model):
         return dict(
             id=self.id,
             mailing_id=self.mailing_id,
-            programmed_date=self.programmed_date.isoformat(),
+            programmed_date=(self.programmed_date.isoformat()
+                             if self.programmed_date else None),
             sent_date=self.sent_date.isoformat() if self.sent_date else None,
         )
 

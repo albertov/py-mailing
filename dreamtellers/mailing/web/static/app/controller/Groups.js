@@ -7,7 +7,7 @@ Ext.define('WebMailing.controller.Groups', {
             "groups": {
                 render: this.onPanelRender,
             },
-            "group_grid": {
+            "groups > group_grid": {
                 new_item: this.onNewGroup,
                 delete_item: this.onDeleteGroup
             }

@@ -3,7 +3,8 @@ Ext.define('WebMailing.model.Mailing', {
     idProperty: 'id',
     requires: [
         'WebMailing.Rest',
-        'WebMailing.model.Item'
+        'WebMailing.model.Item',
+        'WebMailing.model.SentMailing'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -27,6 +28,15 @@ Ext.define('WebMailing.model.Mailing', {
                     }
                 }
             }
+        }, {
+            model: 'WebMailing.model.SentMailing',
+            foreignKey: 'mailing_id',
+            name:'sent_mailings',
+            primaryKey:'id',
+            storeConfig: {
+                autoSync: true,
+                remoteSort: true
+            }
         }
     ],
     proxy: {
@@ -34,7 +44,7 @@ Ext.define('WebMailing.model.Mailing', {
         url: 'mailing/',
         reader: {
             type: 'json',
-            root: 'mailings',
+            root: 'mailings'
         }
     },
 

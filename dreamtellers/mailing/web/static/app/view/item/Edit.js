@@ -15,6 +15,7 @@ Ext.define('WebMailing.view.item.Edit', {
             title: 'Items', // i18n
             itemId: 'tree_container',
             region: 'west',
+            border: false,
             width: 400,
             collapsible: true
         }, {
@@ -37,7 +38,8 @@ Ext.define('WebMailing.view.item.Edit', {
             tree = Ext.create('WebMailing.view.item.Tree', {
                 store: Ext.create('WebMailing.store.ItemTreeStore', {
                     mailing: record,
-                    categories: Ext.getStore('Categories')
+                    categories: Ext.getStore('Categories'),
+                    border: false
                 })
             });
         if (old)

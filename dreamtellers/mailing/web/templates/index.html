@@ -20,7 +20,8 @@
             src="${static_url('pagedown/Markdown.Editor.js')}"></script>
     <script type="text/javascript">
         Ext.Loader.setPath({
-            'Ext.ux.pagedown': '${static_url("pagedown")}'
+            'Ext.ux.pagedown': '${static_url("pagedown")}',
+            'Ext.ux.datetime': '${static_url("datetime")}'
         });
         window.appFolder ='${static_url("app")}';
     </script>

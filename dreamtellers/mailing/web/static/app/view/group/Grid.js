@@ -17,7 +17,7 @@ Ext.define('WebMailing.view.group.Grid', {
             text: 'Nombre', //i18n
             dataIndex: 'name',
             sortable: true,
-            width: 350,
+            width: 150,
             field: {
                 xtype: 'textfield',
                 allowBlank: false
@@ -26,7 +26,7 @@ Ext.define('WebMailing.view.group.Grid', {
             text: 'Descripción', // i18n
             dataIndex: 'description',
             sortable: true,
-            width: 350,
+            flex: 1,
             field: {
                 xtype: 'textfield'
             }
