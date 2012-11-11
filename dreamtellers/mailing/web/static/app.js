@@ -1,7 +1,10 @@
 Ext.application({
     name: 'WebMailing',
     appFolder: window.appFolder,
-    controllers: ['Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images'],
+    controllers: [
+        'Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images',
+        'SentMailings'
+    ],
     requires: [
         'Ext.app.Application',
         'Ext.tab.Panel',

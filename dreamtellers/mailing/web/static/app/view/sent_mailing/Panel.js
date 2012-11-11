@@ -1,6 +1,7 @@
 Ext.define('WebMailing.view.sent_mailing.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
+        'WebMailing.LoadMask',
         'Ext.layout.container.Fit',
         'Ext.layout.container.Border',
         'WebMailing.view.sent_mailing.Grid',
@@ -21,12 +22,25 @@ Ext.define('WebMailing.view.sent_mailing.Panel', {
             xtype: 'group_chooser',
             itemId: 'group_chooser',
             region: 'center',
-            border: false
+            border: false,
+            disabled: true
         }
     ],
+    initComponent: function() {
+        this.callParent(arguments);
+        this.loadMask = Ext.create('WebMailing.LoadMask', this);
+    },
+    getRecord: function() {
+        return this.record;
+    },
     setRecord: function(record) {
         this.record = record;
-        this._createAndSwapGrid(record);
+        if (record) {
+            this._createAndSwapGrid(record);
+        } else {
+            this.items.get('group_chooser').disable();
+            this.items.get('grid_container').disable();
+        }
     },
     _createAndSwapGrid: function(record) {
         var container = this.items.get('grid_container'),

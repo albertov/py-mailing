@@ -27,6 +27,7 @@ Ext.define('WebMailing.model.GroupSentMailing', {
     proxy: {
         type: 'rest2',
         url: 'group_sent_mailing/',
+        batchActions: true,
         reader: {
             type: 'json',
             root: 'group_sent_mailings'

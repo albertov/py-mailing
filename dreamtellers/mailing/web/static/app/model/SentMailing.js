@@ -25,7 +25,10 @@ Ext.define('WebMailing.model.SentMailing', {
             model: 'WebMailing.model.GroupSentMailing',
             foreignKey: 'sent_mailing_id',
             name:'group_sent_mailings',
-            primaryKey:'id'
+            primaryKey:'id',
+            storeConfig: {
+                autoSync: true
+            }
         }
     ],
     proxy: {

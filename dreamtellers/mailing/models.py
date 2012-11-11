@@ -491,10 +491,13 @@ class Mailing(Model):
 class GroupSentMailing(Model):
     __tablename__ = 'group_sent_mailing'
     group_id = Column(Integer, ForeignKey('group.id', ondelete="CASCADE"),
-                      primary_key=True)
+                      primary_key=True, nullable=False)
     sent_mailing_id = Column(Integer,
                              ForeignKey('sent_mailing.id', ondelete="CASCADE"),
-                             primary_key=True)
+                             primary_key=True, nullable=False)
+    group = orm.relation(Group, backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
+    sent_mailing = orm.relation("SentMailing", backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
+
     def __json__(self):
         return dict(
             id='::'.join(map(str, [self.group_id, self.sent_mailing_id])),
@@ -511,7 +514,7 @@ class SentMailing(Model):
     sent_date = Column(DateTime)
     groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
 
-    mailing = orm.relation(Mailing)
+    mailing = orm.relation(Mailing, backref=orm.backref('sent_mailings', cascade='all,delete-orphan'))
 
     recipients = orm.relation(Recipient,
         secondary = GroupSentMailing.__table__.join(

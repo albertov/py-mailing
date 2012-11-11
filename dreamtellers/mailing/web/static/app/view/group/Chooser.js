@@ -13,7 +13,7 @@ Ext.define('WebMailing.view.group.Chooser', {
             title: 'Grupos disponibles', // i18n
             xtype: 'group_grid',
             region: 'north',
-            height: 400,
+            height: 300,
             plugins: null,
             store: 'Groups',
             multiSelect: true,
@@ -53,11 +53,18 @@ Ext.define('WebMailing.view.group.Chooser', {
     ],
     initComponent: function() {
         this.callParent(arguments);
-        this.items.get('selected').getView().on('beforedrop', this.onBeforeDrop,
-                                                this);
+        var view = this.getSelectedGrid().getView();
+        view.on('beforedrop', this.onBeforeDrop, this);
+        this.getSelectedGrid().relayEvents(view, ["drop"]);
+    },
+    getSelectedGrid: function() {
+        return this.items.get('selected');
+    },
+    getAvailableGrid: function() {
+        return this.items.get('available');
     },
     onBeforeDrop: function(_, data) {
-        var store = this.items.get('selected').getStore();
+        var store = this.getSelectedGrid().getStore();
         for (var i=0; i<data.records.length; i++) {
             var record = data.records[i];
             if (store.getById(record.getId())) {
