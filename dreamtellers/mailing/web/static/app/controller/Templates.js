@@ -18,6 +18,7 @@ Ext.define('WebMailing.controller.Templates', {
             },
             "templates template_grid": {
                 select: this.onTemplateSelect,
+                deselect: this.onTemplateDeSelect,
                 new_item: this.onNewTemplate,
                 delete_item: this.onDeleteTemplate
             }
@@ -32,6 +33,9 @@ Ext.define('WebMailing.controller.Templates', {
     },
     onTemplateSelect: function(grid, record) {
         this.getPanel().setRecord(record);
+    },
+    onTemplateDeSelect: function() {
+        this.getPanel().setRecord(null);
     },
     onNewTemplate: function(grid) {
         var r = grid.store.add({

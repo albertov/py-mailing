@@ -37,6 +37,7 @@ Ext.define('WebMailing.view.template.Panel', {
     initComponent: function() {
         this.callParent(arguments);
         this.loadMask = Ext.create('WebMailing.LoadMask', this);
+        Ext.getStore('Templates').on('update', this.onStoreUpdate, this);
     },
     getRecord: function() {
         return this.record;
@@ -46,11 +47,7 @@ Ext.define('WebMailing.view.template.Panel', {
         return fp.getForm().findField('body');
     },
     setRecord: function(record) {
-        if (this.record) {
-            this.record.store.un('update', this.onStoreUpdate, this);
-        }
         this.record = record;
-        this.record.store.on('update', this.onStoreUpdate, this);
         var fp = this.items.get('form'),
             mode = record?this.modeMap[record.get('type')]:null;
         if (record) {
@@ -60,6 +57,7 @@ Ext.define('WebMailing.view.template.Panel', {
             fp.getForm().loadRecord(record);
         } else {
             fp.disable();
+            this.getCodeEditor().setValue('');
         }
     },
     onStoreUpdate: function(store, record) {
