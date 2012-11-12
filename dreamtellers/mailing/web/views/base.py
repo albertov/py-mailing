@@ -5,8 +5,12 @@ from bottle import redirect, abort, response, static_file, request
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.exc import IntegrityError
 
+from sqlalchemy import sql, types, func
+
+
 from ...models import Session
-from ..validators import validate, ModelListValidator, InvalidForm
+from ..validators import (validate, JsonValidator, Schema, InvalidForm, Int,
+                          String)
 
 __all__ = [
     'ErrorResponse',
@@ -44,6 +48,59 @@ def error_handler(f):
         except (ErrorResponse, IntegrityError), e:
             return error_response(str(e))
     return wrapper
+
+class SortValidator(JsonValidator):
+    if_missing = None
+
+    def __init__(self, model):
+        self.model = model
+
+    def _to_python(self, value, state=None):
+        value = super(SortValidator, self)._to_python(value, state)
+        if value:
+            ret = []
+            for v in value:
+                col = getattr(self.model, v['property'])
+                if v.get('direction', 'ASC') == 'DESC':
+                    col = sql.desc(col)
+                ret.append(col)
+            return ret
+
+
+class FilterValidator(JsonValidator):
+    if_missing = None
+
+    def __init__(self, model):
+        self.model = model
+
+    def _to_python(self, value, state=None):
+        value = super(FilterValidator, self)._to_python(value, state)
+        if value:
+            ret = []
+            for v in value:
+                col = getattr(self.model, v['property'])
+                if isinstance(col.property.columns[0].type,
+                              (types.Unicode, types.String)):
+                    ret.append(func.lower((col).contains(v['value'].lower())))
+                else:
+                    ret.append(col==v['value'])
+            return ret
+
+class ModelListValidator(Schema):
+    if_key_missing = None
+
+    def __init__(self, model):
+        self.model = model
+        fields = dict(self.fields,
+            sort=SortValidator(model),
+            filter=FilterValidator(model),
+            )
+        super(ModelListValidator, self).__init__(fields=fields)
+
+    id = String(if_missing=None)
+    limit = Int(min=0, max=100, if_missing=25)
+    page = Int(min=1, if_missing=1)
+    #start = Int(min=0, if_missing=0)
 
  
 def generic_collection_view(model, plural, filter=None):

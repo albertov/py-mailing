@@ -1,7 +1,5 @@
 import json
 
-from sqlalchemy import sql, types, func
-
 from formencode.api import Invalid
 from formencode.schema import Schema, format_compound_error
 from formencode.validators import (
@@ -31,9 +29,7 @@ __all__ = [
     'Email',
     'UnicodeString',
     'OneOf',
-    'SortValidator',
     'JsonValidator',
-    'ModelListValidator',
     'ISO8601DateValidator',
     'FieldStorageUploadConverter',
 ]
@@ -102,42 +98,6 @@ class JsonValidator(FancyValidator):
         return json.dumps(value)
     
 
-class SortValidator(JsonValidator):
-    if_missing = None
-
-    def __init__(self, model):
-        self.model = model
-
-    def _to_python(self, value, state=None):
-        value = super(SortValidator, self)._to_python(value, state)
-        if value:
-            ret = []
-            for v in value:
-                col = getattr(self.model, v['property'])
-                if v.get('direction', 'ASC') == 'DESC':
-                    col = sql.desc(col)
-                ret.append(col)
-            return ret
-
-
-class FilterValidator(JsonValidator):
-    if_missing = None
-
-    def __init__(self, model):
-        self.model = model
-
-    def _to_python(self, value, state=None):
-        value = super(FilterValidator, self)._to_python(value, state)
-        if value:
-            ret = []
-            for v in value:
-                col = getattr(self.model, v['property'])
-                if isinstance(col.property.columns[0].type,
-                              (types.Unicode, types.String)):
-                    ret.append(func.lower((col).startswith(v['value'].lower())))
-                else:
-                    ret.append(col==v['value'])
-            return ret
 
 
 class Schema(Schema):
@@ -145,21 +105,6 @@ class Schema(Schema):
     filter_extra_fields = True
 
 
-class ModelListValidator(Schema):
-    if_key_missing = None
-
-    def __init__(self, model):
-        self.model = model
-        fields = dict(self.fields,
-            sort=SortValidator(model),
-            filter=FilterValidator(model),
-            )
-        super(ModelListValidator, self).__init__(fields=fields)
-
-    id = String(if_missing=None)
-    limit = Int(min=0, max=100, if_missing=25)
-    page = Int(min=1, if_missing=1)
-    #start = Int(min=0, if_missing=0)
 
 
 class ISO8601DateValidator(FancyValidator):
