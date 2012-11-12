@@ -8,6 +8,7 @@ Ext.define('WebMailing.model.Group', {
         {name:'id', type: 'int'},
         {name:'name', type: 'string'},
         {name:'description', type: 'string'},
+        {name:'priority', type: 'int'},
         {name:'created', type: 'date',  dateFormat: 'c', persist:false},
         {name:'modified', type: 'date',  dateFormat: 'c', persist:false}
     ],

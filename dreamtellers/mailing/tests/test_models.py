@@ -138,12 +138,14 @@ class TestSentMailing(BaseModelTest):
         ob.groups = [
             self._makeGroup(
                 name = 'group_a',
+                priority=1,
                 recipients=[self._makeRecipient(name='foo',
                                                 email='a@example.com'),
                             self._makeRecipient(name='bar',
                                                 email='b@example.com')]),
             self._makeGroup(
                 name = 'group_b',
+                priority=0,
                 recipients=[self._makeRecipient(name='foo2',
                                                 email='a2@example.com'),
                             self._makeRecipient(name='bar2',
@@ -159,3 +161,5 @@ class TestSentMailing(BaseModelTest):
         from ..models import Recipient
         for r in retrieved.recipients:
             self.assertIsInstance(r, Recipient)
+        names = [r.name for r in retrieved.recipients]
+        self.failUnless(names.index('foo2')<names.index('foo'))

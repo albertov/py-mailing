@@ -31,6 +31,14 @@ Ext.define('WebMailing.view.group.Grid', {
                 xtype: 'textfield'
             }
         }, {
+            text: 'Prioridad', // i18n
+            dataIndex: 'priority',
+            sortable: true,
+            width: 70,
+            field: {
+                xtype: 'numberfield'
+            }
+        }, {
             text: 'Modificado',
             dataIndex: 'modified',
             sortable: true,

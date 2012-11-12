@@ -343,8 +343,12 @@ class Group(Model):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
     description = Column(Unicode)
+    priority = Column(Integer, nullable=False, default=0)
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
+
+
+    __mapper_args__ = {'order_by':priority}
 
     def __repr__(self):
         data = (self.id, self.name)
@@ -354,6 +358,7 @@ class Group(Model):
         return dict(
             id=self.id,
             name=self.name,
+            priority=self.priority,
             description=self.description or None,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
@@ -495,8 +500,10 @@ class GroupSentMailing(Model):
     sent_mailing_id = Column(Integer,
                              ForeignKey('sent_mailing.id', ondelete="CASCADE"),
                              primary_key=True, nullable=False)
-    group = orm.relation(Group, backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
-    sent_mailing = orm.relation("SentMailing", backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
+    group = orm.relation(Group,
+        backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
+    sent_mailing = orm.relation("SentMailing",
+        backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
 
     def __json__(self):
         return dict(
@@ -506,23 +513,37 @@ class GroupSentMailing(Model):
         )
 
 class SentMailing(Model):
-    __tablename__ = 'sent_mailing'
+    __table__ = Table('sent_mailing', metadata,
+        Column("id", Integer, primary_key=True),
+        Column("mailing_id", Integer, ForeignKey('mailing.id'), nullable=False),
+        Column("programmed_date", DateTime),
+        Column("sent_date", DateTime),
+        Column("created", DateTime, nullable=False,
+               default=datetime.datetime.now),
+        Column("modified", DateTime, nullable=False,
+               default=datetime.datetime.now),
+    )
 
-    id = Column(Integer, primary_key=True)
-    mailing_id = Column(Integer, ForeignKey('mailing.id'), nullable=False)
-    programmed_date = Column(DateTime)
-    sent_date = Column(DateTime)
     groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
-
     mailing = orm.relation(Mailing, backref=orm.backref('sent_mailings', cascade='all,delete-orphan'))
 
-    recipients = orm.relation(Recipient,
-        secondary = GroupSentMailing.__table__.join(
+    @declared_attr
+    def recipients(cls):
+        _recipient_join = GroupSentMailing.__table__.join(
             Group.__table__.join(Recipient.__table__).alias('group_recipient')
-            ).alias('recipient_group_sent_mailing_table'),
-        viewonly=True,
-        lazy=True
-        )
+            ).alias('group_sent_mailing_group_recipient')
+
+        return orm.relation(Recipient,
+            secondary=_recipient_join,
+            viewonly=True,
+            lazy=True,
+            order_by=[c for c in _recipient_join.c if 'priority' in c.name]
+            )
+
+
+    @classmethod
+    def least_recently_created(cls):
+        return cls.query.order_by(sql.desc(cls.created)).first()
 
     def __json__(self):
         return dict(
@@ -531,8 +552,9 @@ class SentMailing(Model):
             programmed_date=(self.programmed_date.isoformat()
                              if self.programmed_date else None),
             sent_date=self.sent_date.isoformat() if self.sent_date else None,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
         )
-
 
 
 

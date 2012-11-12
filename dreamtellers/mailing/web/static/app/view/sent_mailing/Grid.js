@@ -28,6 +28,18 @@ Ext.define('WebMailing.view.sent_mailing.Grid', {
                 xtype: 'datetimefield',
                 format: 'Y/m/d'
             }
+        }, {
+            text: 'Modificado',
+            dataIndex: 'modified',
+            sortable: true,
+            renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
+            width:150
+        }, {
+            text: 'Creado',
+            dataIndex: 'created',
+            sortable: true,
+            renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
+            width: 150
         }
     ]
 });

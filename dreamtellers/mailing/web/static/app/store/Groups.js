@@ -7,7 +7,7 @@ Ext.define('WebMailing.store.Groups', {
     autoSync: true,
     pageSize: 100,
     sorters: [{
-        property: 'name',
+        property: 'priority',
         direction: 'ASC'
     }],
     

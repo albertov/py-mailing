@@ -3,7 +3,7 @@ from . import BaseViewTest
 
 class TestGroupViews(BaseViewTest):
     def test_create_a_good_one(self):
-        data = dict(name='foo', description=None)
+        data = dict(name='foo', description=None, priority=0)
         resp = self.app.post_json('/group/', data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['groups']), 1)
