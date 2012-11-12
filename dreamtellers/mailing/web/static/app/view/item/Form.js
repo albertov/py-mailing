@@ -5,7 +5,8 @@ Ext.define('WebMailing.view.item.Form', {
         labelAlign: 'top'
     },
     requires: [
-        'Ext.ux.pagedown.Field'
+        'Ext.ux.pagedown.Field',
+        'Ext.form.field.ComboBox'
     ],
     autoScroll: true,
     trackResetOnLoad: true,

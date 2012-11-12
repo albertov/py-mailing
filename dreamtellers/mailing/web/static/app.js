@@ -3,7 +3,7 @@ Ext.application({
     appFolder: window.appFolder,
     controllers: [
         'Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images',
-        'SentMailings'
+        'SentMailings', 'Templates'
     ],
     requires: [
         'Ext.app.Application',
@@ -43,6 +43,10 @@ Ext.application({
                         id: 'groups',
                         xtype: 'groups',
                         title: 'Grupos' // i18n
+                    }, {
+                        id: 'templates',
+                        xtype: 'templates',
+                        title: 'Plantillas' // i18n
                     }
                 ]
             }

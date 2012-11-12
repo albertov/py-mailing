@@ -1,0 +1,35 @@
+## -*- coding: utf-8 -*-
+Nombre boletín ${'nº {0:03}'.format(mailing.number)}
+==============================================================================
+Boletín informativo mensual, ${format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()}
+
+(Si no puede visualizar correctamente este email pruebe en la siguiente
+dirección: ${mailing.url})
+
+
+% for (cat, items) in mailing.grouped_items:
+${cat.title.upper()}
+${'-'*len(cat.title)}
+
+% for item in items:
+ * ${item.title}
+% endfor
+
+% endfor
+==============================================================================
+
+% for (cat, items) in mailing.grouped_items:
+${cat.title.upper()}
+${'-'*len(cat.title)}
+
+% for item in items:
+* ${item.title} *
+
+% if item.type == 'Article':
+${item.plain_text(79)}
+% elif item.type == 'ExternalLink':
+${item.url}
+% endif
+
+% endfor
+% endfor

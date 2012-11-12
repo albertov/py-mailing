@@ -11,6 +11,7 @@ from babel.dates import format_date
 from lxml import etree, builder
 
 import markdown
+from markupsafe import escape
 
 from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
                         Table, LargeBinary, String, MetaData,\
@@ -300,11 +301,12 @@ template_image_table = Table("template_image", Model.metadata,
 class Template(Model):
     __tablename__ = "template"
     id = Column(Integer, primary_key=True)
-    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
-    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     title = Column(Unicode, nullable=False)
     type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
+
+    created = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
 
     images = orm.relation(Image, secondary=template_image_table, lazy=True)
 
@@ -334,11 +336,42 @@ class Template(Model):
                 )
             return tpl.render_unicode(**namespace)
         else:
-            from genshi.template import MarkupTemplate
-            tpl = MarkupTemplate(self.body)
-            stream = tpl.generate(**namespace)
-            return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
+            from genshi.template import MarkupTemplate, TemplateSyntaxError
+            try:
+                tpl = MarkupTemplate(self.body)
+                stream = tpl.generate(**namespace)
+                return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
+            except TemplateSyntaxError, e:
+                return self._render_error(e)
+    
+    def _render_error(self, e, context=2):
+        lines = self.body.splitlines()[e.lineno-1-context:e.lineno+context]
+        olines = []
+        start = e.lineno-context
+        for i, line in enumerate(lines):
+            color = '#f00' if i==context else '#888'
+            olines.append((
+                u'<span>{2}:</span>'
+                u'<span style="color:{0}">{1}</span>'
+                ).format(color, escape(_ellipsis(line, 150)), start+i)
+                )
+        return (u'<h1>Error en plantilla</h1>'
+                u'<b>{0}</b><br />{1}').format(e, '<br />'.join(olines))
+
         
+    def __json__(self):
+        return dict(
+            id=self.id,
+            title=self.title,
+            type=self.type,
+            body=self.body,
+            created=self.created.isoformat() if self.created else None,
+            modified=self.modified.isoformat() if self.modified else None,
+            )
+
+def _ellipsis(s, l):
+    m = l-3
+    return s[:m] + ('...' if len(s)>m else '')
 
 class Group(Model):
     __tablename__ = "group"

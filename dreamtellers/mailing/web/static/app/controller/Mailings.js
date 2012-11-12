@@ -1,7 +1,7 @@
 Ext.define('WebMailing.controller.Mailings', {
     extend: 'Ext.app.Controller',
     views: ['mailing.Panel'],
-    stores: ['Mailings', 'Categories'],
+    stores: ['Mailings', 'Categories', 'Templates'],
     models: ['Mailing'],
     refs: [
         {
@@ -37,6 +37,7 @@ Ext.define('WebMailing.controller.Mailings', {
         this.mon(this.mailings, 'load', this._restoreSelection, this);
         this.mon(this.mailings, 'write', this.refreshView, this);
         this.mon(Ext.getStore('Categories'), 'write', this.refreshView, this);
+        this.mon(Ext.getStore('Templates'), 'write', this.refreshView, this);
     },
 
     _saveSelection: function() {

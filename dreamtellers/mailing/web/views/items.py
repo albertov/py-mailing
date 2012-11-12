@@ -49,14 +49,14 @@ class ItemValidator(Schema):
                                        value, state)
                 }
                 raise Invalid(format_compound_error(error_dict),
-                                  value, state, error_dict=error_dict)
+                              value, state, error_dict=error_dict)
             if value['type']=='Article' and not value.get('content'):
                 error_dict = {
                     'content': Invalid(self.fields['content'].message('empty', state),
                                         value, state)
                 }
                 raise Invalid(format_compound_error(error_dict),
-                                  value, state, error_dict=error_dict)
+                              value, state, error_dict=error_dict)
         return value
 
 def _create(data):
