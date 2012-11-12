@@ -41,4 +41,5 @@ class TestGroupViews(BaseViewTest):
         self.assertEqual(len(resp.json['groups']), 1)
         item = resp.json['groups'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k!='modified':
+                self.assertEqual(item[k], data[k])

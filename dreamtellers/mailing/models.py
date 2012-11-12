@@ -129,7 +129,7 @@ class Category(Model):
     image_id = Column(Integer, ForeignKey("image.id"))
     category_id = Column(Integer, ForeignKey("category.id"))
 
-    image = orm.relation(Image, lazy=True)
+    image = orm.relation(Image, lazy='joined')
     subcategories = orm.relation("Category",
         backref = orm.backref('category', remote_side=[id]),
         lazy='joined',
@@ -155,6 +155,7 @@ class Category(Model):
             id=self.id,
             title=self.title,
             image_id=self.image_id,
+            image=self.image.__json__() if self.image is not None else None,
             categories = [c.__json__() for c in self.subcategories],
             category_id=self.category_id,
             created=self.created.isoformat() if self.created else None,
@@ -175,7 +176,7 @@ class Item(Model):
                        nullable=False)
     image_id = Column(Integer, ForeignKey("image.id"))
 
-    image = orm.relation(Image)
+    image = orm.relation(Image, lazy='joined')
     image_position = Column(String(1), nullable=False, default="l")
 
 
@@ -212,6 +213,7 @@ class Item(Model):
             modified=self.modified.isoformat() if self.modified else None,
             image_id = self.image_id,
             image_position = self.image_position,
+            image=self.image.__json__() if self.image is not None else None,
             content = self.content,
             )
 

@@ -55,4 +55,5 @@ class TestUpdateMailing(BaseViewTest):
         self.assertEqual(len(resp.json['mailings']), 1)
         item = resp.json['mailings'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k!='modified':
+                self.assertEqual(item[k], data[k])

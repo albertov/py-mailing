@@ -41,4 +41,5 @@ class TestRecipientViews(BaseViewTest):
         self.assertEqual(len(resp.json['recipients']), 1)
         item = resp.json['recipients'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k!='modified':
+                self.assertEqual(item[k], data[k])

@@ -34,14 +34,12 @@ Ext.define('WebMailing.view.category.Tree', {
                 xtype: 'image_combo'
             },
             renderer: function(image_id, meta, record) {
-                var image = Ext.getStore('Images').getById(image_id);
-                //var image = record.getImage();
-                if (!image) {
+                if (image_id===null) {
                     return '&nbsp';
                 } else {
                     return Ext.String.format(
                         '<img src="{0}?width=120&height=120" alt="{1}" title="{1}" />',
-                        image.get('url'), image.get('title')
+                        record.get('image_url'), record.get('image_title')
                     );
                 }
             }
@@ -83,7 +81,6 @@ Ext.define('WebMailing.view.category.Tree', {
         this.plugins = [p];
         this.callParent(arguments);
         this.on('beforeedit', this.onRowBeforeEdit, this);
-        Ext.getStore('Images').load();
     },
 
     onRowBeforeEdit: function(p, o) {

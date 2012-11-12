@@ -8,6 +8,8 @@ Ext.define('WebMailing.model.Category', {
         {name:'id', type: 'int'},
         {name:'category_id', defaultValue:null},
         {name:'image_id', defaultValue:null},
+        {name:'image_title', mapping:"image.title", persist:false},
+        {name:'image_url', mapping:"image.url", persist:false},
         {name:'title', type: 'string'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}

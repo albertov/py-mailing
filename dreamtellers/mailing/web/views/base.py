@@ -134,8 +134,8 @@ def generic_update_item(model, updater, plural):
             obs = dict((o.id, o)
                        for o in model.query.filter(model.id.in_(ids)).all())
             items = [updater(obs[d['id']], d) for d in data]
-        items = [ob.__json__() for ob in items]
         Session.commit()
+        items = [ob.__json__() for ob in items]
         return {
             'success': True,
             plural: items

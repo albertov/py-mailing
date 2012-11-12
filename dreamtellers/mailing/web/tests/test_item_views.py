@@ -65,7 +65,8 @@ class TestUpdateItem(BaseViewTest):
         self.assertEqual(len(resp.json['items']), 1)
         item = resp.json['items'][0]
         for k in data:
-            self.assertEqual(item[k], data[k])
+            if k!='modified':
+                self.assertEqual(item[k], data[k])
 
     def test_update_two_articles(self):
         m = self._makeMailing()
@@ -83,4 +84,5 @@ class TestUpdateItem(BaseViewTest):
         self.assertEqual(len(resp.json['items']), 2)
         for item, data in zip(resp.json['items'], data):
             for k in data:
-                self.assertEqual(item[k], data[k])
+                if k!='modified':
+                    self.assertEqual(item[k], data[k])
