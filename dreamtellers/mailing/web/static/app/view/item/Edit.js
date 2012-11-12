@@ -30,8 +30,12 @@ Ext.define('WebMailing.view.item.Edit', {
         this.loadMask = Ext.create('WebMailing.LoadMask', this);
     },
     setMailing: function(record) {
-        this._createAndSwapTree(record);
-        this.loadMask.bindStore(record.items());
+        if (record!==this.record) {
+            console.debug('setMailing');
+            this.record = record;
+            this._createAndSwapTree(record);
+            this.loadMask.bindStore(record.items());
+        }
     },
     _createAndSwapTree: function(record) {
         var container = this.items.get('tree_container'),

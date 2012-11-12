@@ -81,9 +81,6 @@ Ext.define('WebMailing.store.ItemTreeStore', {
                 c = c.parentNode;
             }
             cat.appendChild(newItem);
-            cat.sort(function(a,b) {
-                return a.get('position')-b.get('position');
-            }, true);
         }, this);
         root.sort(function(a,b) {
             return a.get('position')-b.get('position');

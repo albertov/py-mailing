@@ -70,17 +70,21 @@ Ext.define('WebMailing.controller.Items', {
         }
     },
     onNewItem: function(tree, node) {
-        console.debug('onNewItem', arguments);
         var parent = node.get('record'),
             category_id = parent?parent.get('id'):null;
-            item = tree.store.items.add({
+            store = tree.store.items,
+            item = store.add({
                 id: null,
                 title: 'Sin título', // i18n
                 content: 'Texto', // i18n
                 category_id: category_id,
                 type: 'Article'
             })[0];
-            this.setActiveRecord(item);
+        store.on('write', function() {
+            var root = tree.getRootNode(),
+                node = root.findChild("id", "item-"+item.get('id'), true);
+            tree.getSelectionModel().select(node);
+        }, this, {single:true, delay:1});
     },
     onDeleteNode: function(tree, node) {
         var record = node.get('record');
