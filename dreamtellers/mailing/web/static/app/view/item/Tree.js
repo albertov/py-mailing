@@ -3,6 +3,7 @@ Ext.define('WebMailing.view.item.Tree', {
     alias: 'widget.item_tree',
     requires: [
         'Ext.tree.plugin.TreeViewDragDrop',
+        'WebMailing.store.ItemTreeStore',
         'WebMailing.CRUDPlugin'
     ],
     selModel: {
@@ -54,7 +55,15 @@ Ext.define('WebMailing.view.item.Tree', {
             },
         });
         this.plugins = [p];
+        this.store = Ext.create('WebMailing.store.ItemTreeStore', {
+            mailing: this.mailing,
+            categories: this.categories
+        });
         this.callParent(arguments);
         this.relayEvents(this.getView(), ['beforedrop']);
+    },
+    destroy: function() {
+        this.callParent(arguments);
+        this.store.destroy();
     }
 });

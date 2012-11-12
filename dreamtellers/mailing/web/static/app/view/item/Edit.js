@@ -3,7 +3,6 @@ Ext.define('WebMailing.view.item.Edit', {
     requires: [
         'Ext.layout.container.Border',
         'Ext.layout.container.Fit',
-        'WebMailing.store.ItemTreeStore',
         'WebMailing.view.item.Form',
         'WebMailing.view.item.Tree',
         'WebMailing.LoadMask'
@@ -38,11 +37,8 @@ Ext.define('WebMailing.view.item.Edit', {
         var container = this.items.get('tree_container'),
             old = container.items.get(0),
             tree = Ext.create('WebMailing.view.item.Tree', {
-                store: Ext.create('WebMailing.store.ItemTreeStore', {
-                    mailing: record,
-                    categories: Ext.getStore('Categories'),
-                    border: false
-                })
+                mailing: record,
+                categories: Ext.getStore('Categories'),
             });
         if (old)
             Ext.destroy(container.items.remove(old))
