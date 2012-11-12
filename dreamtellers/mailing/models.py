@@ -20,7 +20,6 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.orderinglist import ordering_list
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .util import sniff_content_type
@@ -510,14 +509,16 @@ class GroupSentMailing(Model):
         )
 
 class SentMailingProcessedRecipient(Model):
-    __tablename__ = 'sent_mailing_processed_recipient'
-    recipient_id = Column(Integer,
-                          ForeignKey('recipient.id', ondelete="CASCADE"),
-                          primary_key=True, nullable=False)
-    sent_mailing_id = Column(Integer,
-                             ForeignKey('sent_mailing.id', ondelete="CASCADE"),
-                             primary_key=True, nullable=False)
-    time = Column(DateTime, nullable=False, default=datetime.datetime.now),
+    __table__ = Table('sent_mailing_processed_recipient', metadata,
+        Column("recipient_id", Integer,
+               ForeignKey('recipient.id', ondelete="CASCADE"),
+               primary_key=True, nullable=False),
+        Column("sent_mailing_id", Integer,
+               ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+               primary_key=True, nullable=False),
+        Column("time", DateTime, nullable=False,
+               default=datetime.datetime.now),
+   )
 
     def __json__(self):
         return dict(
@@ -558,12 +559,15 @@ class SentMailing(Model):
             )
 
     processed_recipients = orm.relation(Recipient,
-        secondary=SentMailingProcessedRecipient.__table__)
+        secondary=SentMailingProcessedRecipient.__table__,
+        order_by=SentMailingProcessedRecipient.__table__.c.time,
+        lazy=True
+        )
 
     @property
     def unprocessed_recipients(self):
-        return [r for r in self.recipients
-                if r not in self.processed_recipients]
+        processed = set(self.processed_recipients)
+        return [r for r in self.recipients if r not in processed]
 
 
     @classmethod
