@@ -81,10 +81,14 @@ Ext.define('WebMailing.controller.Items', {
                 type: 'Article'
             })[0];
         store.on('write', function() {
-            var root = tree.getRootNode(),
-                node = root.findChild("id", "item-"+item.get('id'), true);
-            tree.getSelectionModel().select(node);
+            this.selectNodeForItem(item);
         }, this, {single:true, delay:1});
+    },
+    selectNodeForItem: function(item) {
+        var tree = this.getTree(),
+            root = tree.getRootNode(),
+            node = root.findChild("id", "item-"+item.get('id'), true);
+        tree.getSelectionModel().select(node);
     },
     onDeleteNode: function(tree, node) {
         var record = node.get('record');
