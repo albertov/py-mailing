@@ -163,3 +163,51 @@ class TestSentMailing(BaseModelTest):
             self.assertIsInstance(r, Recipient)
         names = [r.name for r in retrieved.recipients]
         self.failUnless(names.index('foo2')<names.index('foo'))
+
+        for g in retrieved.groups:
+            self.session.delete(g)
+        self.session.commit()
+        self.failUnlessEqual(0, len(retrieved.groups))
+        self.failUnlessEqual(0, len(retrieved.recipients))
+
+    def test_processed_recipients(self):
+        programmed_date = datetime.datetime(2010,1,1)
+        ob = self._makeOne(mailing=self._makeMailing(),
+                           programmed_date=programmed_date)
+        ob.groups = [
+            self._makeGroup(
+                name = 'group_a',
+                priority=1,
+                recipients=[self._makeRecipient(name='foo',
+                                                email='a@example.com'),
+                            self._makeRecipient(name='bar',
+                                                email='b@example.com')]),
+            self._makeGroup(
+                name = 'group_b',
+                priority=0,
+                recipients=[self._makeRecipient(name='foo2',
+                                                email='a2@example.com'),
+                            self._makeRecipient(name='bar2',
+                                                email='b2@example.com')]),
+        ]
+        self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        retrieved = self.session.query(ob.__class__).one()
+        self.failUnlessEqual(0, len(retrieved.processed_recipients))
+        retrieved.processed_recipients.append(retrieved.groups[0].recipients[0])
+
+        self.session.commit()
+        self.session.expunge_all()
+
+        retrieved = self.session.query(ob.__class__).one()
+
+        self.failUnlessEqual(1, len(retrieved.processed_recipients))
+        self.failUnlessEqual(3, len(retrieved.unprocessed_recipients))
+        from ..models import Recipient
+        for r in retrieved.processed_recipients:
+            self.assertIsInstance(r, Recipient)
+        self.session.commit()
+        self.session.delete(retrieved)
+        self.session.commit()

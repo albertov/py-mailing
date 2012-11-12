@@ -20,6 +20,7 @@ from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from .util import sniff_content_type
@@ -500,15 +501,28 @@ class GroupSentMailing(Model):
     sent_mailing_id = Column(Integer,
                              ForeignKey('sent_mailing.id', ondelete="CASCADE"),
                              primary_key=True, nullable=False)
-    group = orm.relation(Group,
-        backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
-    sent_mailing = orm.relation("SentMailing",
-        backref=orm.backref('group_sent_mailings', cascade='all,delete-orphan'))
 
     def __json__(self):
         return dict(
             id='::'.join(map(str, [self.group_id, self.sent_mailing_id])),
             group_id=self.group_id,
+            sent_mailing_id=self.sent_mailing_id,
+        )
+
+class SentMailingProcessedRecipient(Model):
+    __tablename__ = 'sent_mailing_processed_recipient'
+    recipient_id = Column(Integer,
+                          ForeignKey('recipient.id', ondelete="CASCADE"),
+                          primary_key=True, nullable=False)
+    sent_mailing_id = Column(Integer,
+                             ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+                             primary_key=True, nullable=False)
+    time = Column(DateTime, nullable=False, default=datetime.datetime.now),
+
+    def __json__(self):
+        return dict(
+            id='::'.join(map(str, [self.recipient_id, self.sent_mailing_id])),
+            recipient_id=self.recipient_id,
             sent_mailing_id=self.sent_mailing_id,
         )
 
@@ -525,7 +539,10 @@ class SentMailing(Model):
     )
 
     groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
-    mailing = orm.relation(Mailing, backref=orm.backref('sent_mailings', cascade='all,delete-orphan'))
+    mailing = orm.relation(Mailing,
+        backref=orm.backref('sent_mailings', cascade='all,delete-orphan'),
+        innerjoin=True,
+        )
 
     @declared_attr
     def recipients(cls):
@@ -539,6 +556,14 @@ class SentMailing(Model):
             lazy=True,
             order_by=[c for c in _recipient_join.c if 'priority' in c.name]
             )
+
+    processed_recipients = orm.relation(Recipient,
+        secondary=SentMailingProcessedRecipient.__table__)
+
+    @property
+    def unprocessed_recipients(self):
+        return [r for r in self.recipients
+                if r not in self.processed_recipients]
 
 
     @classmethod
