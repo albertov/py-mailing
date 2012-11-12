@@ -24,10 +24,7 @@ Ext.define('WebMailing.view.template.Panel', {
     ],
     listeners: {
         activate: function() {
-            var f = this.getCodeEditor();
-            if (f.editor) {
-                f.editor.focus();
-            }
+            this.setRecord(this.getRecord());
         }
     },
     modeMap: {
