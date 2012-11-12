@@ -34,12 +34,14 @@ Ext.define('WebMailing.view.sent_mailing.Panel', {
         return this.record;
     },
     setRecord: function(record) {
-        this.record = record;
-        if (record) {
-            this._createAndSwapGrid(record);
-        } else {
-            this.items.get('group_chooser').disable();
-            this.items.get('grid_container').disable();
+        if (record!==this.record) {
+            this.record = record;
+            if (record) {
+                this._createAndSwapGrid(record);
+            } else {
+                this.items.get('group_chooser').disable();
+                this.items.get('grid_container').disable();
+            }
         }
     },
     _createAndSwapGrid: function(record) {
