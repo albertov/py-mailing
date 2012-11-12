@@ -21,7 +21,8 @@ Ext.define('WebMailing.view.image.Combo', {
     },
     matchFieldWidth: false,
     queryMode: 'local',
-    displayField: 'title',
+    queryField: 'title',
+    displayField: 'filename',
     initComponent: function() {
         this.store = Ext.create('WebMailing.store.Images', {
             pageSize: this.pageSize||100,
@@ -37,7 +38,15 @@ Ext.define('WebMailing.view.image.Combo', {
         if (forceAll) {
             this.clearValue();
         }
-        return this.callParent(arguments);
+        var displayField = this.displayField, ret;
+        this.displayField = this.queryField || this.displayField;
+        try {
+            ret = this.callParent(arguments);
+        } catch(e) {
+            this.displayField = displayField;
+            throw (e);
+        }
+        this.displayField = displayField;
     },
     setValue: function(value) {
         // makes sure record is loaded in store
