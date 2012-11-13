@@ -6,6 +6,8 @@ Ext.define('WebMailing.view.item.Form', {
     },
     requires: [
         'Ext.ux.pagedown.Field',
+        'Ext.container.Container',
+        'Ext.layout.container.HBox',
         'Ext.form.field.ComboBox'
     ],
     autoScroll: true,
@@ -13,51 +15,75 @@ Ext.define('WebMailing.view.item.Form', {
     bodyStyle: {
         padding: '5px'
     },
+    defaults: {
+        anchor: '100%'
+    },
     items: [
         {
-            name: 'type',
-            xtype: 'combo',
-            editable: false,
-            fieldLabel: 'Tipo', //i18n
-            anchor: '95%',
-            queryMode: 'local',
-            displayField: 'text',
-            valueField: 'value',
-            store: Ext.create('Ext.data.Store', {
-                fields: ['value', 'text'],
-                data: [
-                    {
-                        value: 'Article',
-                        text: 'Artículo' // i18n
-                    }, {
-                        value: 'ExternalLink',
-                        text: 'Enlace' //i18n
-                    }
-                ]
-            })
-
-        }, {
             name: 'title',
             xtype: 'textfield',
             fieldLabel: 'Título', //i18n
-            anchor: '95%'
+        }, {
+            xtype: 'container',
+            layout: 'hbox',
+            items: [
+                {
+                    name: 'type',
+                    xtype: 'combo',
+                    editable: false,
+                    fieldLabel: 'Tipo', //i18n
+                    queryMode: 'local',
+                    displayField: 'text',
+                    valueField: 'value',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['value', 'text'],
+                        data: [
+                            {
+                                value: 'Article',
+                                text: 'Artículo' // i18n
+                            }, {
+                                value: 'ExternalLink',
+                                text: 'Enlace' //i18n
+                            }
+                        ]
+                    }),
+                    flex: 1,
+                    padding: "0 5 0 0"
+
+                }, {
+                    name: 'image_id',
+                    xtype: 'image_combo',
+                    fieldLabel: 'Imágen', //i18n
+                    flex: 2
+                }
+            ]
         }, {
             name: 'url',
             xtype: 'textfield',
-            fieldLabel: 'Enlace', //i18n
-            anchor: '95%'
-        }, {
-            name: 'image_id',
-            xtype: 'image_combo',
-            fieldLabel: 'Imágen', //i18n
-            anchor: '95%'
+            fieldLabel: 'Enlace' //i18n
         }, {
             name: 'content',
             xtype: 'markdownfield',
+            fieldLabel: 'Texto', //i18n
             grow: true,
             growMax: 250,
-            fieldLabel: 'Texto', //i18n
-            anchor: '95%'
+            hookNames: ["insertImageDialog"],
+            listeners: {
+                insertImageDialog: function(callback) {
+                    var combo = this.up('form').getForm().findField('image_id'),
+                        rec = combo.findRecordByValue(combo.getValue()),
+                        mag = null;
+                    if (rec) {
+                        msg = "La plantilla insertará la imágen en el boletín";
+                    } else {
+                        msg = "Escoge una imágen para el Item en el menú del " +
+                              "formulario.";
+                    }
+                    Ext.MessageBox.alert("Aviso", msg,
+                                         function() {callback(null)});
+                    return true;
+                }
+            }
         }
     ],
     buttons: [

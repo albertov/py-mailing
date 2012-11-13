@@ -30,16 +30,20 @@ Ext.define("Ext.ux.pagedown.Field", {
             disableFormats: true
         }
     ],
+    hookNames: [],
     initComponent: function() {
         this.inputId = 'wmd-input'+this.id;
-        this.callParent(arguments);
         this.on('render', this._initializeEditor, this);
         this.addEvents("help");
+        if (this.hookNames && this.hookNames.length) {
+            this.addEvents.apply(this, this.hookNames);
+        }
+        this.callParent(arguments);
     },
     setValue: function() {
         this.callParent(arguments);
-        if (this._editor) {
-            this._editor.refreshPreview();
+        if (this.editor) {
+            this.editor.refreshPreview();
         }
     },
     getSubTplData: function() {
@@ -49,9 +53,19 @@ Ext.define("Ext.ux.pagedown.Field", {
     },
     _initializeEditor: function() {
         var converter = new Markdown.getSanitizingConverter();
-        this._editor = new Markdown.Editor(converter, this.id, {
-            handler: Ext.bind(this.fireEvent, this, ["help", [this]])
+        this.editor = new Markdown.Editor(converter, this.id, {
+            handler: Ext.bind(this.fireEvent, this, ["help", this])
         });
-        this._editor.run();
+        var me = this;
+        Ext.each(this.hookNames, function(hookName) {
+            me.editor.hooks.set(hookName, function() {
+                var args = [hookName].concat(Ext.Array.slice(arguments));
+                return me.fireEvent.apply(me, args);
+            });
+        });
+        this.editor.run();
+    },
+    getEditor: function() {
+        return this.editor;
     }
 });
