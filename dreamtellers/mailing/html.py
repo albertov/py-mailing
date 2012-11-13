@@ -1,7 +1,7 @@
 from lxml import etree
 
 from .util import collapse_styles
-from .models import MissingTemplate
+from .models import MissingTemplate, FileLookupError
 
 class HTMLPageComposer(object):
 
@@ -40,7 +40,10 @@ class HTMLPageComposer(object):
             if text:
                 return _TextFile(text)
         else:
-            return self._mailing.get_file(filename)
+            try:
+                return self._mailing.get_file(filename)
+            except FileLookupError:
+                return None
 
         
     

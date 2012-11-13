@@ -8,6 +8,7 @@ import datetime
 import re
 import traceback
 import sys
+import os
 
 from babel.dates import format_date
 
@@ -35,8 +36,12 @@ Session = orm.scoped_session(
     )
 Model.query = Session.query_property()
 
-class MissingTemplate(StandardError):
+class FileLookupError(LookupError):
     pass
+
+class MissingTemplate(FileLookupError):
+    pass
+
 
 
 @event.listens_for(orm.mapper, 'before_update')
@@ -317,6 +322,11 @@ class Template(Model):
         format_date = format_date
         )
 
+    @property
+    def body_lines(self):
+        return self.body.splitlines()
+    
+
     @classmethod
     def latest_by_type(cls, type):
         q = cls.query.filter_by(type=type)
@@ -338,21 +348,28 @@ class Template(Model):
         from genshi.template import MarkupTemplate, TemplateSyntaxError
         from genshi.template.eval import UndefinedError
         namespace = dict(self.variables, **data)
-        try:
+        def render():
             tpl = MarkupTemplate(self.body)
             stream = tpl.generate(**namespace)
-            return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
+            o = stream.render(self.type)
+            return o.decode('utf8') #FIXME: Derive from <meta http-equiv> if present
+
+        if 'RAISE_TEMPLATE_ERRORS' in os.environ:
+            return render()
+
+        try:
+            return render()
         except TemplateSyntaxError, e:
-            return self._render_error(e, e.lineno)
+            return self._render_html_error(e, e.lineno)
         except UndefinedError, e:
-            var_name = re.match(r'"(.*?)"', e.message).group(1) 
+            var_name = re.search(r'"(.*?)"', e.message).group(1) 
             r = re.compile(r'\b{0}\b'.format(var_name))
             lineno = None
             for i, l in enumerate(self.body_lines):
                 if r.search(l):
                     lineno = i+1
                     break
-            return self._render_error(e, lineno)
+            return self._render_html_error(e, lineno)
         except Exception, e:
             # assume exception ocurred in template
             frame = traceback.extract_tb(sys.exc_info()[2])[-1]
@@ -361,34 +378,64 @@ class Template(Model):
                 function_name = escape(function_name),
                 e = escape(str(e))
                 )
-            return self._render_error(err, lineno)
+            return self._render_html_error(err, lineno)
 
     def _render_text(self, **data):
         namespace = dict(self.variables, **data)
         from mako.template import Template
+        from mako.exceptions import RichTraceback
         module_directory = '/tmp/mako_templates' #FIXME
-        tpl = Template(self.body,
-            module_directory=module_directory,
-            default_filters=['decode.utf8'],
-            )
-        return tpl.render_unicode(**namespace)
+        def render():
+            tpl = Template(self.body,
+                module_directory=module_directory,
+                default_filters=['decode.utf8'],
+                )
+            return tpl.render_unicode(**namespace)
+        if 'RAISE_TEMPLATE_ERRORS' in os.environ:
+            return render()
 
-    @property
-    def body_lines(self):
-        return self.body.splitlines()
-    
-    def _render_error(self, e, lineno=None, context=2):
+        try:
+            return render()
+        except:
+            tb = RichTraceback()
+            lineno, function = tb.traceback[-1][1:3]
+            return self._render_text_error(tb.error, lineno)
+
+    def _render_text_error(self, e, lineno=None, context=2):
         olines = []
         if lineno is not None:
-            lines = self.body_lines[lineno-1-context:lineno+context]
-            start = lineno-context
-            for i, line in enumerate(lines):
-                color = '#f00' if i==context else '#888'
+            lines = list(enumerate(self.body_lines))
+            lines = lines[max(lineno-1-context,0):lineno+context]
+            for i, line in lines:
+                olines.append(
+                    u'{arrow}{lineno}: {line}'.format(
+                        line = _ellipsis(line, 150),
+                        lineno = i+1,
+                        arrow = '-->' if i+1==lineno else '   '
+                ))
+        return (u'Error en plantilla "{title}"\n'
+                u'{error}\n\n{lines}').format(
+                    error=e,
+                    lines='\n'.join(olines),
+                    title=self.title
+                )
+            
+
+    def _render_html_error(self, e, lineno=None, context=2):
+        olines = []
+        if lineno is not None:
+            lines = list(enumerate(self.body_lines))
+            lines = lines[max(lineno-1-context,0):lineno+context]
+            for i, line in lines:
+                color = '#f00' if i+1==lineno else '#888'
                 olines.append((
-                    u'<span>{2}:</span>'
-                    u'<span style="color:{0}">{1}</span>'
-                    ).format(color, escape(_ellipsis(line, 150)), start+i)
-                    )
+                    u'<span>{lineno}:</span>'
+                    u'<span style="color:{color}">{line}</span>'
+                    ).format(
+                        color=color,
+                        line=escape(_ellipsis(line, 150)),
+                        lineno=i+1
+                     ))
         return (u'<h1>Error en plantilla <em>{title}</em></h1>'
                 u'<b>{error}</b><br />{lines}').format(
                     error=e,
@@ -536,7 +583,7 @@ class Mailing(Model):
         try:
             return [i for i in self.images if i.filename==filename][0]
         except IndexError:
-            raise LookupError(filename)
+            raise FileLookupError(filename)
 
     def items_by_type(self, type, grouped=False):
         items =  [i for i in self.items if i.type==type]

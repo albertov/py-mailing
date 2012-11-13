@@ -12,8 +12,19 @@ Ext.define('WebMailing.view.mailing.Detail', {
     items: [
         {
             itemId: 'view',
-            xtype: 'mailing_view',
-            title: 'Vista' // i18n
+            xtype: 'tabpanel',
+            title: 'Vista', // i18n
+            items: [
+                {
+                    itemId: 'html_view',
+                    xtype: 'mailing_view',
+                    title: 'HTML' // i18n
+                }, {
+                    itemId: 'text_view',
+                    xtype: 'mailing_view',
+                    title: 'Texto' // i18n
+                }
+            ]
         }, {
             itemId: 'edit',
             xtype: 'mailing_edit',
@@ -33,9 +44,10 @@ Ext.define('WebMailing.view.mailing.Detail', {
     },
     refresh: function() {
         if (this.record) {
-            this.items.get('edit').setRecord(this.record);
-            this.items.get('sent_mailings').setRecord(this.record);
-            this.items.get('view').setSrc(this.record.getViewUrl());
+            this.down('#edit').setRecord(this.record);
+            this.down('#sent_mailings').setRecord(this.record);
+            this.down('#html_view').setSrc(this.record.getViewUrl());
+            this.down('#text_view').setSrc(this.record.getViewUrl('index.txt'));
             this.setTitle(this.record.getTitle());
         }
     }

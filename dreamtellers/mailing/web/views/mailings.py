@@ -17,15 +17,11 @@ class MailingValidator(Schema):
     date = ISO8601DateValidator(allow_empty=False)
     number = Int(min=0)
 
-@app.route('/m/<number:int>/')
-def mailing_by_number(number):
-    return _get_composer(number).get_file('index.html').data
-
-@app.route('/m/<number:int>/<filename:re:.+>')
+@app.route('/m/<number:int>/<filename:re:.*>')
 def mailing_file(number, filename):
-    try:
-        f = _get_composer(number).get_file(filename)
-    except LookupError:
+    filename = filename or 'index.html'
+    f = _get_composer(number).get_file(filename)
+    if f is None:
         abort(404)
     if hasattr(f, 'url'):
         redirect(f.url)

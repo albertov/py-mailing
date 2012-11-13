@@ -48,8 +48,8 @@ Ext.define('WebMailing.model.Mailing', {
         }
     },
 
-    getViewUrl: function() {
-        return Ext.String.format('/m/{0}/', this.get('number'));
+    getViewUrl: function(fname) {
+        return Ext.String.format('/m/{0}/{1}', this.get('number'), fname||'');
     },
 
     getTitle: function() {
