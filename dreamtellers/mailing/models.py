@@ -62,9 +62,12 @@ class Image(Model):
     content_type = Column(String(20), nullable=False)
 
     @classmethod
-    def by_hash(cls, hash):
+    def by_hash(cls, hash, undefer_data=True):
         try:
-            return cls.query.filter_by(hash=hash).one()
+            q = cls.query.filter_by(hash=hash)
+            if undefer_data:
+                q = q.options(orm.undefer('data'))
+            return q.one()
         except NoResultFound:
             return None
 
