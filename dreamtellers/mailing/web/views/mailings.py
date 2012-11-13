@@ -1,4 +1,4 @@
-from ...models import Mailing, Template
+from ...models import Mailing, Template, Image
 from ...html import HTMLPageComposer
 
 from .. import app
@@ -20,17 +20,20 @@ class MailingValidator(Schema):
 @app.route('/m/<number:int>/<filename:re:.*>')
 def mailing_file(number, filename):
     filename = filename or 'index.html'
+    if filename not in ['index.html', 'index.txt']:
+        # Try to take shortcut if filename is probably an image
+        img = Image.by_filename(filename)
+        if img is not None:
+            redirect(img.url)
     f = _get_composer(number).get_file(filename)
     if f is None:
         abort(404)
-    if hasattr(f, 'url'):
-        redirect(f.url)
     else:
         response.content_type = f.content_type
         return f.data
 
-def _get_composer(number):
-    m = Mailing.by_number(number, eager=True)
+def _get_composer(number, eager=True):
+    m = Mailing.by_number(number, eager)
     if m is not None:
         return HTMLPageComposer(m)
     else:

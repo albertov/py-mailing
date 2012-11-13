@@ -68,6 +68,13 @@ class Image(Model):
         except NoResultFound:
             return None
 
+    @classmethod
+    def by_filename(cls, filename):
+        try:
+            return cls.query.filter_by(filename=filename).one()
+        except NoResultFound:
+            return None
+
     @hybrid_property
     def data(self):
         return self._data
