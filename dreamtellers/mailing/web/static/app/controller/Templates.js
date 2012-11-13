@@ -22,7 +22,7 @@ Ext.define('WebMailing.controller.Templates', {
             "templates template_grid": {
                 select: this.onTemplateSelect,
                 deselect: this.onTemplateDeSelect,
-                beforedeselect: this.onBeforeDeselect,
+                beforedeselect: this.checkIfSaveIsNeeded,
                 new_item: this.onNewTemplate,
                 delete_item: this.onDeleteTemplate
             }
@@ -38,7 +38,7 @@ Ext.define('WebMailing.controller.Templates', {
     onTemplateSelect: function(grid, record) {
         this.getPanel().setRecord(record);
     },
-    onBeforeDeselect: function(sm, record) {
+    checkIfSaveIsNeeded: function() {
         var f = this.getForm().getForm();
         if (f.getRecord() && f.isDirty()) {
             Ext.MessageBox.show({
@@ -63,6 +63,8 @@ Ext.define('WebMailing.controller.Templates', {
         this.getPanel().setRecord(null);
     },
     onNewTemplate: function(grid) {
+        if (!this.checkIfSaveIsNeeded())
+            return;
         var r = grid.store.add({
             title: 'Título', //i18n
             type: 'xhtml'
@@ -71,9 +73,9 @@ Ext.define('WebMailing.controller.Templates', {
             grid.rowEditor.startEdit(r, 0);
         }, this, {single:true})
     },
-
-
     onDeleteTemplate: function(grid, record) {
+        if (!this.checkIfSaveIsNeeded())
+            return;
         Ext.Msg.confirm(
             "Aviso",
             Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',

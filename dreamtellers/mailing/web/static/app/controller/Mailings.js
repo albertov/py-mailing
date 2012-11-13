@@ -26,7 +26,7 @@ Ext.define('WebMailing.controller.Mailings', {
         this.control({
             "mailing_grid": {
                 'select': this.onRowSelect,
-                'beforedeselect': this.onBeforeDeselect,
+                'beforedeselect': this.checkIfSaveIsNeeded,
                 'deselect': this.onRowDeSelect,
                 'afterrender': this.reloadStore,
                 'new_item': this.onNewMailing,
@@ -36,7 +36,7 @@ Ext.define('WebMailing.controller.Mailings', {
                 "blur": this.onMailingFormDirtyChange
             },
             "item_tree": {
-                beforedeselect: this.onBeforeDeselect,
+                beforedeselect: this.checkIfSaveIsNeeded,
             }
         });
         this.mailings = Ext.getStore('Mailings');
@@ -74,7 +74,7 @@ Ext.define('WebMailing.controller.Mailings', {
          }
     },
 
-    onBeforeDeselect: function() {
+    checkIfSaveIsNeeded: function() {
         var f = this.getItemForm().getForm();
         if (f.getRecord() && f.isDirty()) {
             Ext.MessageBox.show({
@@ -124,6 +124,8 @@ Ext.define('WebMailing.controller.Mailings', {
     },
 
     onDeleteMailing: function(grid, record) {
+        if (!this.checkIfSaveIsNeeded())
+            return;
         Ext.Msg.confirm(
             "Aviso",
             Ext.String.format('Se borrara permanentemente "{0}". ¿Seguro?',
@@ -139,6 +141,8 @@ Ext.define('WebMailing.controller.Mailings', {
         }
     },
     onNewMailing: function(grid) {
+        if (!this.checkIfSaveIsNeeded())
+            return;
         var store = this.application.getStore('Mailings'),
             rec = store.add({date: new Date})[0];
         store.on('write', Ext.bind(this.setActiveRecord, this, [rec]),
