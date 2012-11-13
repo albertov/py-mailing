@@ -8,6 +8,9 @@ Ext.define('WebMailing.controller.Templates', {
         {
             selector: "templates",
             ref: "panel"
+        }, {
+            selector: "templates form",
+            ref: "form"
         }
     ],
 
@@ -19,6 +22,7 @@ Ext.define('WebMailing.controller.Templates', {
             "templates template_grid": {
                 select: this.onTemplateSelect,
                 deselect: this.onTemplateDeSelect,
+                beforedeselect: this.onBeforeDeselect,
                 new_item: this.onNewTemplate,
                 delete_item: this.onDeleteTemplate
             }
@@ -33,6 +37,27 @@ Ext.define('WebMailing.controller.Templates', {
     },
     onTemplateSelect: function(grid, record) {
         this.getPanel().setRecord(record);
+    },
+    onBeforeDeselect: function(sm, record) {
+        var f = this.getForm().getForm();
+        if (f.getRecord() && f.isDirty()) {
+            Ext.MessageBox.show({
+                title: "Aviso", // i18n
+                msg: "La plantilla contiene cambios sin guardar. ¿Desea guardarlos?",
+                icon: Ext.MessageBox.WARNING,
+                buttons: Ext.Msg.YESNOCANCEL,
+                fn: function(btn) {
+                    if (btn=="yes") {
+                        f.updateRecord();
+                    } else if (btn=="no") {
+                        f.reset();
+                    }
+                }
+            });
+            return false;
+        } else {
+            return true;
+        }
     },
     onTemplateDeSelect: function() {
         this.getPanel().setRecord(null);

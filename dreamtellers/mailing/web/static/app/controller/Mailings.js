@@ -14,6 +14,9 @@ Ext.define('WebMailing.controller.Mailings', {
             ref: 'form',
             selector: 'mailing_form'
         }, {
+            ref: 'itemForm',
+            selector: 'mailing_detail item_form'
+        }, {
             ref: 'detail',
             selector: 'mailing_detail'
         }
@@ -23,6 +26,7 @@ Ext.define('WebMailing.controller.Mailings', {
         this.control({
             "mailing_grid": {
                 'select': this.onRowSelect,
+                'beforedeselect': this.onBeforeDeselect,
                 'deselect': this.onRowDeSelect,
                 'afterrender': this.reloadStore,
                 'new_item': this.onNewMailing,
@@ -30,6 +34,9 @@ Ext.define('WebMailing.controller.Mailings', {
             },
             "mailing_form field": {
                 "blur": this.onMailingFormDirtyChange
+            },
+            "item_tree": {
+                beforedeselect: this.onBeforeDeselect,
             }
         });
         this.mailings = Ext.getStore('Mailings');
@@ -65,6 +72,28 @@ Ext.define('WebMailing.controller.Mailings', {
              if (selection.length)
                  sm.select(selection);
          }
+    },
+
+    onBeforeDeselect: function() {
+        var f = this.getItemForm().getForm();
+        if (f.getRecord() && f.isDirty()) {
+            Ext.MessageBox.show({
+                title: "Aviso", // i18n
+                msg: "El item contiene cambios sin guardar. ¿Desea guardarlos?",
+                icon: Ext.MessageBox.WARNING,
+                buttons: Ext.Msg.YESNOCANCEL,
+                fn: function(btn) {
+                    if (btn=="yes") {
+                        f.updateRecord();
+                    } else if (btn=="no") {
+                        f.reset();
+                    }
+                }
+            });
+            return false;
+        } else {
+            return true;
+        }
     },
 
     onRowSelect: function(grid, record) {
