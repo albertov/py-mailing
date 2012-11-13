@@ -5,6 +5,9 @@ from cStringIO import StringIO
 from hashlib import md5
 import textwrap
 import datetime
+import re
+import traceback
+import sys
 
 from babel.dates import format_date
 
@@ -301,7 +304,7 @@ template_image_table = Table("template_image", Model.metadata,
 class Template(Model):
     __tablename__ = "template"
     id = Column(Integer, primary_key=True)
-    title = Column(Unicode, nullable=False)
+    title = Column(Unicode, nullable=False, unique=True)
     type = Column(String(20), nullable=False, default='xhtml')
     body = Column(Unicode, nullable=False)
 
@@ -326,37 +329,72 @@ class Template(Model):
         return self.__class__.__name__ + repr(data)
 
     def render(self, **data):
-        namespace = dict(self.variables, **data)
         if self.type == 'text':
-            from mako.template import Template
-            module_directory = '/tmp/mako_templates' #FIXME
-            tpl = Template(self.body,
-                module_directory=module_directory,
-                default_filters=['decode.utf8'],
-                )
-            return tpl.render_unicode(**namespace)
+            return self._render_text(**data)
         else:
-            from genshi.template import MarkupTemplate, TemplateSyntaxError
-            try:
-                tpl = MarkupTemplate(self.body)
-                stream = tpl.generate(**namespace)
-                return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
-            except TemplateSyntaxError, e:
-                return self._render_error(e)
-    
-    def _render_error(self, e, context=2):
-        lines = self.body.splitlines()[e.lineno-1-context:e.lineno+context]
-        olines = []
-        start = e.lineno-context
-        for i, line in enumerate(lines):
-            color = '#f00' if i==context else '#888'
-            olines.append((
-                u'<span>{2}:</span>'
-                u'<span style="color:{0}">{1}</span>'
-                ).format(color, escape(_ellipsis(line, 150)), start+i)
+            return self._render_xhtml(**data)
+
+    def _render_xhtml(self, **data):
+        from genshi.template import MarkupTemplate, TemplateSyntaxError
+        from genshi.template.eval import UndefinedError
+        namespace = dict(self.variables, **data)
+        try:
+            tpl = MarkupTemplate(self.body)
+            stream = tpl.generate(**namespace)
+            return stream.render(self.type).decode('utf8') #FIXME: Derive from <meta http-equiv> if present
+        except TemplateSyntaxError, e:
+            return self._render_error(e, e.lineno)
+        except UndefinedError, e:
+            var_name = re.match(r'"(.*?)"', e.message).group(1) 
+            r = re.compile(r'\b{0}\b'.format(var_name))
+            lineno = None
+            for i, l in enumerate(self.body_lines):
+                if r.search(l):
+                    lineno = i+1
+                    break
+            return self._render_error(e, lineno)
+        except Exception, e:
+            # assume exception ocurred in template
+            frame = traceback.extract_tb(sys.exc_info()[2])[-1]
+            lineno, function_name = frame[1:-1]
+            err = "In {function_name}: {e}".format(
+                function_name = escape(function_name),
+                e = escape(str(e))
                 )
-        return (u'<h1>Error en plantilla</h1>'
-                u'<b>{0}</b><br />{1}').format(e, '<br />'.join(olines))
+            return self._render_error(err, lineno)
+
+    def _render_text(self, **data):
+        namespace = dict(self.variables, **data)
+        from mako.template import Template
+        module_directory = '/tmp/mako_templates' #FIXME
+        tpl = Template(self.body,
+            module_directory=module_directory,
+            default_filters=['decode.utf8'],
+            )
+        return tpl.render_unicode(**namespace)
+
+    @property
+    def body_lines(self):
+        return self.body.splitlines()
+    
+    def _render_error(self, e, lineno=None, context=2):
+        olines = []
+        if lineno is not None:
+            lines = self.body_lines[lineno-1-context:lineno+context]
+            start = lineno-context
+            for i, line in enumerate(lines):
+                color = '#f00' if i==context else '#888'
+                olines.append((
+                    u'<span>{2}:</span>'
+                    u'<span style="color:{0}">{1}</span>'
+                    ).format(color, escape(_ellipsis(line, 150)), start+i)
+                    )
+        return (u'<h1>Error en plantilla <em>{title}</em></h1>'
+                u'<b>{error}</b><br />{lines}').format(
+                    error=e,
+                    lines='<br />'.join(olines),
+                    title=self.title
+                )
 
         
     def __json__(self):
