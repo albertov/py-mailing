@@ -3,7 +3,6 @@ from itertools import groupby, chain
 from operator import attrgetter
 from cStringIO import StringIO
 from hashlib import md5
-from UserDict import DictMixin
 import textwrap
 import datetime
 import re
@@ -18,18 +17,17 @@ from lxml import etree, builder
 import markdown
 from markupsafe import escape
 
-from sqlalchemy import  Column, ForeignKey, DateTime, Integer, Unicode, orm,\
-                        Table, LargeBinary, String, Enum, MetaData, sql, event,\
-                        create_engine
+from sqlalchemy import (Column, ForeignKey, DateTime, Integer, Unicode, orm,
+                        Table, LargeBinary, String, MetaData, sql, event,
+                        create_engine)
 from sqlalchemy.orm import deferred, joinedload_all
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.ext.declarative import (declarative_base, declared_attr,
-                                         DeclarativeMeta)
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.hybrid import hybrid_property
 
-from .util import sniff_content_type
+from ..util import sniff_content_type
 
 metadata = MetaData()
 Model = declarative_base(metadata=metadata)
@@ -37,6 +35,9 @@ Session = orm.scoped_session(
     orm.sessionmaker(autoflush=False, autocommit=False)
     )
 Model.query = Session.query_property()
+
+
+from .config import Config
 
 class FileLookupError(LookupError):
     pass
@@ -740,98 +741,3 @@ class Plugin(object):
             finally:
                 Session.remove()
         return wrapper
-
-
-
-class Config(Model):
-    __tablename__ = "config"
-    __type_names__ = ("int", "float", "str", "unicode", "bool")
-    _key = Column("key", String(128), primary_key=True)
-    _value = Column("value", Unicode, nullable=False)
-    type = Column(Enum(*__type_names__), default="unicode", nullable=False)
-    
-
-    class __metaclass__(DictMixin, DeclarativeMeta):
-            
-        def __getitem__(cls, key):
-            ob = cls.query.get(key)
-            if ob is None:
-                raise KeyError(key)
-            return ob.value
-
-        def __setitem__(cls, key, value):
-            ob = cls.query.get(key)
-            if ob is not None:
-                ob.value = value
-            else:
-                ob = cls(key, value)
-                Session.add(ob)
-                Session.flush()
-
-        def __delitem__(cls, key):
-            ob = cls.query.get(key)
-            if ob is not None:
-                Session.delete(ob)
-                Session.flush()
-            else:
-                raise KeyError(key)
-
-        def __json__(cls):
-            return dict(cls)
-
-        def __contains__(cls, key):
-            return bool(cls.query.get(key))
-
-        def __iter__(cls):
-            return (c.key for c in cls.query)
-
-        def iteritems(cls):
-            return ((c.key, c.value) for c in cls.query)
-            
-
-        def keys(cls):
-            return list(cls)
-            
-
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-
-    @hybrid_property
-    def key(self):
-        return self._key
-
-    @key.setter
-    def _key_setter(self, key):
-        if type(key) is not str:
-            raise TypeError("Only str keys are allowed")
-        self._key = key
-
-    @key.expression
-    def _key_expr(cls):
-        return cls._key
-
-
-
-    @hybrid_property
-    def value(self):
-        if self.type!='bool':
-            cast = __builtins__[self.type]
-            return cast(self._value)
-        else:
-            return self._value != 'False'
-
-    @value.setter
-    def _value_setter(self, value):
-        self.type = type(value).__name__
-        if self.type not in self.__type_names__:
-            raise TypeError
-        self._value = unicode(value)
-
-    @value.expression
-    def _value_expr(cls):
-        return cls._value
-
-    @value.comparator
-    def _value_comparator(cls):
-        raise NotImplementedError

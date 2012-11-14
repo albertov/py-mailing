@@ -18,6 +18,9 @@ class TestConfig(BaseModelTest):
     def test_get_unknown_key(self):
         self.assertRaises(KeyError, Config.__getitem__, 'foo')
 
+    def test_det_unknown_key(self):
+        self.assertRaises(KeyError, Config.__delitem__, 'foo')
+
     def test_non_str_key(self):
         self.assertRaises(TypeError, Config.__setitem__, 2, 4)
 
