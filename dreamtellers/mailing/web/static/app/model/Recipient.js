@@ -14,7 +14,7 @@ Ext.define('WebMailing.model.Recipient', {
     ],
     proxy: {
         type: 'rest2',
-        url: 'recipient/',
+        url: url('recipient/'),
         reader: {
             type: 'json',
             root: 'recipients'

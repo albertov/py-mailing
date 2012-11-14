@@ -14,13 +14,13 @@ def _import_views():
 
 _import_views()
 
-@app.route('/', template='index.html')
+@app.route('/admin/', name='admin', template='admin_index.html')
 def index():
     return {
         'debug': app.config['debug']
     }
 
 STATIC_ROOT = resource_filename('dreamtellers.mailing.web', 'static')
-@app.route('/static/<filename:path>')
+@app.route('/static/<filename:path>', name='static')
 def server_static(filename):
     return static_file(filename, root=STATIC_ROOT)

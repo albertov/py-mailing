@@ -1,3 +1,4 @@
+from bottle import request
 from genshi.template import TemplateLoader
 from pkg_resources import resource_filename
 
@@ -9,8 +10,11 @@ class Plugin(object):
     def __init__(self, auto_reload=True):
         self.loader = TemplateLoader([resource_filename(__name__, 'templates')],
                                      auto_reload=auto_reload)
+        from . import static_url
+        from bottle import request
         self.global_variables = dict(
-            static_url = static_url
+            static_url = static_url,
+            request = request,
             )
 
     def setup(self, app):
@@ -32,6 +36,3 @@ class Plugin(object):
 
     def close(self):
         pass
-
-def static_url(s):
-    return '/static/' + s #FIXME

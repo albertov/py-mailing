@@ -14,7 +14,7 @@ Ext.define('WebMailing.model.Group', {
     ],
     proxy: {
         type: 'rest2',
-        url: 'group/',
+        url: url('group/'),
         reader: {
             type: 'json',
             root: 'groups'

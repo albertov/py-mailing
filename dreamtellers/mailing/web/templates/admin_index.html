@@ -32,7 +32,9 @@
         Ext.Loader.setConfig({
             enabled: ${'true' if debug else 'false'}
         });
-        window.appFolder ='${static_url("app")}';
+        window.url = function(s) {
+            return "${request.script_name}" + s;
+        }
     </script>
     <script type="text/javascript" src="${static_url('app.js' if debug else 'app-all.js')}"></script>
 </head>

@@ -34,7 +34,7 @@ Ext.define('WebMailing.controller.Images', {
     onNewImage: function(win) {
         var me=this, form = win.down('form').getForm();
         form.submit({
-            url: 'image/upload',
+            url: url('image/upload'),
             waitMsg: 'Subiendo imágen al servidor...', //i18n
             timeout: 30,
             success: function(fp, o) {

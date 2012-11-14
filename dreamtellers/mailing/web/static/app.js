@@ -1,6 +1,6 @@
 Ext.application({
     name: 'WebMailing',
-    appFolder: window.appFolder,
+    appFolder: url('static/app'),
     controllers: [
         'Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images',
         'SentMailings', 'Templates'
@@ -13,7 +13,6 @@ Ext.application({
     ],
 
     launch: function() {
-        window.application = this;
         Ext.create('Ext.container.Viewport', {
             layout: 'fit',
             items: {

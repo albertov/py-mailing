@@ -15,7 +15,7 @@ Ext.define('WebMailing.model.Image', {
     ],
     proxy: {
         type: 'rest2',
-        url: 'image/',
+        url: url('image/'),
         reader: {
             type: 'json',
             root: 'images'

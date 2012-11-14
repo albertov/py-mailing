@@ -14,6 +14,9 @@ app = Bottle()
 
 from . import views
 
+def static_url(s):
+    return app.get_url('static', filename=s)
+
 
 def configure_sqlalchemy(app, config, prefix='sqlalchemy.'):
     if 'engine' in config:
@@ -40,7 +43,7 @@ def app_factory(global_config, **local_config):
     app.config = config
     configure_sqlalchemy(app, config)
     configure_genshi(app, config)
-    return app.wsgi
+    return app
 
 
 parser = OptionParser()

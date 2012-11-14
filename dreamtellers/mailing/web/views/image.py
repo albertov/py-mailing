@@ -63,7 +63,7 @@ def upload_image():
     return markupsafe.escape(json.dumps(resp))
 
 
-@app.get("/image/<hash>/view")
+@app.get("/image/<hash>/view", name='image_view')
 def view_image(hash):
     img = Image.by_hash(hash)
     if img is None:

@@ -13,8 +13,8 @@ Ext.define('WebMailing.view.template.Form', {
     items: [
         {
             xtype:      'codemirror',
-            pathModes:  'static/codemirror/mode',
-            pathExtensions:  'static/codemirror/lib/util',
+            pathModes:  url('static/codemirror/mode'),
+            pathExtensions:  url('static/codemirror/lib/util'),
             name:       'body',
             fieldLabel: 'Cuerpo', // i18n
             anchor:     '100% 0',

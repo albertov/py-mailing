@@ -94,7 +94,8 @@ class Image(Model):
 
     @property
     def url(self):
-        return '/image/%s/view'%self.hash
+        from .web import app
+        return app.get_url('image_view', hash=self.hash)
 
     PIL_MAP = {
         'image/jpeg': 'JPEG',

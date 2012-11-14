@@ -46,7 +46,7 @@ Ext.define('WebMailing.model.Category', {
     ],
     proxy: {
         type: 'rest2',
-        url: 'category/',
+        url: url('category/'),
         reader: {
             type: 'json',
             root: 'categories',
