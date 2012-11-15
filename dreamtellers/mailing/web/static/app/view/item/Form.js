@@ -8,7 +8,9 @@ Ext.define('WebMailing.view.item.Form', {
         'Ext.ux.pagedown.Field',
         'Ext.container.Container',
         'Ext.layout.container.HBox',
-        'Ext.form.field.ComboBox'
+        'Ext.form.field.ComboBox',
+        'Ext.form.field.TextArea',
+        'Ext.form.TextField'
     ],
     autoScroll: true,
     trackResetOnLoad: true,
@@ -20,18 +22,19 @@ Ext.define('WebMailing.view.item.Form', {
     },
     items: [
         {
-            name: 'title',
-            xtype: 'textfield',
             fieldLabel: 'Título', //i18n
+            name: 'title',
+            xtype: 'textarea',
+            grow: 1
         }, {
             xtype: 'container',
             layout: 'hbox',
             items: [
                 {
+                    fieldLabel: 'Tipo', //i18n
                     name: 'type',
                     xtype: 'combo',
                     editable: false,
-                    fieldLabel: 'Tipo', //i18n
                     queryMode: 'local',
                     displayField: 'text',
                     valueField: 'value',
@@ -58,13 +61,14 @@ Ext.define('WebMailing.view.item.Form', {
                 }
             ]
         }, {
+            fieldLabel: 'Enlace', //i18n
             name: 'url',
-            xtype: 'textfield',
-            fieldLabel: 'Enlace' //i18n
+            vtype: 'url',
+            xtype: 'textfield'
         }, {
+            fieldLabel: 'Texto', //i18n
             name: 'content',
             xtype: 'markdownfield',
-            fieldLabel: 'Texto', //i18n
             grow: true,
             growMax: 250,
             hookNames: ["insertImageDialog"],
