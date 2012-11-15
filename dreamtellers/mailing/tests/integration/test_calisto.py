@@ -18,7 +18,6 @@ def fixture(s):
 
 class TestCalistoMailing(BaseModelTest):
 
-
     def _makeMailing(self):
         return mailing_from_fixture(fixture('data.json'))
     

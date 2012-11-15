@@ -10,11 +10,13 @@ class Plugin(object):
     def __init__(self, auto_reload=True):
         self.loader = TemplateLoader([resource_filename(__name__, 'templates')],
                                      auto_reload=auto_reload)
-        from . import static_url
         from bottle import request
+        from . import static_url
+        from ..models import Config
         self.global_variables = dict(
             static_url = static_url,
             request = request,
+            Config = Config,
             )
 
     def setup(self, app):

@@ -17,7 +17,7 @@ class MailingValidator(Schema):
     date = ISO8601DateValidator(allow_empty=False)
     number = Int(min=0)
 
-@app.route('/m/<number:int>/<filename:re:.*>')
+@app.route('/m/<number:int>/<filename:re:.*>', name='mailing_file')
 def mailing_file(number, filename):
     filename = filename or 'index.html'
     if filename not in ['index.html', 'index.txt']:

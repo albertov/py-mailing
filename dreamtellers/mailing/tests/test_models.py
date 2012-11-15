@@ -5,9 +5,9 @@ from unittest2 import TestCase
 class BaseModelTest(TestCase):
 
     def setUp(self):
-        from ..models import Session, metadata, create_engine
+        from ..models import Session, Model, create_engine
         self.engine = create_engine('sqlite://')
-        metadata.create_all(self.engine)
+        Model.metadata.create_all(self.engine)
         Session.configure(bind=self.engine)
         self.session = Session
 
