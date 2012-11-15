@@ -24,7 +24,7 @@ def mailing_file(number, filename):
         # Try to take shortcut if filename is probably an image
         img = Image.by_filename(filename)
         if img is not None:
-            redirect(img.url)
+            redirect(img.internal_url)
     f = _get_composer(number).get_file(filename)
     if f is None:
         abort(404)

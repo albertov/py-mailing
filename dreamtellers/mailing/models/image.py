@@ -12,6 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from ..util import sniff_content_type
 
 from . import Model
+from .config import Config
 
 
 class Image(Model):
