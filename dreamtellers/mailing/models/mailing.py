@@ -20,12 +20,20 @@ class FileLookupError(LookupError):
 class MissingTemplate(FileLookupError):
     pass
 
-mailing_template_table = Table("mailing_template", Model.metadata,
-   Column('mailing_id', ForeignKey('mailing.id', ondelete='CASCADE'),
-          primary_key=True),
-    Column('template_id', ForeignKey('template.id', ondelete='CASCADE'),
-           primary_key=True)
-)
+class MailingTemplate(Model):
+    __tablename__ = "mailing_template"
+
+    mailing_id = Column(ForeignKey('mailing.id', ondelete='CASCADE'),
+                       primary_key=True)
+    template_id = Column(ForeignKey('template.id', ondelete='CASCADE'),
+                         primary_key=True)
+
+    def __json__(self):
+        return dict(
+            id='::'.join(map(str, [self.mailing_id, self.template_id])),
+            template_id=self.template_id,
+            mailing_id=self.mailing_id,
+        )
                             
 
 class Mailing(Model):
@@ -40,7 +48,7 @@ class Mailing(Model):
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
                          lazy=True, cascade='all,delete-orphan')
-    templates = orm.relation(Template, secondary=mailing_template_table,
+    templates = orm.relation(Template, secondary=MailingTemplate.__table__,
                              collection_class=attribute_mapped_collection('type'),
                              lazy=True)
 

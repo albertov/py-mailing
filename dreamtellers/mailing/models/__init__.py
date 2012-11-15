@@ -17,7 +17,7 @@ from .item import Category, Item
 from .content import Article, ExternalLink
 from .recipient import Group, Recipient
 from .mailing import (Mailing, SentMailing, GroupSentMailing, FileLookupError,
-                      MissingTemplate)
+                      MailingTemplate, MissingTemplate)
 
 
 __all__ = [

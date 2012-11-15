@@ -1,52 +1,56 @@
 Ext.define('WebMailing.view.mailing.View', {
-    extend: 'Ext.panel.Panel',
+    extend: 'WebMailing.IframePanel',
+    requires: [
+        'WebMailing.store.Templates',
+        'Ext.toolbar.Toolbar',
+        'Ext.toolbar.TextItem',
+        'Ext.form.field.ComboBox'
+    ],
     alias: 'widget.mailing_view',
-    html: '<iframe frameborder="0" width="100%" height="100%" />',
-    src: null,
-    listeners: {
-        afterrender: function() {
-            this.iframe = this.getEl().query('iframe')[0];
-            Ext.fly(this.iframe).on('load', this.loadMask.hide, this.loadMask);
-            if (this.src) {
-                this.setSrc(this.src);
-            }
-        }
-    },
+    view_type: 'xhtml',
     initComponent: function() {
+        this.combo = Ext.widget('combo', {
+            store: Ext.create('WebMailing.store.Templates', {
+                remoteFilter: true,
+                autoLoad: true,
+                filters: [
+                    {property: 'type', value: this.view_type}
+                ]
+            }),
+            queryCaching: false,
+            displayField: 'title',
+            valueField: 'id',
+            forceSelection: true,
+            triggerAction: 'all',
+            editable: false,
+            dock: 'top'
+        });
+        this.combo.on('select', this.onComboSelect, this);
         this.callParent(arguments);
-        this.loadMask = Ext.create('WebMailing.LoadMask', this);
+        this.addDocked(Ext.widget('toolbar', {
+            items: [
+                Ext.widget('tbtext', {text:'Plantilla'}), //i18n
+                this.combo
+            ]
+        }));
     },
-    setSrc: function(src) {
-        var me = this;
-        this.src = src;
-        function setIt() {
-            if (me.iframe) {
-                if (me._isSameUrl(src)) {
-                   me._restoreScrollPositionOnLoad();
-                }
-                me.loadMask.show();
-                me.iframe.src = me.src;
-            } else {
-                console.warn("Cannot setUrl because iframe hasn't been rendered");
-            }
+            
+    setRecord: function(record) {
+        if (record) {
+            this.setSrc(record.getViewUrl(this.view_type));
         }
-         if (this.isVisible()) {
-             setIt();
-         } else {
-             this.on('activate', setIt, this, {single:true});
-         }
-     },
+        if (this.record!==record) {
+            this.record = record;
+            var me = this;
+            this.record.getTemplate(this.view_type, function(tpl) {
+                me.combo.select(tpl?tpl.get('id'):null);
+            });
+        }
+    },
 
-     _isSameUrl: function(s) {
-         var s2 = this.iframe.src;
-         return s2 && s2.substring(s2.indexOf(s))==s;
-     },
-
-     _restoreScrollPositionOnLoad: function() {
-        var pos = Ext.fly(this.iframe.contentDocument.body).getXY()
-        Ext.fly(this.iframe).on('load', function() {
-            this.iframe.contentWindow.scrollTo(-pos[0], -pos[1]);
-        }, this, {single:true});
-     }
+    onComboSelect: function(combo, records) {
+        if (this.record) {
+            this.record.addTemplate(records[0]);
+        }
+    }
 });
-

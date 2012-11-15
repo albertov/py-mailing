@@ -18,10 +18,12 @@ Ext.define('WebMailing.view.mailing.Detail', {
                 {
                     itemId: 'html_view',
                     xtype: 'mailing_view',
+                    view_type: 'xhtml',
                     title: 'HTML' // i18n
                 }, {
                     itemId: 'text_view',
                     xtype: 'mailing_view',
+                    view_type: 'text',
                     title: 'Texto' // i18n
                 }
             ]
@@ -46,8 +48,8 @@ Ext.define('WebMailing.view.mailing.Detail', {
         if (this.record) {
             this.down('#edit').setRecord(this.record);
             this.down('#sent_mailings').setRecord(this.record);
-            this.down('#html_view').setSrc(this.record.getViewUrl());
-            this.down('#text_view').setSrc(this.record.getViewUrl('index.txt'));
+            this.down('#html_view').setRecord(this.record);
+            this.down('#text_view').setRecord(this.record);
             this.setTitle(this.record.getTitle());
         }
     }

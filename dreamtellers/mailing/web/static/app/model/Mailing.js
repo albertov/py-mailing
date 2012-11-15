@@ -1,10 +1,15 @@
 Ext.define('WebMailing.model.Mailing', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
+    type_map: {
+        xhtml: 'index.html',
+        text: 'index.txt'
+    },
     requires: [
         'WebMailing.Rest',
         'WebMailing.model.Item',
-        'WebMailing.model.SentMailing'
+        'WebMailing.model.SentMailing',
+        'WebMailing.model.MailingTemplate'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -19,6 +24,20 @@ Ext.define('WebMailing.model.Mailing', {
             model: 'WebMailing.model.Item',
             foreignKey: 'mailing_id',
             name:'items',
+            primaryKey:'id',
+            storeConfig: {
+                autoSync: true,
+                listeners: {
+                    write: function() {
+                        var s = Ext.getStore('Mailings');
+                        s.fireEvent('write', s);
+                    }
+                }
+            }
+        }, {
+            model: 'WebMailing.model.MailingTemplate',
+            foreignKey: 'mailing_id',
+            name:'mailing_templates',
             primaryKey:'id',
             storeConfig: {
                 autoSync: true,
@@ -49,11 +68,61 @@ Ext.define('WebMailing.model.Mailing', {
         }
     },
 
-    getViewUrl: function(fname) {
-        return this.get('internal_url') + (fname||'');
+    getViewUrl: function(view_type) {
+        return this.get('internal_url') + this.type_map[view_type];
     },
 
     getTitle: function() {
         return Ext.String.format("Boletín #{0}", this.get('number')); //i18n
+    },
+
+    addTemplate: function(template) {
+        var template_store = Ext.getStore("Templates"), me = this;
+        function doIt() {
+            me.mailing_templates().load(function() {
+                var need_to_create = true;
+                me.mailing_templates().each(function(mt) {
+                    var t = template_store.getById(mt.get('template_id'));
+                    if (t.get('type')==template.get('type')) {
+                        need_to_create = false;
+                        mt.set('template_id', template.get('id'));
+                        return false;
+                    }
+                });
+                if (need_to_create) {
+                    me.mailing_templates().add({template_id:template.get('id')});
+                }
+            });
+        }
+        if (template_store.getCount()==0) {
+            template_store.load(doIt);
+        } else {
+            doIt();
+        }
+    },
+    getTemplate: function(type, callback) {
+        var template_store = Ext.getStore("Templates"), me = this;
+        function doIt() {
+            me.mailing_templates().load(function() {
+                var found = false;
+                me.mailing_templates().each(function(mt) {
+                    var t = template_store.getById(mt.get('template_id'));
+                    if (t.get('type')==type) {
+                        callback(t);
+                        found = true;
+                        return false;
+                    }
+                });
+                if (!found) {
+                    callback(null);
+                }
+            });
+        }
+        if (template_store.getCount()==0) {
+            template_store.load(doIt);
+        } else {
+            doIt();
+        }
     }
+
 });

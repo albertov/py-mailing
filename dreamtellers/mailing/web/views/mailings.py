@@ -1,4 +1,4 @@
-from ...models import Mailing, Template, Image
+from ...models import Mailing, MailingTemplate, Template, Image
 from ...html import HTMLPageComposer
 
 from .. import app
@@ -55,3 +55,10 @@ def _create_mailing(data):
 
 rest_views(app, Mailing, '/mailing/', 'mailings',
            validator=MailingValidator, creator=_create_mailing)
+
+class MailingTemplateValidator(Schema):
+    mailing_id = Int(allow_empty=False)
+    template_id = Int(allow_empty=False)
+
+rest_views(app, MailingTemplate, '/mailing_template/', 'mailing_templates',
+           validator=MailingTemplateValidator)
