@@ -49,7 +49,7 @@ class TestUpdateMailing(BaseViewTest):
         mailing.templates['xhtml'] = tpl
         self.session.add(mailing)
         self.session.flush()
-        data = dict(mailing.__json__(), number=1000)
+        data = dict(mailing.__json__(), date='2010-01-01T00:00:00')
         resp = self.app.put_json('/mailing/%s'%mailing.id, data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['mailings']), 1)
