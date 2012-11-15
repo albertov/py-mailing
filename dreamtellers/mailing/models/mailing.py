@@ -75,13 +75,15 @@ class Mailing(Model):
         if tpl:
             return tpl.format(number=self.number)
         else:
-            from ..web import app
-            location = app.get_url('mailing_file', number=self.number,
-                                    filename='')
             base = Config.setdefault('server.external_base_url',
                                      'http://localhost:8080')
-            return base + location
+            return base + self.internal_url
 
+
+    @property
+    def internal_url(self):
+        from ..web import app
+        return app.get_url('mailing_file', number=self.number, filename='')
 
     @property
     def images(self):
@@ -125,6 +127,7 @@ class Mailing(Model):
             id=self.id,
             number=self.number,
             date=self.date.isoformat() if self.date else None,
+            internal_url = self.internal_url,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
         )

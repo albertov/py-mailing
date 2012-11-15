@@ -58,6 +58,12 @@ class Image(Model):
 
     @property
     def url(self):
+        base = Config.setdefault('server.external_base_url',
+                                 'http://localhost:8080')
+        return base + self.internal_url
+
+    @property
+    def internal_url(self):
         from ..web import app
         return app.get_url('image_view', hash=self.hash)
 
@@ -99,6 +105,6 @@ class Image(Model):
             content_type=self.content_type,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
-            url=self.url,
+            internal_url=self.internal_url,
             )
 

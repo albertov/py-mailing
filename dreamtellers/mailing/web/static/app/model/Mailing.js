@@ -9,6 +9,7 @@ Ext.define('WebMailing.model.Mailing', {
     fields: [
         {name:'id', type: 'int'},
         {name:'number', type: 'int', defaultValue: null},
+        {name:'internal_url', persist: false},
         {name:'date', type: 'date',  dateFormat: 'c'},
         {name:'created', type: 'date',  dateFormat: 'c'},
         {name:'modified', type: 'date',  dateFormat: 'c'}
@@ -49,7 +50,7 @@ Ext.define('WebMailing.model.Mailing', {
     },
 
     getViewUrl: function(fname) {
-        return Ext.String.format('/m/{0}/{1}', this.get('number'), fname||'');
+        return this.get('internal_url') + (fname||'');
     },
 
     getTitle: function() {

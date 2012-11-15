@@ -91,5 +91,4 @@ def iter_config_key_values(top='.', exclude=('tests',)):
 def prepopulate_config(top='.', exclude=('tests',)):
     from .models import Config
     for fname, key, value in iter_config_key_values(top, exclude):
-        print repr((fname, key, value))
         Config[key] = value
