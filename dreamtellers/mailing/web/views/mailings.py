@@ -43,13 +43,9 @@ def _create_mailing(data):
     form = validate(MailingValidator, data)
     ob = Mailing()
     update_from_form(ob, form)
-    if 'xhtml' not in ob.templates:
-        tpl = Template.latest_by_type('xhtml')
-        if tpl is not None:
-            ob.templates['xhtml'] = tpl
-        else:
-            raise ErrorResponse(
-                _('Could not assign a default xhtml template. Please create one first'))
+    lrc = Mailing.least_recently_created()
+    if lrc is not None:
+        ob.templates = lrc.templates
     ob.number = ob.next_number()
     return ob
 

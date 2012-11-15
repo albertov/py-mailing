@@ -69,6 +69,10 @@ class Mailing(Model):
             return None
 
     @classmethod
+    def least_recently_created(cls):
+        return cls.query.order_by(sql.desc(cls.created)).first()
+
+    @classmethod
     def next_number(cls):
         query = sql.select([sql.func.max(cls.number)])
         return (Session.execute(query).scalar() or 0) + 1

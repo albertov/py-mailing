@@ -30,11 +30,6 @@ class TestNewMailing(BaseViewTest):
         self.assertEqual(item['date'], data['date'])
         self.assertEqual(item['number'], 1) #uses next_number()
 
-    def test_no_default_template(self):
-        data = dict(number=0, date='2010-01-01T00:00:00')
-        resp = self.app.post_json('/mailing/', data, status=400)
-        self.assertFalse(resp.json['success'])
-
     def test_create_a_bad_one(self):
         data = dict(number=0, date='2010-01-Z')
         resp = self.app.post_json('/mailing/', data, status=400)

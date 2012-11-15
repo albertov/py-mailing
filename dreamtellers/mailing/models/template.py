@@ -50,13 +50,6 @@ class Template(Model):
         return self.body.splitlines()
     
 
-    @classmethod
-    def latest_by_type(cls, type):
-        q = cls.query.filter_by(type=type)
-        q = q.order_by(sql.desc(cls.modified))
-        return q.first()
-
-
     def __repr__(self):
         data = (self.id, self.title)
         return self.__class__.__name__ + repr(data)
