@@ -4,8 +4,11 @@ import traceback
 import datetime
 import os
 
+from lxml import etree
+
 from sqlalchemy import (Column, ForeignKey, DateTime, Integer, Unicode, orm,
                         Table, String, sql)
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from babel.dates import format_date
 
@@ -28,12 +31,13 @@ template_image_table = Table("template_image", Model.metadata,
            primary_key=True)
 )
 
+
 class Template(Model):
     __tablename__ = "template"
     id = Column(Integer, primary_key=True)
     title = Column(Unicode, nullable=False, unique=True)
     type = Column(String(20), nullable=False, default='xhtml')
-    body = Column(Unicode, nullable=False)
+    _body = Column('body', Unicode, nullable=False)
 
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
@@ -45,10 +49,31 @@ class Template(Model):
         format_date = format_date
         )
 
+    @hybrid_property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def _body_setter(self, value):
+        self._body = value
+        self.images = self._find_images(value)
+
+    @body.expression
+    def _body_expression(cls):
+        return cls._body
+
     @property
     def body_lines(self):
         return self.body.splitlines()
     
+    def _find_images(self, body):
+        dom = etree.HTML(body)
+        filenames = []
+        for e in dom.xpath('//*[@background]'):
+            filenames.append(e.attrib['background'])
+        for e in dom.xpath('//img[@src]'):
+            filenames.append(e.attrib['src'])
+        return filter(None, map(Image.by_filename, filenames))
 
     def __repr__(self):
         data = (self.id, self.title)

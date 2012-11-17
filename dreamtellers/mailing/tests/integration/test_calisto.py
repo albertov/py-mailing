@@ -89,10 +89,18 @@ class TestCalistoMailing(BaseModelTest):
 
 def mailing_from_fixture(fname, number=0, date=datetime.datetime.now()):
     from ...models import (Mailing, Image, Article, ExternalLink, Template,
-                           Category)
+                           Category, Session)
     
     data = json.load(open(fname))
     mailing = Mailing(number=number, date=date)
+
+    for f in glob(fixture('template/*')):
+        if f.split('.')[-1] in ('gif', 'png', 'jpg', 'jpeg'):
+            with open(f) as file:
+                f = os.path.basename(f)
+                img = Image(filename=f, data=file.read())
+                Session.add(img)
+    Session.flush()
 
     body = open(fixture('template/index.html')).read().decode('utf8')
     mailing.templates['xhtml'] = Template(title="Calisto 1", body=body)
@@ -101,17 +109,11 @@ def mailing_from_fixture(fname, number=0, date=datetime.datetime.now()):
     mailing.templates['text'] = Template(title="Calisto 1 (texto)", body=body,
                                          type='text')
 
-    images = {}
-    for f in glob(fixture('template/*')):
-        if f.split('.')[-1] in ('gif', 'png', 'jpg', 'jpeg'):
-            with open(f) as file:
-                f = os.path.basename(f)
-                images[f] = Image(filename=f, data=file.read())
 
     for cat_data in data['categories']:
         cat = Category(title=cat_data['title'])
         if 'logo' in cat_data:
-            cat.image = images[cat_data['logo']]
+            cat.image = Image.by_filename(cat_data['logo'])
             cat.image.title = cat.title
         for item_data in cat_data['items']:
             if 'link' in item_data:
@@ -131,9 +133,4 @@ def mailing_from_fixture(fname, number=0, date=datetime.datetime.now()):
             item.category = cat
             mailing.items.append(item)
 
-    tpl = mailing.templates['xhtml']
-    for i in images.values():
-        if i.title is None:
-            # no es imagen de categoria
-           tpl.images.append(i)
     return mailing
