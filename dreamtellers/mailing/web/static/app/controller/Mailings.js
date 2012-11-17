@@ -37,6 +37,9 @@ Ext.define('WebMailing.controller.Mailings', {
             },
             "item_tree": {
                 beforedeselect: this.checkIfSaveIsNeeded,
+            },
+            "mailing_view combo": {
+                select: this.onTemplateComboSelect,
             }
         });
         this.mailings = Ext.getStore('Mailings');
@@ -147,5 +150,11 @@ Ext.define('WebMailing.controller.Mailings', {
             rec = store.add({date: new Date})[0];
         store.on('write', Ext.bind(this.setActiveRecord, this, [rec]),
                  this, {single:true})
+    },
+    onTemplateComboSelect: function(combo, records) {
+        var record = this.getDetail().getRecord();
+        if (record) {
+            record.addTemplate(records[0]);
+        }
     }
 });

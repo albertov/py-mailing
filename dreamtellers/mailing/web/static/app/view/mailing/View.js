@@ -25,7 +25,6 @@ Ext.define('WebMailing.view.mailing.View', {
             editable: false,
             dock: 'top'
         });
-        this.combo.on('select', this.onComboSelect, this);
         this.callParent(arguments);
         this.addDocked(Ext.widget('toolbar', {
             items: [
@@ -48,9 +47,7 @@ Ext.define('WebMailing.view.mailing.View', {
         }
     },
 
-    onComboSelect: function(combo, records) {
-        if (this.record) {
-            this.record.addTemplate(records[0]);
-        }
+    getRecord: function() {
+        return this.record;
     }
 });
