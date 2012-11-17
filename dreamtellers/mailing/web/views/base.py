@@ -36,7 +36,15 @@ _ = lambda s: s
 
 
 class ErrorResponse(StandardError):
-    pass
+    def __init__(self, message, errors=None):
+        self.message = message
+        self.errors = errors
+
+    def __unicode__(self):
+        return self.message
+
+    def __str__(self):
+        return unicode(self).encode('ascii', 'replace')
 
 def error_handler(f):
     @wraps(f)
@@ -45,7 +53,9 @@ def error_handler(f):
             return f(*args, **kw)
         except InvalidForm, e:
             return invalid_form_response(e.form) 
-        except (ErrorResponse, IntegrityError), e:
+        except ErrorResponse, e:
+            return error_response(unicode(e), e.errors)
+        except IntegrityError, e:
             return error_response(str(e))
     return wrapper
 

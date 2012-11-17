@@ -9,8 +9,6 @@ from pkg_resources import resource_filename
 import cssutils
 from lxml.cssselect import CSSSelector, ExpressionError
 
-from .magic import from_buffer as magic_from_buffer
-
 log = logging.getLogger(__name__)
 
 def collapse_styles(dom):
@@ -58,8 +56,6 @@ def collapse_styles(dom):
         del e.attrib['cstyle']
         e.attrib['style'] = ';'.join(computed_styles+styles)
 
-def sniff_content_type(data):
-    return magic_from_buffer(StringIO(data), 'mime')
 
 def import_all_modules_from_package(package_name, exclude=('__init__',)):
     """Imports all modules in current package"""

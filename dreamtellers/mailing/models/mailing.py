@@ -94,8 +94,8 @@ class Mailing(Model):
 
     @property
     def internal_url(self):
-        from ..web import app
-        return app.get_url('mailing_file', number=self.number, filename='')
+        from ..web import get_url
+        return get_url('mailing_file', number=self.number, filename='')
 
     @property
     def images(self):

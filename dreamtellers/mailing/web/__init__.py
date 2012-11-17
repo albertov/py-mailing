@@ -2,11 +2,11 @@ import sys
 import os.path
 from optparse import OptionParser
 
-from bottle import Bottle
+from bottle import Bottle, request
 from paste.deploy.converters import asbool
 from sqlalchemy import engine_from_config
 
-from ..models import Plugin as SAPlugin
+from ..models import Plugin as SAPlugin, Config
 from .template import Plugin as GenshiPlugin
 
 
@@ -17,6 +17,18 @@ from . import views
 def static_url(s):
     return app.get_url('static', filename=s)
 
+def get_url(*args, **kw):
+    faked_environ = False
+    if not hasattr(request, 'environ'):
+        faked_environ = True
+        script_name = Config.setdefault('server.script_name', '')
+        request.environ = {'SCRIPT_NAME': script_name}
+    try:
+        return app.get_url(*args, **kw)
+    finally:
+        if faked_environ:
+            del request.environ
+    
 
 def configure_sqlalchemy(app, config, prefix='sqlalchemy.'):
     if 'engine' in config:

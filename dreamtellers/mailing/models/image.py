@@ -9,7 +9,6 @@ from sqlalchemy import (Column, DateTime, Integer, Unicode, orm,
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 
-from ..util import sniff_content_type
 
 from . import Model
 from .config import Config
@@ -31,6 +30,7 @@ class Image(Model):
         'image/gif': 'GIF',
         'image/png': 'PNG',
     }
+
 
     @classmethod
     def by_hash(cls, hash, undefer_data=True):
@@ -55,7 +55,7 @@ class Image(Model):
 
     @data.setter
     def data_setter(self, value):
-        self.content_type = sniff_content_type(value)
+        self.content_type = self._get_content_type(value)
         self.hash = md5(value).hexdigest()
         self._data = value
 
@@ -71,11 +71,11 @@ class Image(Model):
 
     @property
     def internal_url(self):
-        from ..web import app
-        return app.get_url('image_view', hash=self.hash)
+        from ..web import get_url
+        return get_url('image_view', hash=self.hash)
 
     def thumbnail(self, width, height):
-        img = PILImage.open(StringIO(self.data))
+        img = _pil_image(self.data)
         img.thumbnail((width, height), PILImage.ANTIALIAS)
         return self._dump_image(img, self.content_type)
 
@@ -88,6 +88,14 @@ class Image(Model):
             return None
         img.save(buf, format)
         return buf.getvalue()
+
+    @classmethod
+    def _get_content_type(cls, data):
+        im = _pil_image(data)
+        if im is not None:
+            for k,v in cls.PIL_MAP.iteritems():
+                if v==im.format:
+                    return k
         
     @classmethod
     def blank_image(cls, width, height, content_type='image/png'):
@@ -110,3 +118,9 @@ class Image(Model):
             internal_url=self.internal_url,
             )
 
+def _pil_image(data):
+    try:
+        return PILImage.open(StringIO(data))
+    except IOError:
+        # not an image
+        return None

@@ -1,9 +1,6 @@
 from . import BaseModelTest
+from ...models.image import _pil_image
 
-def _pil_image(data):
-    import Image as PILImage
-    from cStringIO import StringIO
-    return PILImage.open(StringIO(data))
 
 class TestConfig(BaseModelTest):
 

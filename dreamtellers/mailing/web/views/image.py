@@ -7,7 +7,7 @@ from .. import app
 from ..validators import (validate, Schema, UnicodeString, Int, String,
                           FieldStorageUploadConverter)
 from .base import (rest_views, abort, request, response, generic_creator,
-                   error_handler, _)
+                   error_handler, _, ErrorResponse, error_response)
                 
 
 class ImageValidator(Schema):
@@ -23,9 +23,16 @@ class ShowImageValidator(Schema):
 
 _creator = generic_creator(Image, ImageValidator)
 def creator(data):
+    try:
+        im_data = data['data'].decode('hex')
+    except TypeError:
+        raise ErrorResponse('Image data must be hex-encoded')
+    data['data'] = im_data
     ob = _creator(data)
     if not ob.data:
         ob.data = Image.blank_image(1, 1, 'image/png')
+    if not ob.content_type or 'image' not in ob.content_type:
+        raise ErrorResponse(_(u"El fichero no es una imágen válida"))
     return ob
 
 rest_views(app, Image, '/image/', 'images',
@@ -44,13 +51,11 @@ def upload_image():
         resp = dict(success=False, message=form.message, errors=form.errors)
     else:
         image = form['image']
-        data, filename = image.file.read(), image.filename
-        ob = creator(dict(title=form['title'], data=data, filename=filename))
-        if not ob.content_type or 'image' not in ob.content_type:
-            resp = dict(
-                success=False,
-                message=_("El fichero no es una imágen válida")
-                )
+        data, filename = image.file.read().encode('hex'), image.filename
+        try:
+            ob = creator(dict(title=form['title'], data=data, filename=filename))
+        except ErrorResponse, e:
+            resp = error_response(unicode(e), e.errors)
         else:
             Session.add(ob);
             Session.commit()
