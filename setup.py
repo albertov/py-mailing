@@ -34,6 +34,7 @@ setup(
         "cssutils",
         "ftputil",
         "pastescript",
+        "cssselect",
         ],
     entry_points = """
     [console_scripts]

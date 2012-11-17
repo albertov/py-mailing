@@ -24,6 +24,10 @@ class TestConfig(BaseModelTest):
     def test_non_str_key(self):
         self.assertRaises(TypeError, Config.__setitem__, 2, 4)
 
+    def test_iter(self):
+        Config['foo'] = 4
+        Config['bar'] = 6
+        self.assertEqual(set(Config), set(['foo', 'bar']))
 
     def test_delitem(self):
         Config['foo'] = 4

@@ -52,9 +52,8 @@ class Config(Model):
         def iteritems(cls):
             return ((c.key, c.value) for c in cls.query)
             
-
         def keys(cls):
-            return list(cls)
+            return [c.key for c in cls.query]
             
 
     def __init__(self, key, value):
