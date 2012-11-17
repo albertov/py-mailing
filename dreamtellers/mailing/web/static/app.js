@@ -3,7 +3,7 @@ Ext.application({
     appFolder: url('static/app'),
     controllers: [
         'Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images',
-        'SentMailings', 'Templates'
+        'SentMailings', 'Templates', 'Config'
     ],
     requires: [
         'Ext.app.Application',
@@ -46,6 +46,10 @@ Ext.application({
                         id: 'templates',
                         xtype: 'templates',
                         title: 'Plantillas' // i18n
+                    }, {
+                        id: 'config',
+                        xtype: 'config',
+                        title: 'Configuración' // i18n
                     }
                 ]
             }
