@@ -1,10 +1,11 @@
 #coding: utf8
-from .test_models import BaseModelTest
-from ..models import Config
+from . import BaseModelTest
+from ...models import Config
 
 
 class TestConfig(BaseModelTest):
     def test_getsetitem(self):
+
         Config['foo'] = 4
         self.assertIsInstance(Config['foo'], int)
         self.assertEqual(Config['foo'], 4)

@@ -1,6 +1,6 @@
 from webtest import TestApp
 
-from ...tests.test_models import BaseModelTest
+from ...tests.models import BaseModelTest
 
 class BaseViewTest(BaseModelTest):
     def setUp(self):

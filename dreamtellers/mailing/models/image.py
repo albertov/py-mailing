@@ -26,6 +26,12 @@ class Image(Model):
     _data = orm.deferred(Column('data', LargeBinary(), nullable=False))
     content_type = Column(String(20), nullable=False)
 
+    PIL_MAP = {
+        'image/jpeg': 'JPEG',
+        'image/gif': 'GIF',
+        'image/png': 'PNG',
+    }
+
     @classmethod
     def by_hash(cls, hash, undefer_data=True):
         try:
@@ -68,14 +74,9 @@ class Image(Model):
         from ..web import app
         return app.get_url('image_view', hash=self.hash)
 
-    PIL_MAP = {
-        'image/jpeg': 'JPEG',
-        'image/gif': 'GIF',
-        'image/png': 'PNG',
-    }
     def thumbnail(self, width, height):
         img = PILImage.open(StringIO(self.data))
-        img.thumbnail((width, height), Image.ANTIALIAS)
+        img.thumbnail((width, height), PILImage.ANTIALIAS)
         return self._dump_image(img, self.content_type)
 
     @classmethod

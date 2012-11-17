@@ -7,7 +7,7 @@ from pkg_resources import resource_filename
 
 from lxml import etree
 
-from ..test_models import BaseModelTest
+from ..models import BaseModelTest
 
                       
         
