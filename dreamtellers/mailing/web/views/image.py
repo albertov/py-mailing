@@ -53,7 +53,9 @@ def upload_image():
         image = form['image']
         data, filename = image.file.read().encode('hex'), image.filename
         try:
-            ob = creator(dict(title=form['title'], data=data, filename=filename))
+            ob = creator(
+                dict(title=form['title'], data=data, filename=filename)
+                )
         except ErrorResponse, e:
             resp = error_response(unicode(e), e.errors)
         else:

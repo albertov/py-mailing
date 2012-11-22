@@ -214,6 +214,14 @@ class SentMailing(Model):
         order_by=SentMailingProcessedRecipient.__table__.c.time,
         lazy=True
         )
+    
+    @classmethod
+    def next_in_queue(cls, time):
+        q = cls.query
+        q = q.filter(cls.programmed_date<=time)
+        q = q.filter(cls.sent_date==None)
+        q = q.order_by(cls.programmed_date)
+        return q.first()
 
     @property
     def unprocessed_recipients(self):

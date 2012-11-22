@@ -1,3 +1,4 @@
+import random
 import datetime
 
 from . import BaseModelTest
@@ -161,3 +162,48 @@ class TestSentMailing(BaseModelTest):
         self.session.delete(retrieved)
         self.session.commit()
 
+    def test_next_in_queue_none_programmed(self):
+        ob = self._makeOne(mailing=self._makeMailing())
+        self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        d = datetime.datetime(2010,1,1,15)
+        self.assertFalse(ob.__class__.next_in_queue(d))
+
+    def test_next_in_queue_picks_one_with_lowest_programmed_date(self):
+        ds = [datetime.datetime(2010,1,1,i+10) for i in xrange(5)]
+        random.shuffle(ds)
+        for i,d in enumerate(ds):
+            ob = self._makeOne(mailing=self._makeMailing(number=i),
+                               programmed_date=d)
+            cls = ob.__class__
+            self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        d = max(ds) + datetime.timedelta(hours=1)
+        next = cls.next_in_queue(d)
+        self.assertEqual(min(ds), next.programmed_date)
+
+    def test_next_in_queue_ignores_sent_ones(self):
+        ds = [datetime.datetime(2010,1,1,i+10) for i in xrange(5)]
+        random.shuffle(ds)
+        for i,d in enumerate(ds):
+            ob = self._makeOne(mailing=self._makeMailing(number=i),
+                               programmed_date=d)
+            cls = ob.__class__
+            self.session.add(ob)
+        self.session.commit()
+        self.session.expunge_all()
+
+        d = max(ds) + datetime.timedelta(hours=1)
+        processed = set()
+        for _ in xrange(len(ds)):
+            next = cls.next_in_queue(d)
+            self.assertFalse(next in processed)
+            processed.add(next)
+            self.assertIs(None, next.sent_date)
+            next.sent_date = d
+            self.session.flush()
+        self.assertFalse(cls.next_in_queue(d))
