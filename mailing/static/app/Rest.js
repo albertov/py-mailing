@@ -29,12 +29,22 @@ Ext.define('Mailing.Rest', {
                 });
             } else {
                 var e = operation.getError();
-                Ext.MessageBox.show({
-                    title: "Error desconocido del servidor", // i18n
-                    msg: Ext.String.format("{0}: {1}", e.status, e.statusText),
-                    icon: Ext.MessageBox.ERROR,
-                    buttons: Ext.Msg.OK
-                });
+                if (!e.status) {
+                    Ext.MessageBox.show({
+                        title: "Error de conexión", // i18n
+                        msg: "El servidor no responde", // i18n
+                        icon: Ext.MessageBox.ERROR,
+                        buttons: Ext.Msg.OK
+                    });
+                } else {
+                    Ext.MessageBox.show({
+                        title: "Error desconocido del servidor", // i18n
+                        msg: Ext.String.format("{0}: {1}", e.status,
+                                               e.statusText),
+                        icon: Ext.MessageBox.ERROR,
+                        buttons: Ext.Msg.OK
+                    });
+                }
             }
         }
     },
