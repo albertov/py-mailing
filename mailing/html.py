@@ -34,7 +34,9 @@ class HTMLPageComposer(object):
 
     def get_file(self, filename):
         if filename == 'index.html':
-            return _HTMLFile(self._generate_html())
+            html = self._generate_html()
+            if html:
+                return _HTMLFile(html)
         elif filename == 'index.txt':
             text = self._generate_text()
             if text:
@@ -48,7 +50,10 @@ class HTMLPageComposer(object):
         
     
     def _generate_html(self):
-        dom = etree.HTML(self._mailing.render('xhtml'))
+        try:
+            dom = etree.HTML(self._mailing.render('xhtml'))
+        except MissingTemplate:
+            return None
         self._collapse_styles(dom)
         self._insert_head_padding(dom)
         #TODO: Extract encoding from <meta http-equiv=""> if present

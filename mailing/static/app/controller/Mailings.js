@@ -108,7 +108,11 @@ Ext.define('Mailing.controller.Mailings', {
     },
 
     reloadStore: function() {
-        this.mailings.reload();
+        if (this.mailings.getCount()>0) {
+            this.mailings.reload();
+        } else {
+            this.mailings.load();
+        }
     },
 
     refreshView: function() {

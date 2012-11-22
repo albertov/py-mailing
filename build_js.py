@@ -17,6 +17,8 @@ LICENSE_TEXT = u'Copyright(c) 2012 Alberto Valverde González'
 
 def main():
     jsb = os.path.join(DIR, 'app.jsb3')
+    if os.path.exists(jsb):
+        os.unlink(jsb)
     with running_server() as url:
         print "Creating JSB..."
         subprocess.check_call([SENCHA, 'create', 'jsb',
@@ -28,7 +30,6 @@ def main():
     print "Building minimized app..."
     subprocess.check_call([SENCHA, 'build',
                            '-p', 'app.jsb3', '-d', DIR], cwd=DIR)
-    #os.unlink(jsb)
     
     
 def mangle_jsb(url, fname, projectName='pyMailing', licenseText=LICENSE_TEXT):
@@ -52,7 +53,7 @@ def mangle_jsb(url, fname, projectName='pyMailing', licenseText=LICENSE_TEXT):
             files[:0] = extra_files
         for file in files:
             path = file['path']
-            path = path.replace('../static/', '').replace('/static/', '')
+            path = path.replace('../static', '').replace('/static', '')
             file['path'] = path
     with open(fname, 'w') as f:
         json.dump(data, f, encoding='utf8', indent=4)
