@@ -44,14 +44,15 @@ def mangle_jsb(url, fname, projectName='pyMailing', licenseText=LICENSE_TEXT):
             for script in dom.xpath('//script[@class="in-build"]'):
                 src = script.attrib['src']
                 parts = src.split('/')
+                name = parts.pop(-1)
                 extra_files.append(dict(
-                    path = '/'.join(parts[2:-1])+'/',
-                    name = parts[-1]
+                    path = '/'.join(parts)+'/',
+                    name = name
                 ))
             files[:0] = extra_files
         for file in files:
             path = file['path']
-            path = path.replace('../static/', '').replace('/static', '')
+            path = path.replace('../static', '').replace('/static', '')
             file['path'] = path
     with open(fname, 'w') as f:
         json.dump(data, f, encoding='utf8', indent=4)
