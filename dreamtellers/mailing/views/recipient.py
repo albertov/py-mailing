@@ -1,4 +1,4 @@
-from ...models import Recipient
+from ..models import Recipient
 from .. import app
 from ..validators import Schema, UnicodeString, Email, Int
 from .base import rest_views

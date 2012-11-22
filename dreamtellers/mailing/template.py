@@ -12,7 +12,7 @@ class Plugin(object):
                                      auto_reload=auto_reload)
         from bottle import request
         from . import static_url
-        from ..models import Config
+        from .models import Config
         self.global_variables = dict(
             static_url = static_url,
             request = request,

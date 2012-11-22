@@ -1,4 +1,4 @@
-from ...models import MailingDelivery, GroupMailingDelivery
+from ..models import MailingDelivery, GroupMailingDelivery
 from .. import app
 from ..validators import Schema, Int, ISO8601DateValidator
 from .base import rest_views, generic_creator

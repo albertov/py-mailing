@@ -38,8 +38,8 @@ setup(
         ],
     entry_points = """
     [console_scripts]
-    webmailing = dreamtellers.mailing.web:main
+    webmailing = dreamtellers.mailing:main
     [paste.app_factory]
-    main = dreamtellers.mailing.web:app_factory
+    main = dreamtellers.mailing:app_factory
     """,
     )

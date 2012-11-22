@@ -1,4 +1,4 @@
-DIR=$(CURDIR)/dreamtellers/mailing/web/static
+DIR=$(CURDIR)/dreamtellers/mailing/static
 SENCHA=/Applications/SenchaSDKTools-2.0.0-beta3/sencha
 URL=http://localhost:8080
 

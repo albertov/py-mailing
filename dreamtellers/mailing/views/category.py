@@ -1,4 +1,4 @@
-from ...models import Category
+from ..models import Category
 
 from .. import app
 from ..validators import Schema, Int, UnicodeString

@@ -2,7 +2,7 @@
 import json
 import markupsafe
 
-from ...models import Image, Session
+from ..models import Image, Session
 from .. import app
 from ..validators import (validate, Schema, UnicodeString, Int, String,
                           FieldStorageUploadConverter)

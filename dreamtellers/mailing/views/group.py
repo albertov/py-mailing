@@ -1,4 +1,4 @@
-from ...models import Group
+from ..models import Group
 from .. import app
 from ..validators import Schema, UnicodeString, Int
 from .base import rest_views

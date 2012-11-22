@@ -1,5 +1,5 @@
-from ...models import Mailing, MailingTemplate, Template, Image
-from ...html import HTMLPageComposer
+from ..models import Mailing, MailingTemplate, Template, Image
+from ..html import HTMLPageComposer
 
 from .. import app
 from ..validators import validate, Schema, Int, ISO8601DateValidator

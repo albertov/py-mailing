@@ -71,7 +71,7 @@ class Image(Model):
 
     @property
     def internal_url(self):
-        from ..web import get_url
+        from .. import get_url
         return get_url('image_view', hash=self.hash)
 
     def thumbnail(self, width, height):

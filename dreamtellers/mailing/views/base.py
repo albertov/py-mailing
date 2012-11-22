@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import sql, types, func
 
 
-from ...models import Session
+from ..models import Session
 from ..validators import (validate, JsonValidator, Schema, InvalidForm, Int,
                           String)
 

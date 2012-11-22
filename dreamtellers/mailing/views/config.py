@@ -1,6 +1,6 @@
 import json
 
-from ...models import Config, Session
+from ..models import Config, Session
 
 from .. import app
 from .base import request, error_response

@@ -1,8 +1,8 @@
 from lxml import etree
 from pkg_resources import resource_filename
 
-from ...models import Template
-from ...dtds import DTDResolver
+from ..models import Template
+from ..dtds import DTDResolver
 from .. import app
 from ..validators import (Schema, UnicodeString, OneOf, Invalid,
                           format_compound_error)
