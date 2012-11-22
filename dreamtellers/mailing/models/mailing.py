@@ -144,28 +144,28 @@ class Mailing(Model):
             modified=self.modified.isoformat() if self.modified else None,
         )
         
-class GroupSentMailing(Model):
-    __tablename__ = 'group_sent_mailing'
+class GroupMailingDelivery(Model):
+    __tablename__ = 'group_mailing_delivery'
     group_id = Column(Integer, ForeignKey('group.id', ondelete="CASCADE"),
                       primary_key=True, nullable=False)
-    sent_mailing_id = Column(Integer,
-                             ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+    mailing_delivery_id = Column(Integer,
+                             ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
                              primary_key=True, nullable=False)
 
     def __json__(self):
         return dict(
-            id='::'.join(map(str, [self.group_id, self.sent_mailing_id])),
+            id='::'.join(map(str, [self.group_id, self.mailing_delivery_id])),
             group_id=self.group_id,
-            sent_mailing_id=self.sent_mailing_id,
+            mailing_delivery_id=self.mailing_delivery_id,
         )
 
-class SentMailingProcessedRecipient(Model):
-    __table__ = Table('sent_mailing_processed_recipient', Model.metadata,
+class MailingDeliveryProcessedRecipient(Model):
+    __table__ = Table('mailing_delivery_processed_recipient', Model.metadata,
         Column("recipient_id", Integer,
                ForeignKey('recipient.id', ondelete="CASCADE"),
                primary_key=True, nullable=False),
-        Column("sent_mailing_id", Integer,
-               ForeignKey('sent_mailing.id', ondelete="CASCADE"),
+        Column("mailing_delivery_id", Integer,
+               ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
                primary_key=True, nullable=False),
         Column("time", DateTime, nullable=False,
                default=datetime.datetime.now),
@@ -173,13 +173,13 @@ class SentMailingProcessedRecipient(Model):
 
     def __json__(self):
         return dict(
-            id='::'.join(map(str, [self.recipient_id, self.sent_mailing_id])),
+            id='::'.join(map(str, [self.recipient_id, self.mailing_delivery_id])),
             recipient_id=self.recipient_id,
-            sent_mailing_id=self.sent_mailing_id,
+            mailing_delivery_id=self.mailing_delivery_id,
         )
 
-class SentMailing(Model):
-    __table__ = Table('sent_mailing', Model.metadata,
+class MailingDelivery(Model):
+    __table__ = Table('mailing_delivery', Model.metadata,
         Column("id", Integer, primary_key=True),
         Column("mailing_id", Integer, ForeignKey('mailing.id'), nullable=False),
         Column("programmed_date", DateTime),
@@ -190,17 +190,17 @@ class SentMailing(Model):
                default=datetime.datetime.now),
     )
 
-    groups = orm.relation(Group, secondary=GroupSentMailing.__table__)
+    groups = orm.relation(Group, secondary=GroupMailingDelivery.__table__)
     mailing = orm.relation(Mailing,
-        backref=orm.backref('sent_mailings', cascade='all,delete-orphan'),
+        backref=orm.backref('mailing_deliveries', cascade='all,delete-orphan'),
         innerjoin=True,
         )
 
     @declared_attr
     def recipients(cls):
-        _recipient_join = GroupSentMailing.__table__.join(
+        _recipient_join = GroupMailingDelivery.__table__.join(
             Group.__table__.join(Recipient.__table__).alias('group_recipient')
-            ).alias('group_sent_mailing_group_recipient')
+            ).alias('group_mailing_delivery_group_recipient')
 
         return orm.relation(Recipient,
             secondary=_recipient_join,
@@ -210,8 +210,8 @@ class SentMailing(Model):
             )
 
     processed_recipients = orm.relation(Recipient,
-        secondary=SentMailingProcessedRecipient.__table__,
-        order_by=SentMailingProcessedRecipient.__table__.c.time,
+        secondary=MailingDeliveryProcessedRecipient.__table__,
+        order_by=MailingDeliveryProcessedRecipient.__table__.c.time,
         lazy=True
         )
     

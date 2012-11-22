@@ -1,13 +1,13 @@
-Ext.define('WebMailing.view.sent_mailing.Panel', {
+Ext.define('WebMailing.view.mailing_delivery.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
         'WebMailing.LoadMask',
         'Ext.layout.container.Fit',
         'Ext.layout.container.Border',
-        'WebMailing.view.sent_mailing.Grid',
+        'WebMailing.view.mailing_delivery.Grid',
         'WebMailing.view.group.Chooser'
     ],
-    alias: 'widget.sent_mailings',
+    alias: 'widget.mailing_deliveries',
     layout: 'border',
     border: false,
     items: [
@@ -47,8 +47,8 @@ Ext.define('WebMailing.view.sent_mailing.Panel', {
     _createAndSwapGrid: function(record) {
         var container = this.items.get('grid_container'),
             old = container.items.get(0),
-            grid = Ext.create('WebMailing.view.sent_mailing.Grid', {
-                store: record.sent_mailings()
+            grid = Ext.create('WebMailing.view.mailing_delivery.Grid', {
+                store: record.mailing_deliveries()
             });
         if (old)
             Ext.destroy(container.items.remove(old))

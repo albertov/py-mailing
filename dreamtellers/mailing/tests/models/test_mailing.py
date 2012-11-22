@@ -67,8 +67,8 @@ class TestMailing(BaseModelTest):
         retrieved = self.session.query(ob.__class__).one()
         self.failUnlessEqual(retrieved.templates[TYPE].type, TYPE)
 
-class TestSentMailing(BaseModelTest):
-    _makeOne = BaseModelTest._makeSentMailing
+class TestMailingDelivery(BaseModelTest):
+    _makeOne = BaseModelTest._makeMailingDelivery
 
     def test_create(self):
         programmed_date = datetime.datetime(2010,1,1)

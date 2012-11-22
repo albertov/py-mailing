@@ -3,7 +3,7 @@ Ext.define('WebMailing.view.mailing.Detail', {
     requires: [
         'WebMailing.view.mailing.Edit',
         'WebMailing.view.mailing.View',
-        'WebMailing.view.sent_mailing.Panel'
+        'WebMailing.view.mailing_delivery.Panel'
     ],
     alias: 'widget.mailing_detail',
     title: '&nbsp;',
@@ -32,8 +32,8 @@ Ext.define('WebMailing.view.mailing.Detail', {
             xtype: 'mailing_edit',
             title: 'Edición' //i18n
         }, {
-            itemId: 'sent_mailings',
-            xtype: 'sent_mailings',
+            itemId: 'mailing_deliveries',
+            xtype: 'mailing_deliveries',
             title: 'Envíos' //i18n
         }
     ],
@@ -47,7 +47,7 @@ Ext.define('WebMailing.view.mailing.Detail', {
     refresh: function() {
         if (this.record) {
             this.down('#edit').setRecord(this.record);
-            this.down('#sent_mailings').setRecord(this.record);
+            this.down('#mailing_deliveries').setRecord(this.record);
             this.down('#html_view').setRecord(this.record);
             this.down('#text_view').setRecord(this.record);
             this.setTitle(this.record.getTitle());

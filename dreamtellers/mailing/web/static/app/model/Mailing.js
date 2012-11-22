@@ -8,7 +8,7 @@ Ext.define('WebMailing.model.Mailing', {
     requires: [
         'WebMailing.Rest',
         'WebMailing.model.Item',
-        'WebMailing.model.SentMailing',
+        'WebMailing.model.MailingDelivery',
         'WebMailing.model.MailingTemplate'
     ],
     fields: [
@@ -49,9 +49,9 @@ Ext.define('WebMailing.model.Mailing', {
                 }
             }
         }, {
-            model: 'WebMailing.model.SentMailing',
+            model: 'WebMailing.model.MailingDelivery',
             foreignKey: 'mailing_id',
-            name:'sent_mailings',
+            name:'mailing_deliveries',
             primaryKey:'id',
             storeConfig: {
                 autoSync: true,

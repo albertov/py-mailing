@@ -16,7 +16,7 @@ from .image import Image
 from .item import Category, Item
 from .content import Article, ExternalLink
 from .recipient import Group, Recipient
-from .mailing import (Mailing, SentMailing, GroupSentMailing, FileLookupError,
+from .mailing import (Mailing, MailingDelivery, GroupMailingDelivery, FileLookupError,
                       MailingTemplate, MissingTemplate)
 
 
@@ -34,8 +34,8 @@ __all__ = [
     "Group",
     "Recipient",
     "Mailing",
-    "SentMailing",
-    "GroupSentMailing",
+    "MailingDelivery",
+    "GroupMailingDelivery",
     "FileLookupError",
     "MissingTemplate",
 ]

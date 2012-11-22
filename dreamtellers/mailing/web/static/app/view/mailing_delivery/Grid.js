@@ -1,10 +1,10 @@
-Ext.define('WebMailing.view.sent_mailing.Grid', {
+Ext.define('WebMailing.view.mailing_delivery.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
         'WebMailing.CRUDPlugin',
         'Ext.ux.datetime.DateTimeField'
     ],
-    alias: 'widget.sent_mailing_grid',
+    alias: 'widget.mailing_delivery_grid',
     plugins: [
         {
             ptype: 'crud',

@@ -225,18 +225,15 @@ def rest_views(app, model, url, plural, validator=None, creator=None,
                updater=None, collection_query=None):
                 
     item_url = url + '<id>'
-    app.route(url)(
-        generic_collection_view(model, plural, collection_query)
-        )
-    app.route(item_url)(generic_show_item(model, plural))
-    app.route(item_url, method='DELETE')(generic_delete_item(model))
     if creator is None:
         creator = generic_creator(model, validator)
-    app.route(url, method='POST')(generic_create_item(creator, plural))
     if updater is None:
         updater = generic_updater(validator)
-    app.route(item_url, method='PUT')(
-        generic_update_item(model, updater, plural))
+    app.get(url)(generic_collection_view(model, plural, collection_query))
+    app.post(url)(generic_create_item(creator, plural))
+    app.get(item_url)(generic_show_item(model, plural))
+    app.delete(item_url)(generic_delete_item(model))
+    app.put(item_url)(generic_update_item(model, updater, plural))
 
 # Utilities
 

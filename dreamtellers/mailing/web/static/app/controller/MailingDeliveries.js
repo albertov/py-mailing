@@ -1,49 +1,49 @@
-Ext.define('WebMailing.controller.SentMailings', {
+Ext.define('WebMailing.controller.MailingDeliveries', {
     extend: 'Ext.app.Controller',
-    models: ['SentMailing'],
-    views: ['sent_mailing.Panel'], 
+    models: ['MailingDelivery'],
+    views: ['mailing_delivery.Panel'], 
     refs: [
         {
             ref: 'groupChooser',
-            selector: 'sent_mailings group_chooser'
+            selector: 'mailing_deliveries group_chooser'
         }, {
             ref: 'selectedGroups',
-            selector: 'sent_mailings group_chooser grid[itemId="selected"]'
+            selector: 'mailing_deliveries group_chooser grid[itemId="selected"]'
         }, {
-            ref: 'sentMailingsGrid',
-            selector: "sent_mailings sent_mailing_grid" 
+            ref: 'mailingDeliveriesGrid',
+            selector: "mailing_deliveries mailing_delivery_grid" 
         }
     ],
 
     init: function() {
         this.control({
-            "sent_mailings  sent_mailing_grid": {
-                select: this.onSentMailingSelect,
-                new_item: this.onNewSentMailing,
+            "mailing_deliveries  mailing_delivery_grid": {
+                select: this.onMailingDeliverySelect,
+                new_item: this.onNewMailingDelivery,
                 render: this.clearSelected,
                 deselect: this.clearSelected
             },
-            'sent_mailings group_chooser grid[itemId="available"]': {
+            'mailing_deliveries group_chooser grid[itemId="available"]': {
                 itemdblclick: this.onGroupDblClick
             },
-            'sent_mailings group_chooser grid[itemId="selected"]': {
+            'mailing_deliveries group_chooser grid[itemId="selected"]': {
                 drop: this.onGroupDrop,
                 delete_item: this.onGroupDelete
             }
         });
     },
-    onNewSentMailing: function(grid) {
-        console.debug('onNewSentMailing', arguments);
+    onNewMailingDelivery: function(grid) {
+        console.debug('onNewMailingDelivery', arguments);
         var r = grid.store.add({})[0];
         grid.store.on('write', function() {
             grid.rowEditor.startEdit(r, 0);
         }, this, {single:true});
     },
 
-    onSentMailingSelect: function(grid, record) {
-        console.debug('onSentMailingSelect', arguments);
+    onMailingDeliverySelect: function(grid, record) {
+        console.debug('onMailingDeliverySelect', arguments);
         this.getGroupChooser().enable();
-        record.group_sent_mailings().load({
+        record.group_mailing_deliveries().load({
             scope: this,
             callback: function(records, op, success) {
                 if (success) {
@@ -60,8 +60,8 @@ Ext.define('WebMailing.controller.SentMailings', {
         });
     },
     addGroupsToSelected: function(records) {
-        var sm = this.getSentMailingsGrid().getSelectionModel(),
-            store = sm.getSelection()[0].group_sent_mailings();
+        var sm = this.getMailingDeliveriesGrid().getSelectionModel(),
+            store = sm.getSelection()[0].group_mailing_deliveries();
         store.suspendAutoSync();
         Ext.each(records, function(record) {
             store.add({group_id: record.get('id')});
@@ -81,8 +81,8 @@ Ext.define('WebMailing.controller.SentMailings', {
     },
 
     onGroupDelete: function(_, group) {
-        var sm = this.getSentMailingsGrid().getSelectionModel(),
-            store = sm.getSelection()[0].group_sent_mailings();
+        var sm = this.getMailingDeliveriesGrid().getSelectionModel(),
+            store = sm.getSelection()[0].group_mailing_deliveries();
         var assoc = store.findRecord("group_id", group.get('id'));
         store.remove(assoc);
         group.store.remove(group);

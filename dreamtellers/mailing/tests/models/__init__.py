@@ -49,6 +49,6 @@ class BaseModelTest(TestCase):
         from ...models import Recipient
         return Recipient(**kw)
 
-    def _makeSentMailing(self, **kw):
-        from ...models import SentMailing
-        return SentMailing(**kw)
+    def _makeMailingDelivery(self, **kw):
+        from ...models import MailingDelivery
+        return MailingDelivery(**kw)

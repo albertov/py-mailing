@@ -2,22 +2,22 @@ import datetime
 from . import BaseViewTest
 
 
-class TestSentMailingViews(BaseViewTest):
+class TestMailingDeliveryViews(BaseViewTest):
     def test_create_a_good_one(self):
         m = self._makeMailing(number=0)
         d = datetime.datetime(2008,1,1)
         self.session.add(m)
         self.session.flush()
         data = dict(mailing_id=m.id, programmed_date=d.isoformat())
-        resp = self.app.post_json('/sent_mailing/', data)
+        resp = self.app.post_json('/mailing_delivery/', data)
         self.assertTrue(resp.json['success'])
-        self.assertEqual(len(resp.json['sent_mailings']), 1)
-        item = resp.json['sent_mailings'][0]
+        self.assertEqual(len(resp.json['mailing_deliveries']), 1)
+        item = resp.json['mailing_deliveries'][0]
         for k in data:
             self.assertEqual(item[k], data[k])
 
     def test_associate_group(self):
-        sm = self._makeSentMailing(
+        sm = self._makeMailingDelivery(
             mailing = self._makeMailing(number=0),
             programmed_date = datetime.datetime(2008,1,1)
             )
@@ -26,17 +26,17 @@ class TestSentMailingViews(BaseViewTest):
         self.session.add(g)
         self.session.flush()
 
-        data = dict(sent_mailing_id=sm.id, group_id=g.id)
-        resp = self.app.post_json('/group_sent_mailing/', data)
+        data = dict(mailing_delivery_id=sm.id, group_id=g.id)
+        resp = self.app.post_json('/group_mailing_delivery/', data)
         self.assertTrue(resp.json['success'])
-        self.assertEqual(len(resp.json['group_sent_mailings']), 1)
-        item = resp.json['group_sent_mailings'][0]
+        self.assertEqual(len(resp.json['group_mailing_deliveries']), 1)
+        item = resp.json['group_mailing_deliveries'][0]
         for k in data:
             self.assertEqual(item[k], data[k])
         self.failUnlessEqual(1, len(sm.query.one().groups))
 
     def test_delete_association(self):
-        sm = self._makeSentMailing(
+        sm = self._makeMailingDelivery(
             mailing = self._makeMailing(number=0),
             programmed_date = datetime.datetime(2008,1,1)
             )
@@ -45,11 +45,11 @@ class TestSentMailingViews(BaseViewTest):
         self.session.add(g)
         self.session.flush()
 
-        data = dict(sent_mailing_id=sm.id, group_id=g.id)
-        resp = self.app.post_json('/group_sent_mailing/', data)
+        data = dict(mailing_delivery_id=sm.id, group_id=g.id)
+        resp = self.app.post_json('/group_mailing_delivery/', data)
         self.assertTrue(resp.json['success'])
-        item = resp.json['group_sent_mailings'][0]
+        item = resp.json['group_mailing_deliveries'][0]
         self.failUnlessEqual(1, len(sm.query.one().groups))
-        resp = self.app.delete('/group_sent_mailing/%s'%str(item['id']))
+        resp = self.app.delete('/group_mailing_delivery/%s'%str(item['id']))
         self.assertTrue(resp.json['success'])
         self.failUnlessEqual(0, len(sm.query.one().groups))

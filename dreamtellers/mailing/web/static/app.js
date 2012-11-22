@@ -3,7 +3,7 @@ Ext.application({
     appFolder: url('static/app'),
     controllers: [
         'Mailings', 'Items', 'Categories', 'Recipients', 'Groups', 'Images',
-        'SentMailings', 'Templates', 'Config'
+        'MailingDeliveries', 'Templates', 'Config'
     ],
     requires: [
         'Ext.app.Application',

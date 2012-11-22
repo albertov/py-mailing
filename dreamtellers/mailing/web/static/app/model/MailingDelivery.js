@@ -1,9 +1,9 @@
-Ext.define('WebMailing.model.SentMailing', {
+Ext.define('WebMailing.model.MailingDelivery', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
     requires: [
         'WebMailing.Rest',
-        'WebMailing.model.GroupSentMailing'
+        'WebMailing.model.GroupMailingDelivery'
     ],
     fields: [
         {name:'id', type: 'int'},
@@ -24,9 +24,9 @@ Ext.define('WebMailing.model.SentMailing', {
     ],
     hasMany: [
         {
-            model: 'WebMailing.model.GroupSentMailing',
-            foreignKey: 'sent_mailing_id',
-            name:'group_sent_mailings',
+            model: 'WebMailing.model.GroupMailingDelivery',
+            foreignKey: 'mailing_delivery_id',
+            name:'group_mailing_deliveries',
             primaryKey:'id',
             storeConfig: {
                 autoSync: true
@@ -35,10 +35,10 @@ Ext.define('WebMailing.model.SentMailing', {
     ],
     proxy: {
         type: 'rest2',
-        url: url('sent_mailing/'),
+        url: url('mailing_delivery/'),
         reader: {
             type: 'json',
-            root: 'sent_mailings'
+            root: 'mailing_deliveries'
         }
     }
 });
