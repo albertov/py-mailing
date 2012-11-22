@@ -52,7 +52,7 @@ def mangle_jsb(url, fname, projectName='pyMailing', licenseText=LICENSE_TEXT):
             files[:0] = extra_files
         for file in files:
             path = file['path']
-            path = path.replace('../static', '').replace('/static', '')
+            path = path.replace('../static/', '').replace('/static/', '')
             file['path'] = path
     with open(fname, 'w') as f:
         json.dump(data, f, encoding='utf8', indent=4)
