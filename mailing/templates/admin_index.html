@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+<head>
+    <title>Dreamteller Mailing</title>
+ 
+    <link rel="stylesheet"
+          type="text/css"
+          href="${static_url('extjs/resources/css/ext-all.css')}"/>
+    <link rel="stylesheet"
+          type="text/css"
+          href="${static_url('pagedown/style.css')}"/>
+    <link rel="stylesheet"
+          type="text/css"
+          href="${static_url('codemirror/lib/codemirror.css')}"/>
+    <script type="text/javascript">
+        window.url = function(s) {
+            return "${request.script_name}" + s;
+        }
+    </script>
+    <py:if test="debug">
+        <script type="text/javascript"
+                src="${static_url('extjs/ext-debug.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('pagedown/Markdown.Converter.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('pagedown/Markdown.Sanitizer.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('pagedown/Markdown.Editor.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/lib/codemirror.js')}"
+                class="in-build"></script>
+        <script type="text/javascript">
+            Ext.Loader.setPath({
+                'Ext.ux.pagedown': '${static_url("pagedown")}',
+                'Ext.ux.codemirror': '${static_url("codemirror")}',
+                'Ext.ux.datetime': '${static_url("datetime")}'
+            });
+        </script>
+    </py:if>
+    <script type="text/javascript" src="${static_url('app.js' if debug else 'app-all.js')}"></script>
+
+    <script type="text/javascript">
+        Ext.Loader.setConfig({
+            enabled: ${'true' if debug else 'false'}
+        });
+    </script>
+</head>
+<body></body>
+</html>
+

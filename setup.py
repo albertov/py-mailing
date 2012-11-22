@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 version = '0.1'
 
 setup(
-    name = 'dreamtellers.mailing',
+    name = 'pyMailing',
     version = version,
     description = "",
     long_description="""\
@@ -18,7 +18,6 @@ setup(
     packages = find_packages(exclude=['ez_setup']),
     include_package_data = True,
     zip_safe = False,
-    namespace_packages = ['dreamtellers'],
     test_suite="nose.collector",
     tests_require=["nose", "WebTest", "unittest2"],
     install_requires = [
@@ -38,8 +37,8 @@ setup(
         ],
     entry_points = """
     [console_scripts]
-    webmailing = dreamtellers.mailing:main
+    mailing = mailing:main
     [paste.app_factory]
-    main = dreamtellers.mailing:app_factory
+    main = mailing:app_factory
     """,
     )
