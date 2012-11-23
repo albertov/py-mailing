@@ -7,6 +7,7 @@ Ext.define('Mailing.view.recipient.Grid', {
     plugins: [
         {
             ptype: 'crud',
+            item_names: ['Suscriptor', 'Suscriptores'],
             actions: 'new,delete'
         }
     ],

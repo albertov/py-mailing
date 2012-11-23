@@ -19,6 +19,9 @@ Ext.define('Mailing.IframePanel', {
         this.callParent(arguments);
         this.loadMask = Ext.create('Ext.LoadMask', this);
     },
+    reload: function() {
+        this.setSrc(this.src);
+    },
     setSrc: function(src) {
         var me = this;
         this.src = src;

@@ -5,6 +5,10 @@ Ext.define('Mailing.view.image.Panel', {
         'Mailing.view.image.Grid'
     ],
     alias: 'widget.images',
+    tabConfig: {
+        tooltip: 'Gestión de Imágenes.<br />Debe crearlas aquí antes de poder '+
+                 'asignarlas a Artículos, Categorías, etc...'
+    },
     layout: 'fit',
     items: [
         {

@@ -6,6 +6,12 @@ Ext.define('Mailing.view.config.Panel', {
         'Ext.grid.property.Grid'
     ],
     alias: 'widget.config',
+    tabConfig: {
+        tooltip: ('Parámetros de configuración de la aplicación. <br />' +
+                  '<b>!Tenga cuidado porque una mala gestión puede hacer '+
+                  'que la aplicación deje de funcionar correctamente!</b>')
+                 //i18n
+    },
     layout: 'fit',
     items: [
         {

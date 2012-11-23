@@ -9,6 +9,7 @@ Ext.define('Mailing.view.group.Grid', {
     plugins: [
         {
             ptype: 'crud',
+            item_names: ['Grupo', 'Grupos'],
             actions: 'new,delete'
         }
     ],

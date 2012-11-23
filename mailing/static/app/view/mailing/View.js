@@ -28,7 +28,16 @@ Ext.define('Mailing.view.mailing.View', {
         this.callParent(arguments);
         this.addDocked(Ext.widget('toolbar', {
             items: [
-                Ext.widget('tbtext', {text:'Plantilla'}), //i18n
+                Ext.widget('button', {
+                    iconCls: 'x-tbar-loading',
+                    handler: function() {
+                        this.up('mailing_view').reload();
+                    },
+                    tooltip: 'Recargar la vista del Boletín' //i18n
+                }),
+                Ext.widget('tbtext', {
+                    text:'Plantilla' // i18n
+                }), 
                 this.combo
             ]
         }));

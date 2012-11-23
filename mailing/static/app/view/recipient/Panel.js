@@ -6,6 +6,9 @@ Ext.define('Mailing.view.recipient.Panel', {
         'Mailing.LoadMask'
     ],
     alias: 'widget.recipients',
+    tabConfig: {
+        tooltip: 'Gestión e información de suscriptores'
+    },
     layout: 'fit',
     items: [
         {

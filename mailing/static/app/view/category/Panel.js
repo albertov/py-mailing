@@ -5,6 +5,10 @@ Ext.define('Mailing.view.category.Panel', {
         'Mailing.view.category.Tree'
     ],
     alias: 'widget.categories',
+    tabConfig: {
+        tooltip: ('Gestión de Categorías. <br />Debe crearlas aquí antes de ' +
+                  'poder seleccionarlas en el editor de Boletines') // i18n
+    },
     layout: 'fit',
     items: [
         {

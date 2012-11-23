@@ -9,6 +9,8 @@ Ext.define('Mailing.view.image.Grid', {
     plugins: [
         {
             ptype: 'crud',
+            item_gender: 'f',
+            item_names: ['Imágen', 'Imágenes'],
             actions: 'new,delete'
         }
     ],

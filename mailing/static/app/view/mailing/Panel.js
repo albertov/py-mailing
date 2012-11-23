@@ -5,6 +5,9 @@ Ext.define('Mailing.view.mailing.Panel', {
         'Mailing.view.mailing.Grid',
         'Mailing.view.mailing.Detail'
     ],
+    tabConfig: {
+        tooltip: 'Gestión y envío de boletines' // i18n
+    },
     alias: 'widget.mailings',
     layout: 'border',
     items: [

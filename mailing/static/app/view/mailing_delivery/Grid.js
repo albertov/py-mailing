@@ -8,6 +8,7 @@ Ext.define('Mailing.view.mailing_delivery.Grid', {
     plugins: [
         {
             ptype: 'crud',
+            item_names: ['Envío', 'Envíos'],
             actions: 'new'
         }
     ],

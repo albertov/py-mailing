@@ -12,6 +12,7 @@ Ext.define('Mailing.view.mailing.Grid', {
     plugins: [
         {
             ptype: 'crud',
+            item_names: ['Boletín', 'Boletines'],
             actions: 'new,delete'
         }
     ],

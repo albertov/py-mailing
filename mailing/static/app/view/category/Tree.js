@@ -61,6 +61,12 @@ Ext.define('Mailing.view.category.Tree', {
         var p = Ext.create('Mailing.CRUDPlugin', {
             actions: 'new,delete',
             context_actions: 'new,delete',
+            item_names: ['Categoría', 'Categorías'], //i18n
+            item_gender: 'f',
+            labels: {
+                newQtip: ['crear {uartS} {itemS} {newS} dentro de la {itemS} ',
+                          '{selectedS}']
+            },
             init: function() {
                 Mailing.CRUDPlugin.prototype.init.apply(this, arguments);
                 this.actions['new'].disable();

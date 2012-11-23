@@ -33,6 +33,7 @@ Ext.define('Mailing.view.group.Chooser', {
             plugins: [
                 {
                     ptype: 'crud',
+                    item_names: ['grupo selecionado', 'grupos seleccionados'],
                     actions: 'delete',
                     enable_row_edit: false
                 }

@@ -9,10 +9,12 @@ Ext.application({
         'Ext.app.Application',
         'Ext.tab.Panel',
         'Ext.container.Viewport',
+        'Ext.tip.QuickTipManager',
         'Mailing.view.Home'
     ],
 
     launch: function() {
+        Ext.tip.QuickTipManager.init();
         Ext.create('Ext.container.Viewport', {
             layout: 'fit',
             items: {

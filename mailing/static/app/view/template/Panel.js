@@ -7,6 +7,9 @@ Ext.define('Mailing.view.template.Panel', {
         'Mailing.view.template.Detail'
     ],
     alias: 'widget.templates',
+    tabConfig: {
+        tooltip: 'Gestión de plantillas'
+    },
     layout: 'border',
     items: [
         {
