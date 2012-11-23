@@ -1,6 +1,8 @@
 import datetime
 
-from sqlalchemy import Column, ForeignKey, DateTime, Integer, Unicode, orm
+from sqlalchemy import (Column, ForeignKey, DateTime, Integer, Unicode, orm,
+                        Boolean)
+from sqlalchemy.orm.exc import NoResultFound
 
 from . import Model
 
@@ -36,12 +38,25 @@ class Recipient(Model):
     __tablename__ = "recipient"
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, nullable=False)
-    email = Column(Unicode, nullable=False)
+    email = Column(Unicode, nullable=False, unique=True)
     group_id = Column(Integer, ForeignKey("group.id"))
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
+    active = Column(Boolean, default=True, nullable=False)
+    error = Column(Boolean, default=False, nullable=False)
 
     group = orm.relation(Group,  backref='recipients')
+
+    bounces = orm.relation("Bounce",
+                           backref=orm.backref('recipient', innerjoin=True),
+                           cascade='all,delete-orphan')
+
+    @classmethod
+    def by_email(cls, email):
+        try:
+            return cls.query.filter_by(email=email).one()
+        except NoResultFound:
+            return None
     
     def __repr__(self):
         data = (self.id, self.name, self.email)
@@ -53,9 +68,18 @@ class Recipient(Model):
             id=self.id,
             name=self.name,
             email=self.email,
+            active=self.active,
+            error=self.error,
             group_id=self.group_id,
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
             )
 
-
+class Bounce(Model):
+    __tablename__ = "bounce"
+    recipient_id = Column(Integer,
+                          ForeignKey("recipient.id", ondelete='CASCADE',
+                                     onupdate='CASCADE'),
+                          nullable=False, primary_key=True)
+    timestamp = Column(DateTime, nullable=False, default=datetime.datetime.now,
+                       primary_key=True)

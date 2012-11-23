@@ -13,8 +13,6 @@ Ext.define('Mailing.view.template.Form', {
     items: [
         {
             xtype:      'codemirror',
-            pathModes:  url('static/codemirror/mode'),
-            pathExtensions:  url('static/codemirror/lib/util'),
             name:       'body',
             fieldLabel: 'Cuerpo', // i18n
             anchor:     '100% 0',

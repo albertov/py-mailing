@@ -4,7 +4,8 @@ Ext.define('Mailing.view.mailing.Grid', {
         'Mailing.CRUDPlugin',
         'Ext.form.TextField',
         'Ext.form.NumberField',
-        'Ext.form.DateField'
+        'Ext.form.DateField',
+        'Ext.ux.grid.FiltersFeature'
     ],
     alias: 'widget.mailing_grid',
     store: 'Mailings',
@@ -16,11 +17,13 @@ Ext.define('Mailing.view.mailing.Grid', {
             actions: 'new,delete'
         }
     ],
+    features: [{ftype:'filters'}],
     columns: [
         {
             text: 'Número',
             dataIndex: 'number',
             sortable: true,
+            filterable: true,
             field: {
                 xtype: 'numberfield'
             }
@@ -28,6 +31,7 @@ Ext.define('Mailing.view.mailing.Grid', {
             text: 'Fecha',
             dataIndex: 'date',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d'),
             field: {
                 xtype: 'datefield',
@@ -37,12 +41,14 @@ Ext.define('Mailing.view.mailing.Grid', {
             text: 'Modificado',
             dataIndex: 'modified',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width:150
         }, {
             text: 'Creado',
             dataIndex: 'created',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width: 150
         }

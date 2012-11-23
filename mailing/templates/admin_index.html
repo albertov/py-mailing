@@ -2,7 +2,7 @@
 <html xmlns:py="http://genshi.edgewall.org/"
       xmlns:xi="http://www.w3.org/2001/XInclude">
 <head>
-    <title>Dreamteller Mailing</title>
+    <title>pyMailing</title>
  
     <link rel="stylesheet"
           type="text/css"
@@ -13,6 +13,12 @@
     <link rel="stylesheet"
           type="text/css"
           href="${static_url('codemirror/lib/codemirror.css')}"/>
+    <link rel="stylesheet"
+          type="text/css"
+          href="${static_url('ux.grid/css/GridFilters.css')}"/>
+    <link rel="stylesheet"
+          type="text/css"
+          href="${static_url('ux.grid/css/RangeMenu.css')}"/>
     <script type="text/javascript">
         window.url = function(s) {
             return "${request.script_name}" + s;
@@ -21,6 +27,9 @@
     <py:if test="debug">
         <script type="text/javascript"
                 src="${static_url('extjs/ext-debug.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('app/Util.js')}"
                 class="in-build"></script>
         <script type="text/javascript"
                 src="${static_url('pagedown/Markdown.Converter.js')}"
@@ -34,11 +43,27 @@
         <script type="text/javascript"
                 src="${static_url('codemirror/lib/codemirror.js')}"
                 class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/lib/util/formatting.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/mode/xml/xml.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/mode/javascript/javascript.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/mode/css/css.js')}"
+                class="in-build"></script>
+        <script type="text/javascript"
+                src="${static_url('codemirror/mode/htmlmixed/htmlmixed.js')}"
+                class="in-build"></script>
         <script type="text/javascript">
             Ext.Loader.setPath({
                 'Ext.ux.pagedown': '${static_url("pagedown")}',
                 'Ext.ux.codemirror': '${static_url("codemirror")}',
-                'Ext.ux.datetime': '${static_url("datetime")}'
+                'Ext.ux.datetime': '${static_url("datetime")}',
+                'Ext.ux.grid': '${static_url("ux.grid")}'
             });
         </script>
     </py:if>

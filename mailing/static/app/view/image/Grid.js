@@ -2,7 +2,8 @@ Ext.define('Mailing.view.image.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
         'Mailing.CRUDPlugin',
-        'Ext.form.TextField'
+        'Ext.form.TextField',
+        'Ext.ux.grid.FiltersFeature'
     ],
     alias: 'widget.image_grid',
     store: 'Images',
@@ -14,12 +15,14 @@ Ext.define('Mailing.view.image.Grid', {
             actions: 'new,delete'
         }
     ],
+    features: [{ftype:'filters'}],
     columns: [
         {
             text: 'Título', //i18n
             dataIndex: 'title',
             sortable: true,
             width: 250,
+            filterable: true,
             field: {
                 xtype: 'textfield',
                 allowBlank: true
@@ -29,6 +32,7 @@ Ext.define('Mailing.view.image.Grid', {
             dataIndex: 'filename',
             sortable: true,
             width: 100,
+            filterable: true,
             field: {
                 xtype: 'textfield',
                 allowBlank: false
@@ -52,12 +56,14 @@ Ext.define('Mailing.view.image.Grid', {
             text: 'Modificado',
             dataIndex: 'modified',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width:150
         }, {
             text: 'Creado',
             dataIndex: 'created',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width: 150
         }

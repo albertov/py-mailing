@@ -10,7 +10,7 @@ from sqlalchemy import sql, types, func
 
 from ..models import Session
 from ..validators import (validate, JsonValidator, Schema, InvalidForm, Int,
-                          String)
+                          String, ISO8601DateValidator)
 
 __all__ = [
     'ErrorResponse',
@@ -88,12 +88,19 @@ class FilterValidator(JsonValidator):
         if value:
             ret = []
             for v in value:
-                col = getattr(self.model, v['property'])
-                if isinstance(col.property.columns[0].type,
-                              (types.Unicode, types.String)):
-                    ret.append(func.lower((col).contains(v['value'].lower())))
+                name = v.get('property', v.get('field'))
+                col = getattr(self.model, name)
+                col_type = col.property.columns[0].type
+                value = v['value']
+                operator = getattr(sql.operators, v.get('comparison', 'eq'))
+                if isinstance(col_type, (types.Unicode, types.String)):
+                    filter_ = func.lower((col).contains(value.lower()))
+                elif isinstance(col_type, (types.Date, types.DateTime)):
+                    value = ISO8601DateValidator.to_python(value)
+                    filter_ = operator(col, value)
                 else:
-                    ret.append(col==v['value'])
+                    filter_ = operator(col, value)
+                ret.append(filter_)
             return ret
 
 class ModelListValidator(Schema):

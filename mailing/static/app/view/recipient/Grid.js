@@ -2,7 +2,9 @@ Ext.define('Mailing.view.recipient.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
         'Mailing.CRUDPlugin',
-        'Ext.form.TextField'
+        'Ext.form.TextField',
+        'Ext.form.field.Checkbox',
+        'Ext.ux.grid.FiltersFeature'
     ],
     plugins: [
         {
@@ -11,6 +13,7 @@ Ext.define('Mailing.view.recipient.Grid', {
             actions: 'new,delete'
         }
     ],
+    features: [{ftype:'filters'}],
     alias: 'widget.recipient_grid',
     store: 'Recipients',
     actions: 'new,delete',
@@ -19,6 +22,7 @@ Ext.define('Mailing.view.recipient.Grid', {
             text: 'Nombre',
             dataIndex: 'name',
             sortable: true,
+            filterable: true,
             width: 350,
             field: {
                 xtype: 'textfield',
@@ -28,6 +32,7 @@ Ext.define('Mailing.view.recipient.Grid', {
             text: 'Email',
             dataIndex: 'email',
             sortable: true,
+            filterable: true,
             width: 350,
             field: {
                 xtype: 'textfield',
@@ -57,15 +62,34 @@ Ext.define('Mailing.view.recipient.Grid', {
                 queryMode: 'local'
             }
         }, {
+            text: 'Activo',
+            dataIndex: 'active',
+            sortable: true,
+            filterable: true,
+            width:40,
+            renderer: Mailing.Util.renderBool,
+            field: {
+                xtype: 'checkbox'
+            }
+        }, {
+            text: 'Estado',
+            dataIndex: 'error',
+            sortable: true,
+            filterable: true,
+            width:40,
+            renderer: Mailing.Util.renderError
+        }, {
             text: 'Modificado',
             dataIndex: 'modified',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width:150
         }, {
             text: 'Creado',
             dataIndex: 'created',
             sortable: true,
+            filterable: true,
             renderer: Ext.util.Format.dateRenderer('Y/m/d H:i:s'),
             width: 150
         }

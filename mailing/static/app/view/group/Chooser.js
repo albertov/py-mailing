@@ -3,6 +3,7 @@ Ext.define('Mailing.view.group.Chooser', {
     requires: [
         'Ext.layout.container.Border',
         'Ext.grid.plugin.DragDrop',
+        'Ext.tip.ToolTip',
         'Mailing.view.group.Grid'
     ],
     layout: 'border',
@@ -57,6 +58,8 @@ Ext.define('Mailing.view.group.Chooser', {
         var view = this.getSelectedGrid().getView();
         view.on('beforedrop', this.onBeforeDrop, this);
         this.getSelectedGrid().relayEvents(view, ["drop"]);
+        this.getAvailableGrid().getView().on('render', this._createTooltip,
+                                             this);
     },
     getSelectedGrid: function() {
         return this.items.get('selected');
@@ -72,5 +75,19 @@ Ext.define('Mailing.view.group.Chooser', {
                 return false;
             }
         }
+    },
+    _createTooltip: function(view) {
+        view.tip = Ext.widget('tooltip', {
+            target: view.el,
+            // Each grid row causes its own seperate show and hide.
+            delegate: view.itemSelector,
+            // Moving within the row should not hide the tip.
+            trackMouse: true,
+            renderTo: Ext.getBody(),
+            html: 'Haga doble click sobre los grupos o arrastrélos sobre la '+
+                  'rejilla de abajo para seleccionarlos'
+
+        });
     }
+    
 });
