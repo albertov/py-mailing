@@ -43,6 +43,7 @@ Ext.define('Mailing.controller.Mailings', {
             }
         });
         this.mailings = Ext.getStore('Mailings');
+        this.mon(this.mailings, 'beforeload', this.checkIfSaveIsNeeded, this);
         this.mon(this.mailings, 'beforeload', this._saveSelection, this);
         this.mon(this.mailings, 'load', this._restoreSelection, this);
         this.mon(this.mailings, 'write', this.refreshView, this);

@@ -27,6 +27,8 @@ Ext.define('Mailing.controller.Templates', {
                 delete_item: this.onDeleteTemplate
             }
         });
+        this.templates = Ext.getStore('Templates');
+        this.mon(this.templates, 'beforeload', this.checkIfSaveIsNeeded, this);
     },
     onPanelRender: function(panel) {
         var store = Ext.getStore('Templates');
