@@ -94,7 +94,10 @@ class FilterValidator(JsonValidator):
                 value = v['value']
                 operator = getattr(sql.operators, v.get('comparison', 'eq'))
                 if isinstance(col_type, (types.Unicode, types.String)):
-                    filter_ = func.lower((col).contains(value.lower()))
+                    value = value.lower().replace('*', '%')
+                    if '%' not in value:
+                        value += '%'
+                    filter_ = func.lower(col).like(value)
                 elif isinstance(col_type, (types.Date, types.DateTime)):
                     value = ISO8601DateValidator.to_python(value)
                     filter_ = operator(col, value)
