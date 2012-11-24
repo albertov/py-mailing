@@ -11,7 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 from . import Model
-from .util import HexBinaryComparator
+from .util import HexBinaryAttribute
 from .config import Config
 
 
@@ -64,21 +64,7 @@ class Image(Model):
     def data_expr(cls):
         return cls._data
 
-    @hybrid_property
-    def hash(self):
-        return self._hash.encode('hex')
-
-    @hash.setter
-    def hash(self, value):
-        self._hash = value.decode('hex')
-
-    @hash.expression
-    def hash(cls):
-        return cls._hash
-
-    @hash.comparator
-    def hash(cls):
-        return HexBinaryComparator(cls._hash)
+    hash = HexBinaryAttribute('_hash')
 
     @property
     def url(self):

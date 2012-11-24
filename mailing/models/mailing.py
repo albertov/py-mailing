@@ -13,7 +13,7 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import Model, Session
-from .util import HexBinaryComparator
+from .util import HexBinaryAttribute
 from .item import Item
 from .config import Config
 from .template import Template
@@ -201,22 +201,7 @@ class MailingDeliveryProcessedRecipient(Model):
     def _uuid(cls):
         return orm.column_property(cls.__table__.c.uuid)
 
-    @hybrid_property
-    def uuid(self):
-        return self._uuid.encode('hex')
-
-    @uuid.setter
-    def uuid(self, value):
-        self._uuid = value.decode('hex')
-
-    @uuid.expression
-    def uuid(cls):
-        return cls._uuid
-
-    @uuid.comparator
-    def uuid(cls):
-        return HexBinaryComparator(cls._uuid)
-        
+    uuid = HexBinaryAttribute('_uuid')
 
     def __json__(self):
         return dict(
