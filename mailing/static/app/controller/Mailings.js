@@ -44,38 +44,9 @@ Ext.define('Mailing.controller.Mailings', {
         });
         this.mailings = Ext.getStore('Mailings');
         this.mon(this.mailings, 'beforeload', this.checkIfSaveIsNeeded, this);
-        this.mon(this.mailings, 'beforeload', this._saveSelection, this);
-        this.mon(this.mailings, 'load', this._restoreSelection, this);
         this.mon(this.mailings, 'write', this.refreshView, this);
         this.mon(Ext.getStore('Categories'), 'write', this.refreshView, this);
         this.mon(Ext.getStore('Templates'), 'write', this.refreshView, this);
-    },
-
-    _saveSelection: function() {
-        var grid=this.getGrid(),
-            sm=grid.getSelectionModel(),
-            selection=sm.getSelection();
-        var ids = []
-        for (var i=0; i<selection.length; i++) {
-            var id = selection[i].getId();
-            ids.push(id);
-        }
-        sm._oldSelection = ids;
-    },
-    _restoreSelection: function() {
-        var grid=this.getGrid(),
-            sm=grid.getSelectionModel();
-         if (sm._oldSelection) {
-             var store = grid.getStore(), selection=[];
-             Ext.each(sm._oldSelection, function(id) {
-                 var n = store.getById(id);
-                 if (n!==null) 
-                     selection.push(n);
-             });
-             delete sm._oldSelection;
-             if (selection.length)
-                 sm.select(selection);
-         }
     },
 
     checkIfSaveIsNeeded: function() {

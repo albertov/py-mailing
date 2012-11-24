@@ -34,6 +34,17 @@ class Group(Model):
             modified=self.modified.isoformat() if self.modified else None,
             )
 
+
+class Bounce(Model):
+    __tablename__ = "bounce"
+    recipient_id = Column(Integer,
+                          ForeignKey("recipient.id", ondelete='CASCADE',
+                                     onupdate='CASCADE'),
+                          nullable=False, primary_key=True)
+    timestamp = Column(DateTime, nullable=False, default=datetime.datetime.now,
+                       primary_key=True)
+
+
 class Recipient(Model):
     __tablename__ = "recipient"
     id = Column(Integer, primary_key=True)
@@ -47,7 +58,7 @@ class Recipient(Model):
 
     group = orm.relation(Group,  backref='recipients')
 
-    bounces = orm.relation("Bounce",
+    bounces = orm.relation(Bounce,
                            backref=orm.backref('recipient', innerjoin=True),
                            cascade='all,delete-orphan')
 
@@ -74,12 +85,3 @@ class Recipient(Model):
             created=self.created.isoformat() if self.created else None,
             modified=self.modified.isoformat() if self.modified else None,
             )
-
-class Bounce(Model):
-    __tablename__ = "bounce"
-    recipient_id = Column(Integer,
-                          ForeignKey("recipient.id", ondelete='CASCADE',
-                                     onupdate='CASCADE'),
-                          nullable=False, primary_key=True)
-    timestamp = Column(DateTime, nullable=False, default=datetime.datetime.now,
-                       primary_key=True)
