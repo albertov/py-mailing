@@ -47,8 +47,13 @@ class BaseModelTest(TestCase):
 
     def _makeRecipient(self, **kw):
         from ...models import Recipient
-        return Recipient(**kw)
+        defaults = dict(name='foo', email='email@example.com')
+        return Recipient(**dict(defaults, **kw))
 
     def _makeMailingDelivery(self, **kw):
         from ...models import MailingDelivery
         return MailingDelivery(**kw)
+
+    def _makeMailingDeliveryProcessedRecipient(self, *args, **kw):
+        from ...models.mailing import MailingDeliveryProcessedRecipient
+        return MailingDeliveryProcessedRecipient(*args, **kw)

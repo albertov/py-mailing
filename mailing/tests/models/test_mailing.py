@@ -158,9 +158,6 @@ class TestMailingDelivery(BaseModelTest):
         from ...models import Recipient
         for r in retrieved.processed_recipients:
             self.assertIsInstance(r, Recipient)
-        self.session.commit()
-        self.session.delete(retrieved)
-        self.session.commit()
 
     def test_next_in_queue_none_programmed(self):
         ob = self._makeOne(mailing=self._makeMailing())
@@ -207,3 +204,51 @@ class TestMailingDelivery(BaseModelTest):
             next.sent_date = d
             self.session.flush()
         self.assertFalse(cls.next_in_queue(d))
+
+
+class TestMailingDeliveryProcessedRecipient(BaseModelTest):
+
+    def _makeOne(self, mailing_delivery=None, recipient=None):
+        if mailing_delivery is None:
+            mailing_delivery = self._makeMailingDelivery(
+                mailing=self._makeMailing()
+                )
+        if recipient is None:
+            recipient = self._makeRecipient()
+        return self._makeMailingDeliveryProcessedRecipient(
+            recipient=recipient, mailing_delivery=mailing_delivery)
+
+    def test_delete_mailing_delivery_cascades(self):
+        ob = self._makeOne()
+        self.session.add(ob)
+        self.session.commit()
+        self.assertEqual(1, ob.__class__.query.count())
+        self.session.delete(ob.mailing_delivery)
+        self.session.commit()
+        self.assertEqual(0, ob.__class__.query.count())
+
+    def test_delete_recipient_cascades(self):
+        ob = self._makeOne()
+        self.session.add(ob)
+        self.session.commit()
+        self.assertEqual(1, ob.__class__.query.count())
+
+        self.session.delete(ob.recipient)
+        self.session.commit()
+        self.assertEqual(0, ob.__class__.query.count())
+
+    def test_uuid_is_hex(self):
+        ob = self._makeOne()
+        self.assertEqual(16, len(ob.uuid.decode('hex')))
+
+    def test_retrieve_by_uuid(self):
+        ob = self._makeOne()
+        self.session.add(ob)
+        self.session.commit()
+        self.assertIs(ob, ob.__class__.by_uuid(ob.uuid))
+
+    def test_retrieve_by_bad_uid(self):
+        ob = self._makeOne()
+        self.session.add(ob)
+        self.session.commit()
+        self.assertIs(None, ob.__class__.by_uuid('asdad'))

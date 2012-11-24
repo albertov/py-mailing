@@ -1,14 +1,19 @@
 import datetime
 from itertools import groupby
 from operator import attrgetter
+import uuid
 
-from sqlalchemy import Table, Column, ForeignKey, DateTime, Integer, orm, sql
+from sqlalchemy import (Table, Column, ForeignKey, DateTime, Integer, orm, sql,
+                        Binary)
 from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.orderinglist import ordering_list
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from . import Model, Session
+from .util import HexBinaryComparator
 from .item import Item
 from .config import Config
 from .template import Template
@@ -167,13 +172,56 @@ class MailingDeliveryProcessedRecipient(Model):
         Column("mailing_delivery_id", Integer,
                ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
                primary_key=True, nullable=False),
-        Column("time", DateTime, nullable=False,
-               default=datetime.datetime.now),
+        Column("uuid", Binary(16), unique=True, nullable=False),
+        Column("time", DateTime, nullable=False),
    )
+
+    recipient = orm.relation(Recipient,
+        backref=orm.backref('_mailing_deliveries',
+                            lazy=True,
+                            cascade='all,delete-orphan')
+    )
+    mailing_delivery = orm.relation('MailingDelivery')
+
+    def __init__(self, recipient=None, mailing_delivery=None, time=None):
+        self.mailing_delivery = mailing_delivery
+        self.recipient = recipient
+        self.time = time if time is not None else datetime.datetime.now()
+        self.uuid = uuid.uuid4().hex
+
+
+    @classmethod
+    def by_uuid(cls, uuid):
+        try:
+            return cls.query.filter_by(uuid=uuid).one()
+        except NoResultFound:
+            return None
+
+    @declared_attr
+    def _uuid(cls):
+        return orm.column_property(cls.__table__.c.uuid)
+
+    @hybrid_property
+    def uuid(self):
+        return self._uuid.encode('hex')
+
+    @uuid.setter
+    def uuid(self, value):
+        self._uuid = value.decode('hex')
+
+    @uuid.expression
+    def uuid(cls):
+        return cls._uuid
+
+    @uuid.comparator
+    def uuid(cls):
+        return HexBinaryComparator(cls._uuid)
+        
 
     def __json__(self):
         return dict(
-            id='::'.join(map(str, [self.recipient_id, self.mailing_delivery_id])),
+            id='{0}::{1}'.format(self.recipient_id, self.mailing_delivery_id),
+            uuid = self.uuid,
             recipient_id=self.recipient_id,
             mailing_delivery_id=self.mailing_delivery_id,
         )
@@ -209,11 +257,14 @@ class MailingDelivery(Model):
             order_by=[c for c in _recipient_join.c if 'priority' in c.name]
             )
 
-    processed_recipients = orm.relation(Recipient,
-        secondary=MailingDeliveryProcessedRecipient.__table__,
+    _processed_recipients = orm.relation(MailingDeliveryProcessedRecipient,
         order_by=MailingDeliveryProcessedRecipient.__table__.c.time,
+        cascade='all,delete-orphan',
         lazy=True
         )
+    
+    processed_recipients = association_proxy('_processed_recipients',
+                                             'recipient')
     
     @classmethod
     def next_in_queue(cls, time):

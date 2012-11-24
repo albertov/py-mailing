@@ -63,7 +63,7 @@ class TestImageView(BaseViewTest):
         resp_data = json.loads(h.unescape(resp.body))
         self.assertFalse(resp_data['success'])
 
-    def test_view_non_exting_image(self):
+    def test_view_non_existing_image(self):
         resp = self.app.get('/image/4523453245234/view', status=404)
 
     def test_view_image(self):

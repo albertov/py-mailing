@@ -73,9 +73,10 @@ class MessageComposer(object):
     _url_re = re.compile(r'url\(["\']{0,1}(.*?)["\']{0,1}\)')
     missing_template_text = "This is a HTML only message"
 
-    def __init__(self, mailing, encoding='utf-8'):
+    def __init__(self, mailing, encoding='utf-8', embed_images=True):
         self._mailing = mailing
         self._encoding = encoding
+        self._embed_images = embed_images
 
     def generate_message(self):
         html, encoding = self._generate_html()
@@ -83,11 +84,12 @@ class MessageComposer(object):
         text = self._generate_text()
         msg.add_text(text, 'plain')
         msg.add_text(html, 'html')
-        for img in self._mailing.images:
-            #TODO: NO incluir las imagenes ya incluidas como data:
-            msg.add_image(img.data,
-                          self._content_id(img.filename),
-                          img.content_type)
+        if self._embed_images:
+            for img in self._mailing.images:
+                #TODO: NO incluir las imagenes ya incluidas como data:
+                msg.add_image(img.data,
+                              self._content_id(img.filename),
+                              img.content_type)
         return msg
 
     def _generate_text(self):
@@ -100,7 +102,8 @@ class MessageComposer(object):
         dom = etree.HTML(self._mailing.render('xhtml'))
         self._remove_http_equiv_headers(dom)
         self._collapse_styles(dom)
-        self._internalize_images(dom)
+        if self._embed_images:
+            self._internalize_images(dom)
         #TODO: Extract encoding from <meta http-equiv=""> if present
         encoding = self._encoding
         return etree.tounicode(dom, method='html'), encoding

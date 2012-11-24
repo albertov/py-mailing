@@ -5,19 +5,20 @@ from hashlib import md5
 import Image as PILImage
 
 from sqlalchemy import (Column, DateTime, Integer, Unicode, orm,
-                        LargeBinary, String)
+                        LargeBinary, String, Binary)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 
 
 from . import Model
+from .util import HexBinaryComparator
 from .config import Config
 
 
 class Image(Model):
     __tablename__ = "image"
     id = Column(Integer, primary_key=True)
-    hash = Column(String(32), unique=True, nullable=False)
+    _hash = Column('hash', Binary(16), unique=True, nullable=False)
     filename = Column(Unicode(255), nullable=False, unique=True)
     title = Column(Unicode(512))
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
@@ -62,6 +63,22 @@ class Image(Model):
     @data.expression
     def data_expr(cls):
         return cls._data
+
+    @hybrid_property
+    def hash(self):
+        return self._hash.encode('hex')
+
+    @hash.setter
+    def hash(self, value):
+        self._hash = value.decode('hex')
+
+    @hash.expression
+    def hash(cls):
+        return cls._hash
+
+    @hash.comparator
+    def hash(cls):
+        return HexBinaryComparator(cls._hash)
 
     @property
     def url(self):
