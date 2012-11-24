@@ -252,3 +252,12 @@ class TestMailingDeliveryProcessedRecipient(BaseModelTest):
         self.session.add(ob)
         self.session.commit()
         self.assertIs(None, ob.__class__.by_uuid('asdad'))
+
+    def test_recipient_bounces_query(self):
+        ob = self._makeOne()
+        self.session.add(ob)
+        self.session.commit()
+        self.assertEqual(0, ob.recipient.bounces_query.count())
+        ob.bounce_time = datetime.datetime.now()
+        self.session.flush()
+        self.assertEqual(1, ob.recipient.bounces_query.count())

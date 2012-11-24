@@ -17,7 +17,6 @@ class HexBinaryAttribute(object):
                 ob = ob.encode('hex')
             return ob
 
-
     def __set__(self, instance, value):
         if value is not None:
             value = value.decode('hex')

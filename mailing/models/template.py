@@ -2,12 +2,11 @@ import re
 import sys
 import traceback
 import datetime
-import os
 
 from lxml import etree
 
 from sqlalchemy import (Column, ForeignKey, DateTime, Integer, Unicode, orm,
-                        Table, String, sql)
+                        Table, String, sql, Boolean)
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from babel.dates import format_date
@@ -38,6 +37,8 @@ class Template(Model):
     title = Column(Unicode, nullable=False, unique=True)
     type = Column(String(20), nullable=False, default='xhtml')
     _body = Column('body', Unicode, nullable=False)
+
+    debug = Column(Boolean, nullable=False, default=True)
 
     created = Column(DateTime, nullable=False, default=datetime.datetime.now)
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
@@ -93,7 +94,7 @@ class Template(Model):
             o = stream.render(self.type)
             return o.decode('utf8') #FIXME: Derive from <meta http-equiv> if present
 
-        if 'RAISE_TEMPLATE_ERRORS' in os.environ:
+        if not self.debug:
             return render()
 
         try:
@@ -126,7 +127,8 @@ class Template(Model):
                 default_filters=['decode.utf8'],
                 )
             return tpl.render_unicode(**namespace)
-        if 'RAISE_TEMPLATE_ERRORS' in os.environ:
+
+        if not self.debug:
             return render()
 
         try:

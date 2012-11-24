@@ -34,7 +34,8 @@ class BaseModelTest(TestCase):
 
     def _makeTemplate(self, **kw):
         from ...models import Template
-        return Template(**kw)
+        defaults = dict(title='fooo', body='foo')
+        return Template(**dict(defaults, **kw))
 
     def _makeCategory(self, **kw):
         from ...models import Category

@@ -6,7 +6,6 @@ import uuid
 from sqlalchemy import (Table, Column, ForeignKey, DateTime, Integer, orm, sql,
                         Binary)
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.orderinglist import ordering_list
@@ -173,21 +172,26 @@ class MailingDeliveryProcessedRecipient(Model):
                ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
                primary_key=True, nullable=False),
         Column("uuid", Binary(16), unique=True, nullable=False),
-        Column("time", DateTime, nullable=False),
+        Column("send_time", DateTime, nullable=False),
+        Column("read_time", DateTime),
+        Column("bounce_time", DateTime),
    )
 
     recipient = orm.relation(Recipient,
-        backref=orm.backref('_mailing_deliveries',
-                            lazy=True,
+        innerjoin=True,
+        backref=orm.backref('deliveries',
+                            lazy='dynamic',
                             cascade='all,delete-orphan')
     )
-    mailing_delivery = orm.relation('MailingDelivery')
+    mailing_delivery = orm.relation('MailingDelivery', innerjoin=True)
 
-    def __init__(self, recipient=None, mailing_delivery=None, time=None):
-        self.mailing_delivery = mailing_delivery
-        self.recipient = recipient
-        self.time = time if time is not None else datetime.datetime.now()
-        self.uuid = uuid.uuid4().hex
+    def __init__(self, recipient=None, **kw):
+        kw['recipient'] = recipient
+        if 'send_time' not in kw:
+            kw['send_time'] = datetime.datetime.now()
+        if 'uuid' not in kw:
+            kw['uuid'] = uuid.uuid4().hex
+        super(MailingDeliveryProcessedRecipient, self).__init__(**kw)
 
 
     @classmethod
@@ -243,7 +247,7 @@ class MailingDelivery(Model):
             )
 
     _processed_recipients = orm.relation(MailingDeliveryProcessedRecipient,
-        order_by=MailingDeliveryProcessedRecipient.__table__.c.time,
+        order_by=MailingDeliveryProcessedRecipient.__table__.c.send_time,
         cascade='all,delete-orphan',
         lazy=True
         )

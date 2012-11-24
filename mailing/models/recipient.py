@@ -1,7 +1,7 @@
 import datetime
 
 from sqlalchemy import (Column, ForeignKey, DateTime, Integer, Unicode, orm,
-                        Boolean)
+                        Boolean, sql)
 from sqlalchemy.orm.exc import NoResultFound
 
 from . import Model
@@ -35,16 +35,6 @@ class Group(Model):
             )
 
 
-class Bounce(Model):
-    __tablename__ = "bounce"
-    recipient_id = Column(Integer,
-                          ForeignKey("recipient.id", ondelete='CASCADE',
-                                     onupdate='CASCADE'),
-                          nullable=False, primary_key=True)
-    timestamp = Column(DateTime, nullable=False, default=datetime.datetime.now,
-                       primary_key=True)
-
-
 class Recipient(Model):
     __tablename__ = "recipient"
     id = Column(Integer, primary_key=True)
@@ -58,9 +48,10 @@ class Recipient(Model):
 
     group = orm.relation(Group,  backref='recipients')
 
-    bounces = orm.relation(Bounce,
-                           backref=orm.backref('recipient', innerjoin=True),
-                           cascade='all,delete-orphan')
+    @property
+    def bounces_query(self):
+        from .mailing import MailingDeliveryProcessedRecipient as D
+        return self.deliveries.filter(D.bounce_time!=None)
 
     @classmethod
     def by_email(cls, email):
