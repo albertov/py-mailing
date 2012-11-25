@@ -1,3 +1,4 @@
+from __future__ import with_statement
 from cStringIO import StringIO
 
 from ftputil import FTPHost
