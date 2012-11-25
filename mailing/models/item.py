@@ -42,7 +42,7 @@ class Category(Model):
             id=self.id,
             title=self.title,
             image_id=self.image_id,
-            image=self.image.__json__() if self.image is not None else None,
+            image=self.image.__json__() if self.image is not None else {},
             categories = [c.__json__() for c in self.subcategories],
             category_id=self.category_id,
             created=self.created.isoformat() if self.created else None,

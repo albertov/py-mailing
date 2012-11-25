@@ -27,7 +27,8 @@ Ext.define('Mailing.Rest', {
                     icon: Ext.MessageBox.ERROR,
                     buttons: Ext.Msg.OK
                 });
-            } else {
+            } else if (response.status>=400) {
+                console.debug('error', response);
                 var e = operation.getError();
                 if (!e.status) {
                     Ext.MessageBox.show({
