@@ -12,7 +12,8 @@ class Config(Model):
     __type_names__ = ("int", "float", "str", "unicode", "bool")
     _key = Column("key", String(128), primary_key=True)
     _value = Column("value", Unicode, nullable=False)
-    type = Column(Enum(*__type_names__), default="unicode", nullable=False)
+    type = Column(Enum(*__type_names__, **dict(name='config_type')),
+                  default="unicode", nullable=False)
     
 
     class __metaclass__(DictMixin, DeclarativeMeta):

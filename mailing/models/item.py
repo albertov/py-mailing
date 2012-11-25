@@ -60,7 +60,7 @@ class Item(Model):
     modified = Column(DateTime, nullable=False, default=datetime.datetime.now)
     mailing_id = Column(Integer, ForeignKey('mailing.id', ondelete='CASCADE',
                                             onupdate='CASCADE'),
-                       nullable=False, index=True)
+                       nullable=False)
     image_id = Column(Integer, ForeignKey("image.id"))
 
     image = orm.relation(Image, lazy='joined')
