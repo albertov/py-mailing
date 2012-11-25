@@ -103,7 +103,7 @@ class Template(Model):
             return self._render_html_error(e, e.lineno)
         except UndefinedError, e:
             var_name = re.search(r'"(.*?)"', e.message).group(1) 
-            r = re.compile(r'\b{0}\b'.format(var_name))
+            r = re.compile(r'\b%s\b'%(var_name,))
             lineno = None
             for i, l in enumerate(self.body_lines):
                 if r.search(l):
@@ -114,10 +114,8 @@ class Template(Model):
             # assume exception ocurred in template
             frame = traceback.extract_tb(sys.exc_info()[2])[-1]
             lineno, function_name = frame[1:-1]
-            err = "In {function_name}: {e}".format(
-                function_name = escape(function_name),
-                e = escape(str(e))
-                )
+            err = "In %s: %s" % (escape(function_name),
+                                 escape(str(e)))
             return self._render_html_error(err, lineno)
 
     def _render_text(self, **data):
@@ -144,18 +142,13 @@ class Template(Model):
             lines = list(enumerate(self.body_lines))
             lines = lines[max(lineno-1-context,0):lineno+context]
             for i, line in lines:
-                olines.append(
-                    u'{arrow}{lineno}: {line}'.format(
-                        line = _ellipsis(line, 150),
-                        lineno = i+1,
-                        arrow = '-->' if i+1==lineno else '   '
+                olines.append(u'%s%s: %s' % (
+                    '-->' if i+1==lineno else '   ',
+                    i+1,
+                     _ellipsis(line, 150)
                 ))
-        return (u'Error en plantilla "{title}"\n'
-                u'{error}\n\n{lines}').format(
-                    error=e,
-                    lines='\n'.join(olines),
-                    title=self.title
-                )
+        return u'Error en plantilla "%s"\n%s\n\n%s' % (
+                    self.title, e, '\n'.join(olines))
             
 
     def _render_html_error(self, e, lineno=None, context=2):
@@ -165,20 +158,16 @@ class Template(Model):
             lines = lines[max(lineno-1-context,0):lineno+context]
             for i, line in lines:
                 color = '#f00' if i+1==lineno else '#888'
-                olines.append((
-                    u'<span>{lineno}:</span>'
-                    u'<span style="color:{color}">{line}</span>'
-                    ).format(
-                        color=color,
-                        line=escape(_ellipsis(line, 150)),
-                        lineno=i+1
+                olines.append(
+                    u'<span>%s:</span><span style="color:%s">%s</span>' % (
+                        i+1,
+                        color,
+                        escape(_ellipsis(line, 150)),
                      ))
-        return (u'<h1>Error en plantilla <em>{title}</em></h1>'
-                u'<b>{error}</b><br />{lines}').format(
-                    error=e,
-                    lines='<br />'.join(olines),
-                    title=self.title
-                )
+        return (u'<h1>Error en plantilla <em>%s</em></h1>'
+                u'<b>%s</b><br />%s' % (
+                    self.title, e, '<br />'.join(olines),
+                ))
 
         
     def __json__(self):

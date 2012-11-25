@@ -1,7 +1,12 @@
+#coding=utf8
+from __future__ import with_statement
+try:
+    import json
+except ImportError:
+    import simplejson as json
+from glob import glob
 import os
 import datetime
-import json
-from glob import glob
 
 from pkg_resources import resource_filename
 
@@ -18,8 +23,8 @@ def fixture(s):
 
 class TestCalistoMailing(BaseModelTest):
 
-    def _makeMailing(self):
-        return mailing_from_fixture(fixture('data.json'))
+    def _makeMailing(self, **kw):
+        return mailing_from_fixture(fixture('data.json'), **kw)
     
     def _makeHTMLPageComposer(self, mailing=None):
         if mailing is None:
@@ -67,6 +72,11 @@ class TestCalistoMailing(BaseModelTest):
         html = m.render('xhtml')
         dom = etree.HTML(html)
         self.failUnlessEqual(len(dom.xpath("//*[@class='seccion']")), 4)
+
+    def test_number_is_formatted(self):
+        self.assertIn(u'nº 004',
+            self._makeMailing(number=4).render('xhtml'))
+        
 
     def test_email_message(self):
         m = self._makeMailing()
