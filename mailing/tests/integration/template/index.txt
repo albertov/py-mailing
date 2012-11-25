@@ -1,5 +1,5 @@
 ## -*- coding: utf-8 -*-
-Calisto te cuenta ${'nº {0:03}'.format(mailing.number)}
+Calisto te cuenta ${'nº %.3d'%(mailing.number,)}
 ==============================================================================
 Boletín informativo mensual, ${format_date(mailing.date, 'MMMM-dd, yyyy', 'es').capitalize()}
 

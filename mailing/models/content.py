@@ -49,7 +49,7 @@ class Article(Item):
         for e in dom.xpath('//a'):
             if 'href' in e.attrib:
                 e.tag = 'span'
-                e.text += u' ({0})'.format(e.attrib.pop('href'))
+                e.text += u' (%s)'%(e.attrib.pop('href'),)
         text = '\n\n'.join(etree.tounicode(e, method='text')
                          for e in dom.getchildren())
         return textwrap.fill(text, width)

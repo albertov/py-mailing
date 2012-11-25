@@ -39,13 +39,13 @@ class MultipartMessage(object):
     def add_image(self, data, id, content_type=None):
         subtype = content_type.split('/')[-1] if content_type else None
         img = MIMEImage(data, subtype)
-        img.add_header('Content-ID', '<{0}>'.format(id))
+        img.add_header('Content-ID', '<%s>'%(id))
         img.add_header('Content-Disposition', 'inline')
         self._msg.attach(img)
 
     def add_attachment(self, filename, payload, content_type='octet/stream'):
         filename = self._encode(filename)
-        attachment = MIMEBase(*content_type.split('/'), name=filename)
+        attachment = MIMEBase(*content_type.split('/'), **dict(name=filename))
         attachment.set_payload(payload)
         Encoders.encode_base64(attachment)
         attachment.add_header('Content-Disposition',
@@ -136,7 +136,7 @@ class MessageComposer(object):
                 # Not an internal image, leave it as-is
                 return m.group(0)
             data = b64encode(img.data)
-            return "url(data:{0};base64,{1})".format(img.content_type, data)
+            return "url(data:%s;base64,%s)"%(img.content_type, data)
         return self._url_re.sub(repl, txt)
 
     def _collapse_styles(self, dom):

@@ -1,5 +1,9 @@
 #coding: utf8
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 import markupsafe
 
 from ..models import Image, Session
@@ -67,7 +71,18 @@ def upload_image():
                 images=[ob.__json__()],
             )
     response.content_type = 'text/html' # for extjs' iframe
-    return markupsafe.escape(json.dumps(resp))
+    return json.dumps(_escape_values(resp))
+
+_escape = markupsafe.escape
+def _escape_values(o):
+    if isinstance(o, dict):
+        return dict((k,_escape_values(v)) for k,v in o.iteritems())
+    elif isinstance(o, (list,tuple)):
+        return map(_escape_values, o)
+    elif isinstance(o, basestring):
+        return _escape(o)
+    return o
+
 
 
 @app.get("/image/<hash>/view", name='image_view')
