@@ -1,4 +1,7 @@
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 from formencode.api import Invalid
 from formencode.schema import Schema, format_compound_error

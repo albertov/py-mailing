@@ -1,4 +1,7 @@
-import json
+try:
+    import json
+except ImportError:
+    import simplejson as json
 from functools import wraps
 
 from bottle import redirect, abort, response, static_file, request
