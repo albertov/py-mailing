@@ -64,7 +64,13 @@ class TemplateUploadValidator(TemplateValidator):
     def _to_python(self, value, state=None):
         value = Schema._to_python(self, value, state)
         if value['body'] and hasattr(value['body'], 'file'):
-            value['body'] = value['body'].file.read().decode('utf8')
+            body = value['body'].file.read()
+            try:
+                value['body'] = body.decode('utf8')
+            except UnicodeDecodeError, e:
+                error_dict = {'body': str(e)}
+                raise Invalid(format_compound_error(error_dict),
+                              value, state, error_dict=error_dict)
         return super(TemplateUploadValidator, self)._to_python(value, state)
 
 

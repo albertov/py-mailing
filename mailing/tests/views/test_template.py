@@ -46,7 +46,7 @@ class TestTemplate(BaseViewTest):
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['templates']), 1)
 
-        # Post updated bopy
+        # Post updated body
         id = resp.json['templates'][0]['id']
         new_body = '<html>Foo</html>\n'
         resp = self.app.post(self.get_url('template.upload', id=id),
@@ -67,7 +67,7 @@ class TestTemplate(BaseViewTest):
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['templates']), 1)
 
-        # Post updated bopy
+        # Post updated body
         id = resp.json['templates'][0]['id']
         new_body = '<html>Foo</div>'
         resp = self.app.post(self.get_url('template.upload', id=id),
@@ -80,6 +80,24 @@ class TestTemplate(BaseViewTest):
         self.assertIn('body', resp_data['errors'])
         self.assertIn('Invalid XML: Opening and ending tag mismatch',
                       resp_data['errors']['body'])
+
+    def test_upload_non_string_data(self):
+        # Create initial
+        data = dict(title='foo', type='xhtml', body=None)
+        resp = self.app.post_json(self.get_url('templates'), data)
+        self.assertTrue(resp.json['success'])
+        self.assertEqual(len(resp.json['templates']), 1)
+
+        # Post updated body
+        id = resp.json['templates'][0]['id']
+        resp = self.app.post(self.get_url('template.upload', id=id),
+                             {'type':'xhtml'},
+                             upload_files=[('body', 'file.html', '\xffff'*100)],
+                             status=400)
+        self.assertEqual(resp.content_type, 'text/html')
+        resp_data = self.json_from_html_body(resp.body)
+        self.assertFalse(resp_data['success'])
+        self.assertIn('body', resp_data['errors'])
 
     def test_raw_html_body(self):
         # Create initial

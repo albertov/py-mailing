@@ -109,17 +109,13 @@ Ext.define('Mailing.controller.Templates', {
                 win.close();
             },
             failure: function(fp, o) {
-                if (o.result && o.result.errors) {
-                    fp.markInvalid(o.result.errors);
-                } else {
-                    Ext.MessageBox.show({
-                        title: "Error del servidor", // i18n
-                        msg: o.result?o.result.message:'',
-                        icon: Ext.MessageBox.ERROR,
-                        buttons: Ext.Msg.OK
-                    });
-                    win.close();
-                }
+                Ext.MessageBox.show({
+                    title: "Error del servidor", // i18n
+                    msg: o.result?o.result.message:'',
+                    icon: Ext.MessageBox.ERROR,
+                    buttons: Ext.Msg.OK
+                });
+                win.close();
             }
         });
     },
