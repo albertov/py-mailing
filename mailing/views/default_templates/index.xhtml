@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns:py="http://genshi.edgewall.org/">
-
+<html xmlns:py="http://genshi.edgewall.org/" xmlns="http://www.w3.org/1999/xhtml">
+<!--! Ver http://genshi.edgewall.org/wiki/Documentation/xml-templates.html -->
 <head>
     <title>Título boletín</title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -9,7 +9,22 @@
     </style>
 </head>
 <body>
-    Cuerpo aquí...
-    TODO: Ejemplo
+    <div py:for="(category, items) in mailing.grouped_items">
+        <h1 py:content="category.title"></h1>
+         <div py:for="item in items">
+             <py:if test="item.type=='Article'">
+             <h2>
+                <a name="${item.anchor}" id="${item.anchor}">${item.title}</a>
+             </h2>
+             </py:if>
+
+             <py:if test="item.type=='ExternalLink'">
+             <h2>
+                <a href="${item.url}">${item.title}</a>
+             </h2>
+             </py:if>
+             <div py:if="item.html">Markup(item.html)</div>
+         </div>
+    </div>
 </body>
-</html> 
+</html>

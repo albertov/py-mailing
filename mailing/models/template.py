@@ -50,6 +50,19 @@ class Template(Model):
         format_date = format_date
         )
 
+    __content_types__ = {
+        'xhtml': 'text/html',
+        'text': 'text/plain',
+    }
+
+
+
+    @property
+    def content_type(self):
+        return self.__content_types__[self.type]
+
+
+
     @hybrid_property
     def body(self):
         return self._body

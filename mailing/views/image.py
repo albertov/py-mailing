@@ -1,17 +1,12 @@
 #coding: utf8
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
-import markupsafe
 
 from ..models import Image, Session
 from .. import app
 from ..validators import (validate, Schema, UnicodeString, Int, String,
                           FieldStorageUploadConverter)
 from .base import (rest_views, abort, request, response, generic_creator,
-                   error_handler, _, ErrorResponse, error_response)
+                   error_handler, _, ErrorResponse, error_response,
+                   json_on_html)
                 
 
 class ImageValidator(Schema):
@@ -47,12 +42,12 @@ class ImageUploadValidator(Schema):
     title = UnicodeString(allow_empty=True)
     image = FieldStorageUploadConverter(allow_empty=False)
 
-@app.post("/image/upload")
+@app.post("/image/upload", name='image.upload')
 @error_handler
-def upload_image():
+def upload():
     form = validate(ImageUploadValidator, request.POST, raises=False)
     if not form.is_valid:
-        resp = dict(success=False, message=form.message, errors=form.errors)
+        resp = error_response(form.message, form.errors)
     else:
         image = form['image']
         data, filename = image.file.read().encode('hex'), image.filename
@@ -65,23 +60,11 @@ def upload_image():
         else:
             Session.add(ob);
             Session.commit()
-            images = [ob.__json__()]
             resp = dict(
                 success=True,
                 images=[ob.__json__()],
             )
-    response.content_type = 'text/html' # for extjs' iframe
-    return json.dumps(_escape_values(resp))
-
-_escape = markupsafe.escape
-def _escape_values(o):
-    if isinstance(o, dict):
-        return dict((k,_escape_values(v)) for k,v in o.iteritems())
-    elif isinstance(o, (list,tuple)):
-        return map(_escape_values, o)
-    elif isinstance(o, basestring):
-        return _escape(o)
-    return o
+    return json_on_html(resp)
 
 
 

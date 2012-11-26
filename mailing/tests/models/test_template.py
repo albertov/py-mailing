@@ -14,6 +14,14 @@ class TestTemplate(BaseModelTest):
         ob = self._makeOne()
         self.assertIn('Template', repr(ob))
 
+    def test_content_type(self):
+        ob = self._makeOne(type='xhtml')
+        self.assertEqual('text/html', ob.content_type)
+        ob = self._makeOne(type='text')
+        self.assertEqual('text/plain', ob.content_type)
+
+
+
     def test_render_good_xhtml(self):
         ob = self._makeOne(
             type='xhtml',

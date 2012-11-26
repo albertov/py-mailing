@@ -1,8 +1,3 @@
-try:
-    import json
-except ImportError:
-    import simplejson as json
-import HTMLParser
 
 from ...models import Image
 from ...models.image import _pil_image
@@ -13,7 +8,7 @@ class TestImageView(BaseViewTest):
     def test_create_a_good_one(self):
         data = Image.blank_image(1, 1,'image/png')
         data = dict(title='foo', filename='foo.gif', data=data.encode('hex'))
-        resp = self.app.post_json('/image/', data)
+        resp = self.app.post_json(self.get_url('images'), data)
         self.assertTrue(resp.json['success'])
         self.assertEqual(len(resp.json['images']), 1)
         item = resp.json['images'][0]
@@ -40,11 +35,10 @@ class TestImageView(BaseViewTest):
 
     def test_upload_one(self):
         data = Image.blank_image(1, 1,'image/png')
-        resp = self.app.post('/image/upload', {'title':'foo'},
+        resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
                              upload_files=[('image', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
-        h = HTMLParser.HTMLParser()
-        resp_data = json.loads(h.unescape(resp.body))
+        resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
         self.assertEqual(len(resp_data['images']), 1)
         item = resp_data['images'][0]
@@ -56,14 +50,23 @@ class TestImageView(BaseViewTest):
         for k in expected:
             self.assertEqual(expected[k], item[k])
 
-    def test_upload_non_image(self):
-        data = 'Im not an image!'
-        resp = self.app.post('/image/upload', {'title':'foo'},
+    def test_upload_mising_title(self):
+        data = Image.blank_image(1, 1,'image/png')
+        resp = self.app.post(self.get_url('image.upload'),
                              upload_files=[('image', 'foo.gif', data)],
                              status=400)
         self.assertEqual(resp.content_type, 'text/html')
-        h = HTMLParser.HTMLParser()
-        resp_data = json.loads(h.unescape(resp.body))
+        resp_data = self.json_from_html_body(resp.body)
+        self.assertFalse(resp_data['success'])
+        self.assertIn('title', resp_data['errors'])
+
+    def test_upload_non_image(self):
+        data = 'Im not an image!'
+        resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
+                             upload_files=[('image', 'foo.gif', data)],
+                             status=400)
+        self.assertEqual(resp.content_type, 'text/html')
+        resp_data = self.json_from_html_body(resp.body)
         self.assertFalse(resp_data['success'])
 
     def test_view_non_existing_image(self):
@@ -72,11 +75,10 @@ class TestImageView(BaseViewTest):
     def test_view_image(self):
         content_type = 'image/png'
         data = Image.blank_image(1, 1, content_type)
-        resp = self.app.post('/image/upload', {'title':'foo'},
+        resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
                              upload_files=[('image', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
-        h = HTMLParser.HTMLParser()
-        resp_data = json.loads(h.unescape(resp.body))
+        resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
         self.assertEqual(len(resp_data['images']), 1)
         item = resp_data['images'][0]
@@ -87,11 +89,10 @@ class TestImageView(BaseViewTest):
     def test_view_image_thumbnail(self):
         content_type = 'image/png'
         data = Image.blank_image(100, 100, content_type)
-        resp = self.app.post('/image/upload', {'title':'foo'},
+        resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
                              upload_files=[('image', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
-        h = HTMLParser.HTMLParser()
-        resp_data = json.loads(h.unescape(resp.body))
+        resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
         self.assertEqual(len(resp_data['images']), 1)
         item = resp_data['images'][0]

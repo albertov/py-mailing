@@ -5,6 +5,7 @@ except ImportError:
 from functools import wraps
 
 from bottle import redirect, abort, response, static_file, request
+import markupsafe
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.exc import IntegrityError
 
@@ -33,6 +34,7 @@ __all__ = [
     'static_file',
     'request',
     '_',
+    'json_on_html',
 ]
 
 _ = lambda s: s
@@ -242,9 +244,10 @@ def rest_views(app, model, url, plural, validator=None, creator=None,
         creator = generic_creator(model, validator)
     if updater is None:
         updater = generic_updater(validator)
-    app.get(url)(generic_collection_view(model, plural, collection_query))
+    app.get(url, name=plural)(
+        generic_collection_view(model, plural, collection_query))
     app.post(url)(generic_create_item(creator, plural))
-    app.get(item_url)(generic_show_item(model, plural))
+    app.get(item_url, name=plural+'_item')(generic_show_item(model, plural))
     app.delete(item_url)(generic_delete_item(model))
     app.put(item_url)(generic_update_item(model, updater, plural))
 
@@ -273,3 +276,10 @@ def update_from_form(ob, form):
             old_value = getattr(ob, key, None)
             if old_value != new_value:
                 setattr(ob, key, new_value)
+
+
+
+def json_on_html(data):
+    """JSON encodes data escaping all string values in data in a way they
+    call be safely rendered on an html"""
+    return markupsafe.escape(json.dumps(data))

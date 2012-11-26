@@ -1,9 +1,10 @@
 Ext.define('Mailing.view.template.Grid', {
     extend: 'Ext.grid.Panel',
     requires: [
-        'Mailing.CRUDPlugin',
         'Ext.form.TextField',
-        'Ext.form.field.ComboBox'
+        'Ext.form.field.ComboBox',
+        'Mailing.CRUDPlugin',
+        'Mailing.view.template.TypeCombo'
     ],
     alias: 'widget.template_grid',
     store: 'Templates',
@@ -31,18 +32,8 @@ Ext.define('Mailing.view.template.Grid', {
             sortable: true,
             width: 100,
             field: {
-                xtype: 'combo',
-                editable: false,
-                queryMode: 'local',
-                displayField: 'value',
-                valueField: 'value',
-                store: Ext.create('Ext.data.Store', {
-                    fields: ['value'],
-                    data: [
-                        {value: 'xhtml'},
-                        {value: 'text'}
-                    ]
-                })
+                xtype: 'template_type_combo',
+                allowBlank: false
             }
         }, {
             text: 'Modificado',

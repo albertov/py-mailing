@@ -20,7 +20,7 @@ Ext.define('Mailing.view.category.Tree', {
             text: 'Título', //i18n
             dataIndex: 'title',
             flex: 1,
-            sortable: false,
+            sortable: true,
             field: {
                 xtype: 'textfield',
                 allowBlank: false

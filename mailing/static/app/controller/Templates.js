@@ -1,6 +1,6 @@
 Ext.define('Mailing.controller.Templates', {
     extend: 'Ext.app.Controller',
-    views: ['template.Panel'],
+    views: ['template.Panel', 'template.UploadWindow'],
     models: ['Template'],
     stores: ['Templates'],
 
@@ -25,6 +25,12 @@ Ext.define('Mailing.controller.Templates', {
                 beforedeselect: this.checkIfSaveIsNeeded,
                 new_item: this.onNewTemplate,
                 delete_item: this.onDeleteTemplate
+            },
+            "templates button[itemId=upload]": {
+                click: this.onTemplateUpload
+            },
+            "templates button[itemId=download]": {
+                click: this.onTemplateDownload
             }
         });
         this.templates = Ext.getStore('Templates');
@@ -74,6 +80,52 @@ Ext.define('Mailing.controller.Templates', {
         grid.store.on('write', function() {
             grid.rowEditor.startEdit(r, 0);
         }, this, {single:true})
+    },
+    onTemplateUpload: function() {
+        var record = this.getForm().getForm().getRecord(),
+            win = Ext.widget('template_upload_window', {
+                listeners: {
+                    scope: this,
+                    upload: this.onTemplateUploadSubmit
+                }
+            });
+        win.down('form').loadRecord(record);
+        win.show();
+    },
+    onTemplateUploadSubmit: function(win, form) {
+        var record = this.getForm().getForm().getRecord();
+        form.submit({
+            url: url('template/'+record.get('id')),
+            waitMsg: 'Subiendo plantilla al servidor...', //i18n
+            timeout: 30,
+            success: function(fp, o) {
+                var template = o.result.templates[0];
+                record.store.suspendAutoSync();
+                record.set('body', template.body);
+                record.set('type', template.type);
+                record.commit();
+                form.loadRecord(record);
+                record.store.resumeAutoSync();
+                win.close();
+            },
+            failure: function(fp, o) {
+                if (o.result && o.result.errors) {
+                    fp.markInvalid(o.result.errors);
+                } else {
+                    Ext.MessageBox.show({
+                        title: "Error del servidor", // i18n
+                        msg: o.result?o.result.message:'',
+                        icon: Ext.MessageBox.ERROR,
+                        buttons: Ext.Msg.OK
+                    });
+                    win.close();
+                }
+            }
+        });
+    },
+    onTemplateDownload: function() {
+        var record = this.getForm().getForm().getRecord();
+        window.open(url('template/'+record.get('id')+'/body'));
     },
     onDeleteTemplate: function(grid, record) {
         if (!this.checkIfSaveIsNeeded())

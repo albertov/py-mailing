@@ -1,10 +1,11 @@
 Ext.define('Mailing.view.template.Panel', {
     extend: 'Ext.panel.Panel',
     requires: [
-        'Mailing.LoadMask',
         'Ext.layout.container.Border',
+        'Ext.toolbar.Toolbar',
+        'Mailing.LoadMask',
         'Mailing.view.template.Grid',
-        'Mailing.view.template.Detail'
+        'Mailing.view.template.Form'
     ],
     alias: 'widget.templates',
     tabConfig: {
@@ -22,7 +23,22 @@ Ext.define('Mailing.view.template.Panel', {
         }, {
             xtype: 'template_form',
             itemId: 'form',
-            region: 'center'
+            region: 'center',
+            dockedItems: [{
+                xtype: 'toolbar',
+                dock: 'top',
+                items: [
+                    {
+                        text: 'Cargar',
+                        itemId: 'upload',
+                        tooltip: 'Cargar una plantilla desde un fichero en disco'
+                    }, {
+                        text: 'Descargar',
+                        itemId: 'download',
+                        tooltip: 'Descargar la plantilla a un fichero en disco'
+                    }
+                ]
+            }],
         }
     ],
     listeners: {
