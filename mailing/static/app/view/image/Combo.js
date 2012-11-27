@@ -1,24 +1,21 @@
 Ext.define('Mailing.view.image.Combo', {
-    extend: 'Ext.form.field.ComboBox',
-    alias: 'widget.image_combo',
-    forceSelection: true,
-    tpl: [
-        '<tpl for=".">',
-            '<div class="x-boundlist-item">',
-                '<span>{title}</span>',
-                '<br />',
-                '<img src="{url}?width=180&height=180" />',
-            '</div>',
-        '</tpl>'
+    extend: 'Mailing.ComboGrid',
+    requires: [
+        'Mailing.view.image.Grid',
+        'Mailing.store.Images'
     ],
+    alias: 'widget.image_combo',
+    gridClass: 'Mailing.view.image.Grid',
+    listConfig: {
+        minWidth: 200,
+        plugins: []
+    },
+    forceSelection: true,
     valueField: 'id',
-    pageSize: 15,
+    pageSize: 10,
     typeAhead: true,
     triggerAction: 'all',
     minChars: 1,
-    listConfig: {
-        minWidth: 200,
-    },
     matchFieldWidth: false,
     queryMode: 'local',
     queryField: 'title',
