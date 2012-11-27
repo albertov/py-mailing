@@ -3,7 +3,7 @@ try:
 except ImportError:
     import simplejson as json
 
-import HTMLParser
+from markupsafe import Markup
 
 from bottle import request
 
@@ -12,7 +12,7 @@ from webtest import TestApp
 from ...tests.models import BaseModelTest
 
 class BaseViewTest(BaseModelTest):
-    _unescape = HTMLParser.HTMLParser().unescape
+    _unescape = staticmethod(lambda s: Markup(s).unescape())
 
     def setUp(self):
         super(BaseViewTest, self).setUp()
