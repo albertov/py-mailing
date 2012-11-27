@@ -5,12 +5,12 @@
  * http://www.thomas-lauria.de
  */
 
-Ext.ns('Ext.ux');
-Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
+Ext.define('Ext.ux.imagecrop.ImageCrop', {
   quadratic: false,
   minWidth: 50,
   minHeight: 50,
   preserveRatio: true,
+  imageUrl: '',
   cropData: {
     x: 0,
     y: 0,
@@ -19,7 +19,7 @@ Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
   },
   initComponent: function() {
     this.preserveRatio = this.quadratic || this.preserveRatio;
-    Ext.ux.ImageCrop.superclass.initComponent.call(this);
+    this.callParent(arguments);
   },
   onRender : function(ct, position){
     var c = {};
@@ -34,7 +34,7 @@ Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
     }
     this.cropData.height = c.height;
     this.cropData.width = c.width;
-    Ext.ux.ImageCrop.superclass.onRender.call(this, ct, position);
+    this.callParent([ct, position]);
     this.el.setStyle({
       position: 'relative'
     }).setSize(this.initialWidth,this.initialHeight);
@@ -57,7 +57,7 @@ Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
     var cropBgBox = this.cropBgBox;
     var imageUrl = this.imageUrl;
     var result = this.cropData;
-    var wrapped = new Ext.Resizable(this.cropWrapped, {
+    var wrapped =  Ext.create('Ext.Resizable', this.cropWrapped, {
       wrap: true,
       pinned: true,
       minWidth: this.minWidth,
@@ -79,7 +79,7 @@ Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
             'background-image':'url('+imageUrl+')',
             'background-position':(-box.imageOffset[0])+'px '+(-box.imageOffset[1])+'px'
           });
-          if(parentBox.fireEvent('change', parentBox, result) === false){
+          if (parentBox.fireEvent('change', parentBox, result) === false){
             return parentBox;
           }
         },
@@ -92,7 +92,7 @@ Ext.ux.ImageCrop = Ext.extend(Ext.Component, {
     //wrapped.getResizedChild().setStyle({background:'url(../images/hochschule-reutlingen_medium.jpg)'});
     wrapped.getEl().setStyle({background:'url('+imageUrl+')'});
     wrapped.imageOffset = [0,0];
-    wrapped.dd.endDrag = function(){
+    wrapped.dd.endDrag = function() {
       wrapped.imageOffset = [wrapped.getEl().getBox().x - cropBgBox.getX(), wrapped.getEl().getBox().y - cropBgBox.getY()];
       result.x = wrapped.imageOffset[0];
       result.y = wrapped.imageOffset[1];
