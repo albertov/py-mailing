@@ -38,9 +38,10 @@ Ext.define('Mailing.controller.Images', {
             waitMsg: 'Subiendo imágen al servidor...', //i18n
             timeout: 30,
             success: function(fp, o) {
-                var image = o.result.images[0];
-                var r = Ext.getStore('Images').add(image);
-                me.getGrid().getSelectionModel().select(r);
+                var s = Ext.getStore('Images'),
+                    records = s.getProxy().getReader().read(o.result).records;
+                s.add(records);
+                me.getGrid().getSelectionModel().select(records);
                 win.close();
             },
             failure: function(fp, o) {
