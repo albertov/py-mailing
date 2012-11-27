@@ -12,7 +12,7 @@ Ext.define('Mailing.view.image.Grid', {
             ptype: 'crud',
             item_gender: 'f',
             item_names: ['Imágen', 'Imágenes'],
-            actions: 'new,delete'
+            actions: 'new,delete,edit'
         }
     ],
     features: [{ftype:'filters'}],

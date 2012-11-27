@@ -80,6 +80,7 @@ def upload():
 
 
 @app.post("/image/<id>", name='image.update_upload')
+@error_handler
 def update_upload(id):
     ob = Image.query.get(id)
     if ob is None:

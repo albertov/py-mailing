@@ -1,6 +1,6 @@
 Ext.define('Mailing.controller.Images', {
     extend: 'Ext.app.Controller',
-    views: ['image.Panel', 'image.NewImageWindow'],
+    views: ['image.Panel', 'image.NewImageWindow', 'image.EditWindow'],
     models: ['Image'],
     stores: ['Images'],
     refs: [
@@ -20,7 +20,11 @@ Ext.define('Mailing.controller.Images', {
             },
             "image_grid": {
                 new_item: this.showNewImageWindow,
-                delete_item: this.onDeleteImage
+                delete_item: this.onDeleteImage,
+                edit_item: this.onEditImage
+            },
+            "image_edit_window": {
+                upload: this.onImageUpload,
             }
         });
     },
@@ -64,6 +68,40 @@ Ext.define('Mailing.controller.Images', {
     showNewImageWindow: function() {
         var win = Ext.create('Mailing.view.image.NewImageWindow');
         win.show();
+    },
+
+    onEditImage: function(btn, record) {
+        var win = Ext.widget('image_edit_window');
+        win.down('form').loadRecord(record)
+        win.show();
+    },
+    
+    onImageUpload: function(win, form) {
+        var record = form.getRecord();
+        form.submit({
+            url: url('image/'+record.get('id')),
+            waitMsg: 'Subiendo imágen al servidor...', //i18n
+            timeout: 30,
+            success: function(fp, o) {
+                var s = Ext.getStore('Images');
+                s.reload();
+                win.close();
+            },
+            failure: function(fp, o) {
+                console.debug('failure', arguments);
+                if (o.result && o.result.errors) {
+                    fp.markInvalid(o.result.errors);
+                } else {
+                    Ext.MessageBox.show({
+                        title: "Error del servidor", // i18n
+                        msg: o.result?o.result.message:'',
+                        icon: Ext.MessageBox.ERROR,
+                        buttons: Ext.Msg.OK
+                    });
+                    win.close();
+                }
+            }
+        });
     },
 
     onDeleteImage: function(grid, record) {

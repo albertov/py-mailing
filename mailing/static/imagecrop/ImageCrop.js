@@ -6,6 +6,7 @@
  */
 
 Ext.define('Ext.ux.imagecrop.ImageCrop', {
+  extend: 'Ext.Component',
   quadratic: false,
   minWidth: 50,
   minHeight: 50,
