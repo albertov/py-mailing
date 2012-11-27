@@ -36,7 +36,7 @@ class TestImageView(BaseViewTest):
     def test_upload_one(self):
         data = Image.blank_image(1, 1,'image/png')
         resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
-                             upload_files=[('image', 'foo.gif', data)])
+                             upload_files=[('data', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
         resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
@@ -53,7 +53,7 @@ class TestImageView(BaseViewTest):
     def test_upload_mising_title(self):
         data = Image.blank_image(1, 1,'image/png')
         resp = self.app.post(self.get_url('image.upload'),
-                             upload_files=[('image', 'foo.gif', data)],
+                             upload_files=[('data', 'foo.gif', data)],
                              status=400)
         self.assertEqual(resp.content_type, 'text/html')
         resp_data = self.json_from_html_body(resp.body)
@@ -63,7 +63,7 @@ class TestImageView(BaseViewTest):
     def test_upload_non_image(self):
         data = 'Im not an image!'
         resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
-                             upload_files=[('image', 'foo.gif', data)],
+                             upload_files=[('data', 'foo.gif', data)],
                              status=400)
         self.assertEqual(resp.content_type, 'text/html')
         resp_data = self.json_from_html_body(resp.body)
@@ -76,7 +76,7 @@ class TestImageView(BaseViewTest):
         content_type = 'image/png'
         data = Image.blank_image(1, 1, content_type)
         resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
-                             upload_files=[('image', 'foo.gif', data)])
+                             upload_files=[('data', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
         resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
@@ -90,7 +90,7 @@ class TestImageView(BaseViewTest):
         content_type = 'image/png'
         data = Image.blank_image(100, 100, content_type)
         resp = self.app.post(self.get_url('image.upload'), {'title':'foo'},
-                             upload_files=[('image', 'foo.gif', data)])
+                             upload_files=[('data', 'foo.gif', data)])
         self.assertEqual(resp.content_type, 'text/html')
         resp_data = self.json_from_html_body(resp.body)
         self.assertTrue(resp_data['success'])
@@ -100,3 +100,22 @@ class TestImageView(BaseViewTest):
         self.assertEqual(resp.content_type, content_type)
         im = _pil_image(resp.body)
         self.assertEqual(im.size, (10,10))
+
+    def test_update_upload(self):
+        data = Image.blank_image(1, 1,'image/png')
+        data = dict(title='foo', filename='foo.gif', data=data.encode('hex'))
+        resp = self.app.post_json(self.get_url('images'), data)
+        self.assertTrue(resp.json['success'])
+        self.assertEqual(len(resp.json['images']), 1)
+        id = resp.json['images'][0]['id']
+
+        new_data = Image.blank_image(2, 2,'image/gif')
+        resp = self.app.post(self.get_url('image.update_upload', id=id),
+                             upload_files=[('data', 'bar.gif', new_data)])
+        resp_data = self.json_from_html_body(resp.body)
+        self.assertTrue(resp_data['success'])
+        item = resp_data['images'][0]
+        self.assertEqual(data['filename'], item['filename'])
+
+        resp = self.app.get(item['internal_url'])
+        self.assertEqual(new_data, resp.body)

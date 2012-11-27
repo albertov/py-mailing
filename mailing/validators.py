@@ -3,6 +3,8 @@ try:
 except ImportError:
     import simplejson as json
 
+from UserDict import DictMixin
+
 from formencode.api import Invalid
 from formencode.schema import Schema, format_compound_error
 from formencode.validators import (
@@ -46,7 +48,7 @@ class InvalidForm(StandardError):
     def __unicode__(self):
         return self.form.message
 
-class validate(object):
+class validate(DictMixin):
     def __init__(self, validator, params, raises=True):
         self.errors = None
         self.message = ''
@@ -80,12 +82,18 @@ class validate(object):
             self.errors = e.unpack_errors()
             self.message = unicode(e)
 
+    def __setitem__(self, name, value):
+        self.params[name] = value
+
     def __getitem__(self, name):
         return self.params[name]
 
-    def pop(self, *args):
-        return self.params.pop(*args)
-        
+    def __delitem__(self, name):
+        del self.params[name]
+
+    def keys(self):
+        return self.params.keys()
+
 
     def __iter__(self):
         return iter(self.params)

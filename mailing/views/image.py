@@ -6,12 +6,11 @@ from ..validators import (validate, Schema, UnicodeString, Int, String,
                           FieldStorageUploadConverter)
 from .base import (rest_views, abort, request, response, generic_creator,
                    error_handler, _, ErrorResponse, error_response,
-                   json_on_html)
+                   json_on_html, InvalidForm, invalid_form_response,
+                   update_from_form)
                 
 
 class ImageValidator(Schema):
-    ignore_key_missing = True
-
     title = UnicodeString(allow_empty=True)
     filename = UnicodeString(allow_empty=False)
     data = String(allow_empty=True)
@@ -38,25 +37,38 @@ rest_views(app, Image, '/image/', 'images',
     creator=creator,
     validator=ImageValidator)
 
-class ImageUploadValidator(Schema):
-    title = UnicodeString(allow_empty=True)
-    image = FieldStorageUploadConverter(allow_empty=False)
+class ImageUploadValidator(ImageValidator):
+    data = FieldStorageUploadConverter(allow_empty=False)
+    
+    attr_name = 'data'
+    filename_name = 'filename'
+    coding = 'hex'
+    method = 'encode'
+
+    def _to_python(self, value, state=None):
+        value = Schema._to_python(self, value, state)
+        if value[self.attr_name] and hasattr(value[self.attr_name], 'file'):
+            data = value[self.attr_name].file.read()
+            if self.filename_name:
+                value[self.filename_name] = value[self.attr_name].filename
+            value[self.attr_name] = getattr(data, self.method)(self.coding)
+        return super(ImageUploadValidator, self)._to_python(value, state)
+
 
 @app.post("/image/upload", name='image.upload')
 @error_handler
 def upload():
-    form = validate(ImageUploadValidator, request.POST, raises=False)
+    form = validate(ImageUploadValidator(ignore_key_missing=True),
+                    request.POST, raises=False)
     if not form.is_valid:
         resp = error_response(form.message, form.errors)
     else:
-        image = form['image']
-        data, filename = image.file.read().encode('hex'), image.filename
         try:
-            ob = creator(
-                dict(title=form['title'], data=data, filename=filename)
-                )
+            ob = creator(form)
         except ErrorResponse, e:
             resp = error_response(unicode(e), e.errors)
+        except InvalidForm, e:
+            resp = invalid_form_response(e.form)
         else:
             Session.add(ob);
             Session.commit()
@@ -66,6 +78,26 @@ def upload():
             )
     return json_on_html(resp)
 
+
+@app.post("/image/<id>", name='image.update_upload')
+def update_upload(id):
+    ob = Image.query.get(id)
+    if ob is None:
+        abort(404)
+    form = validate(ImageUploadValidator(ignore_key_missing=True),
+                    request.POST, raises=False)
+    if not form.is_valid:
+        resp = error_response(form.message, form.errors)
+    else:
+        del form['filename']
+        form['data'] = form['data'].decode('hex')
+        update_from_form(ob, form)
+        Session.commit()
+        resp = dict(
+            success=True,
+            images=[ob.__json__()],
+        )
+    return json_on_html(resp)
 
 
 @app.get("/image/<hash>/view", name='image_view')

@@ -23,7 +23,7 @@ Ext.define('Mailing.view.image.NewImageWindow', {
                 anchor: '100%'
             }, {
                 xtype: 'filefield',
-                name: 'image',
+                name: 'data',
                 allowBlank: false,
                 fieldLabel: 'Imágen', //i18n
                 anchor: '100%',
