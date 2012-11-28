@@ -35,6 +35,21 @@ class TestMailing(BaseModelTest):
         self.failUnlessEqual(items[1].__class__.__name__, 'ExternalLink')
         self.failUnlessEqual(items[1].url, 'someurl')
 
+    def test_delete_mailing_cascades_to_items(self):
+        item1 = self._makeExternalLink(title="Foo1", url="someurl")
+        item2 = self._makeArticle(title="Foo2", content="somecontent")
+        ob = self._makeOne(items=[item2, item1])
+        self.session.add(ob)
+        self.session.flush()
+        self.session.expunge_all()
+
+        from mailing.models import Item
+        self.assertEqual(2, Item.query.count())
+
+        self.session.delete(ob)
+        self.session.flush()
+        self.assertEqual(0, Item.query.count())
+
     def test_reverse_items(self):
         cat = self._makeCategory()
         item1 = self._makeArticle(title="Foo1", content="somecontent", category=cat)
@@ -205,6 +220,17 @@ class TestMailingDelivery(BaseModelTest):
             next.sent_date = d
             self.session.flush()
         self.assertFalse(cls.next_in_queue(d))
+
+    def test_delete_mailing_cascades(self):
+        programmed_date = datetime.datetime(2010,1,1)
+        ob = self._makeOne(mailing=self._makeMailing(),
+                           programmed_date=programmed_date)
+        self.session.add(ob)
+        self.session.flush()
+        self.assertEqual(1, ob.__class__.query.count())
+        self.session.delete(ob.mailing)
+        self.session.flush()
+        self.assertEqual(0, ob.__class__.query.count())
 
 
 class TestMailingDeliveryProcessedRecipient(BaseModelTest):

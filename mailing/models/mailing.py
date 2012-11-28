@@ -51,7 +51,7 @@ class Mailing(Model):
 
     items = orm.relation(Item, collection_class=ordering_list('position'),
                          order_by=Item.position, backref='mailing',
-                         lazy=True, cascade='all,delete-orphan')
+                         lazy=True, cascade='all,delete-orphan', passive_deletes=True, passive_updates=True)
     templates = orm.relation(Template, secondary=MailingTemplate.__table__,
                              collection_class=attribute_mapped_collection('type'),
                              lazy=True)
@@ -150,10 +150,10 @@ class Mailing(Model):
         
 class GroupMailingDelivery(Model):
     __tablename__ = 'group_mailing_delivery'
-    group_id = Column(Integer, ForeignKey('group.id', ondelete="CASCADE"),
+    group_id = Column(Integer, ForeignKey('group.id', ondelete="CASCADE", onupdate="CASCADE"),
                       primary_key=True, nullable=False)
     mailing_delivery_id = Column(Integer,
-                             ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
+                             ForeignKey('mailing_delivery.id', ondelete="CASCADE", onupdate="CASCADE"),
                              primary_key=True, nullable=False)
 
     def __json__(self):
@@ -166,10 +166,10 @@ class GroupMailingDelivery(Model):
 class MailingDeliveryProcessedRecipient(Model):
     __table__ = Table('mailing_delivery_processed_recipient', Model.metadata,
         Column("recipient_id", Integer,
-               ForeignKey('recipient.id', ondelete="CASCADE"),
+               ForeignKey('recipient.id', ondelete="CASCADE", onupdate="CASCADE"),
                primary_key=True, nullable=False),
         Column("mailing_delivery_id", Integer,
-               ForeignKey('mailing_delivery.id', ondelete="CASCADE"),
+               ForeignKey('mailing_delivery.id', ondelete="CASCADE", onupdate="CASCADE"),
                primary_key=True, nullable=False),
         Column("uuid", Binary(16), unique=True, nullable=False),
         Column("send_time", DateTime, nullable=False),
@@ -218,7 +218,9 @@ class MailingDeliveryProcessedRecipient(Model):
 class MailingDelivery(Model):
     __table__ = Table('mailing_delivery', Model.metadata,
         Column("id", Integer, primary_key=True),
-        Column("mailing_id", Integer, ForeignKey('mailing.id'), nullable=False),
+        Column("mailing_id", Integer,
+               ForeignKey('mailing.id', onupdate='CASCADE', ondelete='CASCADE'),
+               nullable=False),
         Column("programmed_date", DateTime),
         Column("sent_date", DateTime),
         Column("created", DateTime, nullable=False,
@@ -229,7 +231,8 @@ class MailingDelivery(Model):
 
     groups = orm.relation(Group, secondary=GroupMailingDelivery.__table__)
     mailing = orm.relation(Mailing,
-        backref=orm.backref('mailing_deliveries', cascade='all,delete-orphan'),
+        backref=orm.backref('mailing_deliveries', cascade='all,delete-orphan',
+                            passive_deletes=True, passive_updates=True),
         innerjoin=True,
         )
 
@@ -248,7 +251,7 @@ class MailingDelivery(Model):
 
     _processed_recipients = orm.relation(MailingDeliveryProcessedRecipient,
         order_by=MailingDeliveryProcessedRecipient.__table__.c.send_time,
-        cascade='all,delete-orphan',
+        cascade='all,delete-orphan', 
         lazy=True
         )
     

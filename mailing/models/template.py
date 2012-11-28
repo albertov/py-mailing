@@ -24,9 +24,9 @@ from .image import Image
 from .config import Config
 
 template_image_table = Table("template_image", Model.metadata,
-    Column('template_id', Integer, ForeignKey('template.id', ondelete="CASCADE"),
+    Column('template_id', Integer, ForeignKey('template.id', ondelete="CASCADE", onupdate="CASCADE"),
            primary_key=True),
-    Column('image_id', Integer, ForeignKey('image.id', ondelete="CASCADE"),
+    Column('image_id', Integer, ForeignKey('image.id', ondelete="CASCADE", onupdate="CASCADE"),
            primary_key=True)
 )
 
