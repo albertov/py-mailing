@@ -1,19 +1,28 @@
+import os
 import datetime
 
 from unittest2 import TestCase
 
+ENVIRON_DB_URL_KEY = 'PYMAILING_TEST_DB_URL'
+
 
 class BaseModelTest(TestCase):
+    engine = None
 
     def setUp(self):
+        super(BaseModelTest, self).setUp()
         from ...models import Session, Model, create_engine
-        self.engine = create_engine('sqlite://')
+        url = os.environ.get(ENVIRON_DB_URL_KEY, 'sqlite://')
+        if self.engine is None:
+            # Cache engine as a classattr in BaseModel
+            BaseModelTest.engine = create_engine(url)
         Model.metadata.create_all(self.engine)
         Session.configure(bind=self.engine)
         self.session = Session
 
     def tearDown(self):
         self.session.remove()
+        super(BaseModelTest, self).tearDown()
 
     def _makeMailing(self, **kw):
         from ...models import Mailing

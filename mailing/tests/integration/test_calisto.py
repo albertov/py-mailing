@@ -41,7 +41,7 @@ class TestCalistoMailing(BaseModelTest):
     def test_create_persist_retrieve(self):
         ob = self._makeMailing()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         m = self.session.query(ob.__class__).one()

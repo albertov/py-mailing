@@ -20,6 +20,13 @@ class BaseViewTest(BaseModelTest):
         self._app = app_factory({'engine': self.engine})
         self.app = TestApp(self._app)
 
+    def tearDown(self):
+        self.session.remove()
+        from ...models import Model
+        # App commits so we need to drop all tables to restore clean state
+        Model.metadata.drop_all(self.engine)
+        super(BaseViewTest, self).tearDown()
+
     def get_url(self, *args, **kw):
         try:
             request.bind({'SCRIPT_NAME':'/'})

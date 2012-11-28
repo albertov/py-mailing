@@ -1,6 +1,6 @@
 from UserDict import DictMixin
 
-from sqlalchemy import Column, String, Unicode, Enum
+from sqlalchemy import Column, Unicode, Enum
 from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -10,7 +10,7 @@ from . import Model, Session
 class Config(Model):
     __tablename__ = "config"
     __type_names__ = ("int", "float", "str", "unicode", "bool")
-    _key = Column("key", String(128), primary_key=True)
+    _key = Column("key", Unicode(128), primary_key=True)
     _value = Column("value", Unicode, nullable=False)
     type = Column(Enum(*__type_names__, **dict(name='config_type')),
                   default="unicode", nullable=False)
@@ -19,13 +19,13 @@ class Config(Model):
     class __metaclass__(DictMixin, DeclarativeMeta):
             
         def __getitem__(cls, key):
-            ob = cls.query.get(key)
+            ob = cls.query.get(unicode(key))
             if ob is None:
                 raise KeyError(key)
             return ob.value
 
         def __setitem__(cls, key, value):
-            ob = cls.query.get(key)
+            ob = cls.query.get(unicode(key))
             if ob is not None:
                 ob.value = value
             else:
@@ -34,7 +34,7 @@ class Config(Model):
                 Session.flush()
 
         def __delitem__(cls, key):
-            ob = cls.query.get(key)
+            ob = cls.query.get(unicode(key))
             if ob is not None:
                 Session.delete(ob)
                 Session.flush()

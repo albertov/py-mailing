@@ -13,7 +13,7 @@ class TestMailing(BaseModelTest):
     def test_create_persist_retrieve(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
         self.failUnlessEqual(self.session.query(ob.__class__).count(), 1)
 
@@ -24,7 +24,7 @@ class TestMailing(BaseModelTest):
         item2 = self._makeArticle(title="Foo2", content="somecontent", category=cat)
         ob = self._makeOne(items=[item2, item1])
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -41,12 +41,12 @@ class TestMailing(BaseModelTest):
         item2 = self._makeArticle(title="Foo2", content="somecontent", category=cat)
         ob = self._makeOne(items=[item1, item2])
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
         retrieved.items[:] = retrieved.items[::-1]
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -61,7 +61,7 @@ class TestMailing(BaseModelTest):
         TYPE = 'xhtml'
         ob.templates[TYPE] = tpl
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -75,7 +75,7 @@ class TestMailingDelivery(BaseModelTest):
         ob = self._makeOne(mailing=self._makeMailing(),
                            programmed_date=programmed_date)
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -102,7 +102,7 @@ class TestMailingDelivery(BaseModelTest):
                                                 email='b2@example.com')]),
         ]
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -116,7 +116,8 @@ class TestMailingDelivery(BaseModelTest):
 
         for g in retrieved.groups:
             self.session.delete(g)
-        self.session.commit()
+        self.session.flush()
+        self.session.expire(retrieved)
         self.failUnlessEqual(0, len(retrieved.groups))
         self.failUnlessEqual(0, len(retrieved.recipients))
 
@@ -141,14 +142,14 @@ class TestMailingDelivery(BaseModelTest):
                                                 email='b2@example.com')]),
         ]
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
         self.failUnlessEqual(0, len(retrieved.processed_recipients))
         retrieved.processed_recipients.append(retrieved.groups[0].recipients[0])
 
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         retrieved = self.session.query(ob.__class__).one()
@@ -162,7 +163,7 @@ class TestMailingDelivery(BaseModelTest):
     def test_next_in_queue_none_programmed(self):
         ob = self._makeOne(mailing=self._makeMailing())
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         d = datetime.datetime(2010,1,1,15)
@@ -176,7 +177,7 @@ class TestMailingDelivery(BaseModelTest):
                                programmed_date=d)
             cls = ob.__class__
             self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         d = max(ds) + datetime.timedelta(hours=1)
@@ -191,7 +192,7 @@ class TestMailingDelivery(BaseModelTest):
                                programmed_date=d)
             cls = ob.__class__
             self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.session.expunge_all()
 
         d = max(ds) + datetime.timedelta(hours=1)
@@ -221,20 +222,20 @@ class TestMailingDeliveryProcessedRecipient(BaseModelTest):
     def test_delete_mailing_delivery_cascades(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.assertEqual(1, ob.__class__.query.count())
         self.session.delete(ob.mailing_delivery)
-        self.session.commit()
+        self.session.flush()
         self.assertEqual(0, ob.__class__.query.count())
 
     def test_delete_recipient_cascades(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.assertEqual(1, ob.__class__.query.count())
 
         self.session.delete(ob.recipient)
-        self.session.commit()
+        self.session.flush()
         self.assertEqual(0, ob.__class__.query.count())
 
     def test_uuid_is_hex(self):
@@ -244,19 +245,19 @@ class TestMailingDeliveryProcessedRecipient(BaseModelTest):
     def test_retrieve_by_uuid(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.assertIs(ob, ob.__class__.by_uuid(ob.uuid))
 
     def test_retrieve_by_bad_uid(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.assertIs(None, ob.__class__.by_uuid('asdad'))
 
     def test_recipient_bounces_query(self):
         ob = self._makeOne()
         self.session.add(ob)
-        self.session.commit()
+        self.session.flush()
         self.assertEqual(0, ob.recipient.bounces_query.count())
         ob.bounce_time = datetime.datetime.now()
         self.session.flush()
